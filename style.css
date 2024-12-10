@@ -51,24 +51,84 @@ footer .nav-link {
     margin: 1vh;
 }
 
-.containHistoire{
-    height: 50vh;
-    margin: 5vh;
-    padding: 1vh;
-    box-sizing: border-box;
-}
-
 .carousselImageDescription{
-margin: 1vh;
-display: flex;
+    margin: 6vh 6vh 2vh 6vh;
+    padding: 3vh;
+    display: flex;
     justify-content: space-around;
     flex-wrap: wrap;
 }
 
+.carousselImageDescription img{
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+}
 
+.containHistoire{
+    --bs-gutter-x: 0;
+}
+
+.buttonVert {
+    background-color: #06481D; 
+    color: white; 
+    font-weight: bold; 
+    padding: 10px 20px; 
+    font-size: 18px; 
+    border: none; 
+    border-radius: 8px; 
+    transition: all 0.3s ease; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    display: inline-flex; /* Aligne le texte et l'icône SVG en ligne */
+    align-items: center; /* Aligne le texte et l'icône verticalement */
+    justify-content: center; /* Centre l'élément */
+}
+
+.buttonVert svg {
+    margin-left: 8px; /* Marge entre le texte et l'icône */
+}
+
+.buttonVert:hover {
+    background-color: #05521C; /* Change la couleur au survol */
+    transform: translateY(-4px); /* Légère surélévation du bouton au survol */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Ombre plus marquée au survol */
+}
+
+.imageSAV{
+    background-image: url('images/call-center.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat; 
+    height: 45%;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.listUlLi{
+    line-height: 2.5; 
+  }
+
+.TripleCard{
+    margin: 2vh;
+}
+
+.mentionsLégales{
+    margin: 5vh 25vh 5vh 25vh;
+}
+
+.mentionsLégales h2{
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    border-radius: 0.5vh;
+    padding: 1vh;
+    font-size: 20px;
+    margin: 1vh;
+}
+
+.mentionsLégales p{
+    line-height: 1.5; 
+    margin: 1.5vh;
+}
 
 /* Rappel : 
 p-1 : applique un padding de 0.25rem.
 p-2 : applique un padding de 0.5rem.
 p-3 : applique un padding de 1rem.
-p-4 : applique un padding de 1.5rem. */
+p-4 : applique un padding de 1.5rem.
+gutter = "marge interne" prédéfini dans Bootstrap
