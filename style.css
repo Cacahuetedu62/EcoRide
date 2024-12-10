@@ -65,6 +65,7 @@ footer .nav-link {
 
 .containHistoire{
     --bs-gutter-x: 0;
+    margin: 2vh;
 }
 
 .buttonVert {
@@ -124,6 +125,42 @@ footer .nav-link {
 .mentionsLégales p{
     line-height: 1.5; 
     margin: 1.5vh;
+}
+
+.cardTrajet{
+    background-color: #D3DCE3 ;
+    margin: 3vh;
+    padding: 3vh;
+    border-radius: 1vh;
+}
+
+.container3Cards{
+   padding: 2vh;
+   width: 100%;
+   display: flex;
+}
+
+.departArrive{
+    border: solid rgb(255, 255, 255);
+    padding: 1vh;
+    border-radius: 1vh;
+}
+
+.form-check-input:checked {
+    background-color: #06481D;
+    border-color: #06481D ;
+}
+
+.tarifs{
+    background: linear-gradient(45deg, #4CAF50, #2196F3);
+    padding: 0.5vh;
+    text-align: center;
+    font-weight: bold;
+    font-size: 2.5vh;
+}
+
+.contenair{
+    width: 100%;
 }
 
 /* Rappel : 

@@ -5,7 +5,7 @@ require_once('templates/header.php');
 <main>
     
  <div class="row p-3 justify-content-center align-items-md-stretch containHistoire">
-        <div class="col-md-6">
+        <div class="col-md-6 d-flex justify-content-center">
             <div class="h-100 p-1 rounded-3 image-backgroundHistoire">
                 <p class="descriptionHistoire">EcoRide est une entreprise de covoiturage innovante qui met l'accent sur l'utilisation de véhicules électriques, alliant ainsi mobilité durable et respect de l'environnement. En choisissant EcoRide, vous contribuez à réduire les émissions de CO2 tout en profitant d'un transport économique et pratique. Nous offrons une alternative écologique aux trajets quotidiens, en permettant à nos utilisateurs de partager des trajets en toute sécurité et à moindre coût. Grâce à notre plateforme facile d'accès, chacun peut trouver un trajet éco-responsable adapté à ses besoins. EcoRide, c'est la solution idéale pour ceux qui veulent voyager intelligemment, économiquement et en respectant la planète. Rejoignez notre communauté et participez à la révolution verte du transport !</p>
             </div>
@@ -13,11 +13,11 @@ require_once('templates/header.php');
 
 
       
-        <div class="col-md-6 p-3">  
-            <div class="col-md-7 col-lg-8">
+        <div class="col-md-6 p-3 d-flex justify-content-center">  
+            <div class="col-md-7 col-lg-8 contenair">
                 <h4 class="mb-3 text-center">Chercher un trajet</h4>
                 <form class="needs-validation" novalidate="" data-np-intersection-state="visible" data-np-autofill-form-type="credit_card" data-np-checked="1" data-np-watching="1">
-                    <div class="row g-3">
+                    <div class="row g-3 cardTrajet">
 
 
                         <div class="col-12">
