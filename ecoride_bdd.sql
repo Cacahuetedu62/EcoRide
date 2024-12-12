@@ -159,3 +159,38 @@ MODIFY COLUMN numero_trajets INT AUTO_INCREMENT;
 
 ALTER TABLE trajets
 DROP COLUMN numero_trajets;
+
+DESCRIBE trajets;
+
+ALTER TABLE utilisateurs
+ADD COLUMN note_moyenne DECIMAL(3, 2) DEFAULT NULL;
+
+UPDATE utilisateurs u
+JOIN (
+    SELECT utilisateur_id, AVG(note) AS moyenne
+    FROM avis
+    GROUP BY utilisateur_id
+) AS avg_avis ON u.id = avg_avis.utilisateur_id
+SET u.note_moyenne = avg_avis.moyenne;
+
+
+INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id) VALUES
+('Très bon trajet, chauffeur sympathique.', 5, 'validé', 6, 1),
+('Voyage agréable, un peu long mais tout s\'est bien passé.', 4, 'validé', 6, 2),
+('Chauffeur ponctuel, mais la voiture n\'était pas très propre.', 3, 'validé', 6, 3);
+
+INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id) VALUES
+('Horrible', 1, 'validé', 6, 1);
+
+
+UPDATE utilisateurs
+SET note_moyenne = (
+    SELECT AVG(note)
+    FROM avis
+    WHERE utilisateur_id = 6
+)
+WHERE id = 6;
+
+INSERT INTO voitures (modele, immatriculation, marque, energie, couleur, nb_places, date_premiere_immatriculation, utilisateur_id)
+VALUES ('Tesla Model 3', 'AB-126-CD', 'Tesla', 'électrique', 'Noir', 5, '2023-01-15', 1);
+

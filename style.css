@@ -1,0 +1,191 @@
+* {
+	margin: 0;
+	padding: 0;
+    font-family: "Roboto", sans-serif;
+    font-weight: 120;
+    font-style: normal;
+	text-decoration: none;
+    font-size: 22px;
+}
+
+p{
+    margin:0;
+}
+
+html, body {
+    height: 100%; 
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+main{
+    flex: 1;
+}
+
+a{
+    cursor: pointer;
+}
+
+footer {
+    background-color:#F4B749 ;
+    margin-top: auto;
+}
+
+footer .nav-link {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.image-backgroundHistoire {
+    background-image: url('images/natureHistoire.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.descriptionHistoire{
+    text-align: center;
+    margin: 1vh;
+}
+
+.carousselImageDescription{
+    margin: 6vh 6vh 2vh 6vh;
+    padding: 3vh;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.carousselImageDescription img{
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+}
+
+.containHistoire{
+    --bs-gutter-x: 0;
+    margin: 2vh;
+}
+
+.buttonVert {
+    background-color: #06481D; 
+    color: white; 
+    font-weight: bold; 
+    padding: 10px 20px; 
+    font-size: 18px; 
+    border: none; 
+    border-radius: 8px; 
+    transition: all 0.3s ease; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    display: inline-flex; /* Aligne le texte et l'icône SVG en ligne */
+    align-items: center; /* Aligne le texte et l'icône verticalement */
+    justify-content: center; /* Centre l'élément */
+}
+
+.buttonVert svg {
+    margin-left: 8px; /* Marge entre le texte et l'icône */
+}
+
+.buttonVert:hover {
+    background-color: #05521C; /* Change la couleur au survol */
+    transform: translateY(-4px); /* Légère surélévation du bouton au survol */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Ombre plus marquée au survol */
+}
+
+.imageSAV{
+    background-image: url('images/call-center.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat; 
+    height: 45%;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.listUlLi{
+    line-height: 2.5; 
+  }
+
+.TripleCard{
+    margin: 2vh;
+}
+
+.mentionsLégales{
+    margin: 5vh 25vh 5vh 25vh;
+}
+
+.mentionsLégales h2{
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    border-radius: 0.5vh;
+    padding: 1vh;
+    font-size: 20px;
+    margin: 1vh;
+}
+
+.mentionsLégales p{
+    line-height: 1.5; 
+    margin: 1.5vh;
+}
+
+.cardTrajet{
+    background-color: #D3DCE3 ;
+    margin: 3vh;
+    padding: 3vh;
+    border-radius: 1vh;
+}
+
+.container3Cards{
+   padding: 2vh;
+   width: 100%;
+   display: flex;
+}
+
+.departArrive{
+    border: solid rgb(255, 255, 255);
+    padding: 1vh;
+    border-radius: 1vh;
+}
+
+.form-check-input:checked {
+    background-color: #06481D;
+    border-color: #06481D ;
+}
+
+.tarifs{
+    background: linear-gradient(45deg, #4CAF50, #2196F3);
+    padding: 0.5vh;
+    text-align: center;
+    font-weight: bold;
+    font-size: 2.5vh;
+}
+
+.contenair{
+    width: 100%;
+}
+
+.profilPhotoPseudo img{
+    margin:1vh;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.infosChauffeurs{
+    border: solid rgb(255, 255, 255);
+    padding: 1vh;
+    border-radius: 1vh;
+}
+
+.infosChauffeurs p{
+padding: 0.5vh;
+}
+
+.toast-container{
+width: 50vh;
+}
+
+/* Rappel : 
+p-1 : applique un padding de 0.25rem.
+p-2 : applique un padding de 0.5rem.
+p-3 : applique un padding de 1rem.
+p-4 : applique un padding de 1.5rem.
+gutter = "marge interne" prédéfini dans Bootstrap
