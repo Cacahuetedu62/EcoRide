@@ -183,6 +183,12 @@ padding: 0.5vh;
 width: 50vh;
 }
 
+.reservation{
+    display: flex;
+    flex-direction: column;
+    margin: 3vh;
+}
+
 /* Rappel : 
 p-1 : applique un padding de 0.25rem.
 p-2 : applique un padding de 0.5rem.

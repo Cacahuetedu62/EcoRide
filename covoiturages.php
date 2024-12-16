@@ -11,7 +11,7 @@ require_once('lib/config.php');
             <div class="col-md-4 p-1 d-flex justify-content-center">
                 <div class="col-md-7 col-lg-8 contenair">
                 <h4 class="mb-3 text-center">Chercher un trajet</h4>
-<form class="needs-validation" novalidate="" method="POST" action="">
+<form method="POST" action="">
     <div class="row g-3 cardTrajet">
         <!-- Ville de départ -->
         <div class="col-12">
@@ -30,15 +30,18 @@ require_once('lib/config.php');
                 Veuillez saisir une ville d'arrivé
             </div>
         </div>
+        
+<!-- Date de départ -->
+<div class="col-12">
+    <label for="date_depart" class="form-label">Date de départ</label>
+    <input type="date" class="form-control" id="date_depart" name="date_depart" required 
+           value="<?php echo isset($_POST['date_depart']) ? htmlspecialchars($_POST['date_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>"
+           min="<?php echo date('Y-m-d'); ?>" >
+    <div class="invalid-feedback">
+        Veuillez saisir une date de départ valide (pas avant aujourd'hui).
+    </div>
+</div>
 
-        <!-- Date de départ -->
-        <div class="col-12">
-            <label for="date_depart" class="form-label">Date de départ</label>
-            <input type="date" class="form-control" id="date_depart" name="date_depart" required value="<?php echo isset($_POST['date_depart']) ? htmlspecialchars($_POST['date_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-            <div class="invalid-feedback">
-                Veuillez saisir une date de départ
-            </div>
-        </div>
 
         <!-- Nombre de passagers -->
         <div class="col-12">
@@ -114,6 +117,9 @@ if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
     if ($duree && !is_numeric($duree)) {
         die("La durée du trajet doit être un nombre valide.");
     }
+    
+    $duree = (int) $duree;  // Assurez-vous que la durée est un entier
+    
 
     // Filtrage pour assainir les villes en supprimant les caractères spéciaux HTML
     $ville_depart = htmlspecialchars($ville_depart, ENT_QUOTES, 'UTF-8');
@@ -122,29 +128,34 @@ if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
     $nb_passagers = intval($nb_passagers); // Assurer que le nombre de passagers est un entier
 
     // Préparer la requête SQL
-    $sql = "SELECT DISTINCT t.*, u.pseudo, u.photo, a.note, v.energie, v.nb_places AS voiture_places, t.prix_personnes
-            FROM trajets t
-            JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
-            JOIN utilisateurs u ON tu.utilisateur_id = u.id
-            LEFT JOIN avis a ON a.trajet_id = t.id
-            LEFT JOIN voitures v ON v.utilisateur_id = u.id
-            WHERE t.lieu_depart LIKE :ville_depart
-            AND t.lieu_arrive LIKE :ville_arrive
-            AND t.date_depart = :date_depart
-            AND t.nb_places >= :nb_passagers";
+    $sql = "SELECT DISTINCT t.*, u.pseudo, u.photo, u.note_moyenne, v.energie, v.nb_places AS voiture_places, t.prix_personnes,
+    TIMESTAMPDIFF(HOUR, CONCAT(t.date_depart, ' ', t.heure_depart), CONCAT(t.date_arrive, ' ', t.heure_arrive)) AS duree
+FROM trajets t
+JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
+JOIN utilisateurs u ON tu.utilisateur_id = u.id
+LEFT JOIN avis a ON a.trajet_id = t.id
+LEFT JOIN voitures v ON v.utilisateur_id = u.id
+WHERE t.lieu_depart LIKE :ville_depart
+AND t.lieu_arrive LIKE :ville_arrive
+AND t.date_depart = :date_depart
+AND t.nb_places >= :nb_passagers";
+
+
 
 if ($ecologique) {
-    $sql .= " AND v.energie = 'électrique'";  // Exemple : filtre écologique basé sur l'énergie
+    $sql .= " AND v.energie IN ('électrique', 'hybride')";
 }
 if ($prix_min) {
     $sql .= " AND t.prix_personnes >= :prix_min";
 }
 if ($duree) {
-    $sql .= " AND t.duree <= :duree";  // Assurez-vous que 'duree' est un champ dans votre base de données
+    $sql .= " AND TIMESTAMPDIFF(HOUR, CONCAT(t.date_depart, ' ', t.heure_depart), CONCAT(t.date_arrive, ' ', t.heure_arrive)) >= :duree";
 }
+
 if ($note_min) {
-    $sql .= " AND a.note >= :note_min";
+    $sql .= " AND ROUND(u.note_moyenne, 1) >= :note_min"; // Arrondir la moyenne à 1 décimale
 }
+
 
 
     $stmt = $pdo->prepare($sql);
@@ -177,7 +188,7 @@ if ($note_min) {
     if (count($trajets_disponibles) > 0) {
         // Afficher les résultats
         foreach ($trajets_disponibles as $trajet) {
-            // Vérifier si le trajet est écologique (si l'énergie est électrique)
+            // Vérifier si le trajet est écologique (si l'énergie est électrique || hybride)
             $ecologique = ($trajet['energie'] === 'électrique' || $trajet['energie'] === 'hybride') ? 'Oui' : 'Non';
             ?>
             <div class="col-md-4 p-1 d-flex justify-content-center">
@@ -216,12 +227,14 @@ if ($note_min) {
 
                             <p>Note : 
     <?php
-        $note = $trajet['note'];
-        for ($i = 0; $i < $note; $i++) {
-            echo "🚗";
+        // Utilisation de la note moyenne du chauffeur
+        $note_moyenne = $trajet['note_moyenne'];
+        for ($i = 0; $i < $note_moyenne; $i++) {
+            echo "🚗"; // Affichage de l'icône pour chaque point de la note
         }
     ?>
 </p>
+
                             
                             <p>Nombre de places restantes :<?= $trajet['nb_places'] ?></p>
                             <p>Prix :<?= $trajet['prix_personnes'] ?> € par personne</p>
@@ -234,7 +247,7 @@ if ($note_min) {
         ?></p>
         <p style="font-size: 15px;">*Un trajet est dit "écologique" s'il est effectué avec une voiture éléectrique/hybride</p>
         </div>
-        <a>+ Détails</a>
+        <a href="reservations.php?id=<?php echo htmlspecialchars($trajet['id']); ?>">+ Détails</a>
     </div>    
 </div>
 </div>
