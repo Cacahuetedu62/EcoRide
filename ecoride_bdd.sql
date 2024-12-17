@@ -194,3 +194,41 @@ WHERE id = 6;
 INSERT INTO voitures (modele, immatriculation, marque, energie, couleur, nb_places, date_premiere_immatriculation, utilisateur_id)
 VALUES ('Tesla Model 3', 'AB-126-CD', 'Tesla', 'électrique', 'Noir', 5, '2023-01-15', 1);
 
+INSERT INTO trajets (date_depart, heure_depart, lieu_depart, date_arrive, heure_arrive, lieu_arrive, statut, nb_places, prix_personnes, preferences) VALUES
+('2024-12-15', '08:00:00', 'Paris', '2024-12-15', '12:00:00', 'dijon', 'Disponible', 2, 40.00, 'Commentaire du trajets 20 pour utilisateur 4 ADUPONT');
+
+SELECT * FROM trajets WHERE id = 58;
+
+DESCRIBE trajet_utilisateur;
+DELIMITER //
+
+CREATE PROCEDURE CreerTrajet(
+    IN p_utilisateur_id INT,
+    IN p_date_depart DATE,
+    IN p_heure_depart TIME,
+    IN p_lieu_depart VARCHAR(255),
+    IN p_date_arrive DATE,
+    IN p_heure_arrive TIME,
+    IN p_lieu_arrive VARCHAR(255),
+    IN p_nb_places INT,
+    IN p_prix_personnes DECIMAL(10, 2),
+    IN p_preferences TEXT,
+    IN p_voiture_id INT
+)
+BEGIN
+
+    DECLARE trajet_id INT;
+
+    INSERT INTO trajets (date_depart, heure_depart, lieu_depart, date_arrive, heure_arrive, lieu_arrive, nb_places, prix_personnes, preferences)
+    VALUES (p_date_depart, p_heure_depart, p_lieu_depart, p_date_arrive, p_heure_arrive, p_lieu_arrive, p_nb_places, p_prix_personnes, p_preferences);
+
+    SET trajet_id = LAST_INSERT_ID();
+
+    INSERT INTO trajet_utilisateur (utilisateur_id, trajet_id) VALUES (p_utilisateur_id, trajet_id);
+
+END DELIMITER ;
+
+INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id) VALUES
+('commentaire test utilisateur 4', 2, 'validé', 4, 3);
+
+

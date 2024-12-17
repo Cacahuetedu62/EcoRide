@@ -5,21 +5,23 @@ require_once('lib/config.php');
 ?>
 
 <main>
-
 <?php
 // Vérifier si un ID de trajet est passé via l'URL
 if (isset($_GET['id'])) {
     $trajet_id = (int) $_GET['id'];
 
-    // Récupérer les informations du trajet avec l'ID
     $sql = "SELECT t.*, u.pseudo, u.photo, u.note_moyenne, v.energie, v.nb_places AS voiture_places, t.prix_personnes,
-            t.preferences, 
-            TIMESTAMPDIFF(MINUTE, CONCAT(t.date_depart, ' ', t.heure_depart), CONCAT(t.date_arrive, ' ', t.heure_arrive)) AS duree_minutes
-            FROM trajets t
-            JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
-            JOIN utilisateurs u ON tu.utilisateur_id = u.id
-            LEFT JOIN voitures v ON v.utilisateur_id = u.id
-            WHERE t.id = :id";
+    t.preferences, u.id AS utilisateur_id,
+    TIMESTAMPDIFF(MINUTE, CONCAT(t.date_depart, ' ', t.heure_depart), CONCAT(t.date_arrive, ' ', t.heure_arrive)) AS duree_minutes,
+    a.commentaires
+FROM trajets t
+JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
+JOIN utilisateurs u ON tu.utilisateur_id = u.id
+LEFT JOIN voitures v ON v.utilisateur_id = u.id
+LEFT JOIN avis a ON a.utilisateur_id = u.id  -- Jointure avec la table avis
+WHERE t.id = :id";
+
+
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':id', $trajet_id, PDO::PARAM_INT);
     $stmt->execute();
@@ -69,9 +71,7 @@ if (isset($_GET['id'])) {
                                     echo "🚗";
                                 }
                             ?>
-                        </p>
-                        <p>Nombre de places restantes : <?= $trajet['nb_places'] ?></p>
-                        <p>Prix : <?= $trajet['prix_personnes'] ?> € par personne</p>
+     <p><a href="commentaires.php?id=<?= htmlspecialchars($trajet['utilisateur_id']) ?>">Voir tous les commentaires de <?= htmlspecialchars($trajet['pseudo']) ?></a></p>                        <p>Nombre de places restantes : <?= $trajet['nb_places'] ?></p>
                         <p>    <?php
                          $ecologique = ($trajet['energie'] === 'électrique' || $trajet['energie'] === 'hybride') ? 'Oui' : 'Non';
         if ($ecologique) {
@@ -81,6 +81,8 @@ if (isset($_GET['id'])) {
         }
         ?></p>
 <p>Préférences : <?= htmlspecialchars($trajet['preferences']) ?></p>
+<p>Marque :</p>
+<p>Modèle :</p>
                     </div>
                 </div>
             </div>
