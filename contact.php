@@ -5,7 +5,7 @@ require_once('templates/header.php');
 <main>
 <div class="p-4 p-md-5 mb-4 rounded text-body-emphasis imageSAV">
     <div class="col-lg-6 px-0">
-      <h1 class="display-4">Nous sommes à votre écoute</h1>
+      <h3 class="display-4">Nous sommes à votre écoute</h3>
       <p class="lead my-3">Du lundi au vendredi de 8h00 à 19h00 sans interuption</p>
     </div>
   </div>

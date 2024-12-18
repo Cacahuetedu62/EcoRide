@@ -5,7 +5,7 @@
     font-weight: 120;
     font-style: normal;
 	text-decoration: none;
-    font-size: 22px;
+    font-size: 18px;
 }
 
 p{
@@ -50,6 +50,7 @@ footer .nav-link {
 .descriptionHistoire{
     text-align: center;
     margin: 1vh;
+    color: antiquewhite;
 }
 
 .carousselImageDescription{
@@ -79,13 +80,16 @@ footer .nav-link {
     border-radius: 8px; 
     transition: all 0.3s ease; 
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-    display: inline-flex; /* Aligne le texte et l'icône SVG en ligne */
-    align-items: center; /* Aligne le texte et l'icône verticalement */
-    justify-content: center; /* Centre l'élément */
+    text-decoration: none;
 }
 
-.buttonVert svg {
-    margin-left: 8px; /* Marge entre le texte et l'icône */
+
+.buttonVert a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold; 
+    padding: 10px 20px; 
+    font-size: 18px; 
 }
 
 .buttonVert:hover {
@@ -104,7 +108,7 @@ footer .nav-link {
 }
 
 .listUlLi{
-    line-height: 2.5; 
+    line-height: 2; 
   }
 
 .TripleCard{
@@ -128,66 +132,127 @@ footer .nav-link {
     margin: 1.5vh;
 }
 
-.cardTrajet{
-    background-color: #D3DCE3 ;
-    margin: 3vh;
-    padding: 3vh;
-    border-radius: 1vh;
+.departArrive {
+    background-color: rgb(218, 214, 245);
+    margin-bottom: 10px;
+    padding: 2vh;
 }
 
-.container3Cards{
-   padding: 2vh;
-   width: 100%;
-   display: flex;
+.departArrive input,
+.departArrive label,
+.departArrive a {
+    font-size: 14px; 
 }
 
-.departArrive{
-    border: solid rgb(255, 255, 255);
-    padding: 1vh;
-    border-radius: 1vh;
+.departArrive p{
+    font-size: 14px;
+    line-height: 2;
 }
 
-.form-check-input:checked {
-    background-color: #06481D;
-    border-color: #06481D ;
-}
-
-.tarifs{
-    background: linear-gradient(45deg, #4CAF50, #2196F3);
-    padding: 0.5vh;
-    text-align: center;
-    font-weight: bold;
-    font-size: 2.5vh;
-}
-
-.contenair{
-    width: 100%;
-}
 
 .profilPhotoPseudo img{
     margin:1vh;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-.infosChauffeurs{
-    border: solid rgb(255, 255, 255);
-    padding: 1vh;
-    border-radius: 1vh;
+.colonne-formulaire,
+.colonne-affiner {
+    width: 48%; 
+    padding: 10px;
 }
 
-.infosChauffeurs p{
-padding: 0.5vh;
+.trajetComplet {
+    flex: 1;
+    margin: 0 10px; 
 }
 
-.toast-container{
-width: 50vh;
+.trajetComplet input{
+width: 400px;
 }
 
-.reservation{
+.recapTrajet{
+    border: solid grey 2px;
+    padding: 10px;
+    align-items: center;
+    margin:20px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+#errorMessage{
+    color: red;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Section principale avec l'image en fond dans la page spécifique */
+.form-page .custom-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* La section prend au moins toute la hauteur de la fenêtre */
+    background-image: url('images/route_cote_1.jpg'); /* Remplace par ton image */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    padding: 10vh;
+    margin: 0;
+}
+
+/* Conteneur du formulaire dans la page spécifique */
+.form-page .custom-form-container {
+    background-color: rgba(255, 255, 255, 0.9); /* Fond légèrement transparent pour voir l'image en arrière-plan */
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    width: 100%; /* Largeur du formulaire */
+    max-width: 650px; /* Limite la largeur du formulaire à 600px */
+    text-align: center;
+    position: relative;
+    top: -30px; /* Remonte légèrement la div du formulaire */
+    max-height: 90vh; /* Hauteur maximale du formulaire */
+    overflow-y: auto; /* Permet de faire défiler le formulaire si nécessaire */
+}
+
+/* Espacement des éléments du formulaire (label, input, etc.) dans la page spécifique */
+.form-page form {
     display: flex;
     flex-direction: column;
-    margin: 3vh;
+    align-items: center;
 }
+
+.form-page form label, .form-page form input, .form-page form select, .form-page form textarea, .form-page form button {
+    width: 100%; /* Les éléments occupent toute la largeur disponible */
+    margin-bottom: 5px; /* Réduit l'espacement entre les éléments */
+    width: 70%;
+}
+
+/* Taille des champs du formulaire dans la page spécifique */
+.form-page input, .form-page select, .form-page textarea {
+    padding: 4px;
+    font-size: 0.9rem; /* Réduit la taille du texte des champs */
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+
+/* Ajuster la taille de la textarea dans la page spécifique */
+.form-page textarea {
+    height: 120px; /* Réduit la hauteur de la textarea */
+}
+
+.loginRegister-container {
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-page p {
+    font-size: 12px;
+}
+
 
 /* Rappel : 
 p-1 : applique un padding de 0.25rem.

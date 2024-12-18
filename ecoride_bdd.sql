@@ -231,4 +231,6 @@ END DELIMITER ;
 INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id) VALUES
 ('commentaire test utilisateur 4', 2, 'validé', 4, 3);
 
-
+INSERT INTO trajets (date_depart, heure_depart, lieu_depart, date_arrive, heure_arrive, lieu_arrive, statut, nb_places, prix_personnes, preferences)
+VALUES
+('2024-12-20', '08:00:00', 'Lens', '2024-12-20', '10:30:00', 'Metz', 'Disponible', 4, 25.00, 'Voiture avec air conditionné');
