@@ -121,7 +121,12 @@ WHERE t.id = :id";
         <div id="errorMessage">Si vous n'acceptez pas les conditions vous ne pourrez pass réservé votre trajet</div>
 
         <!-- Bouton de validation -->
-        <button type="submit" id="submitButton" class="buttonVert m-2" disabled>Je réserve mon trajet</button>
+        <?php if (!$isUserLoggedIn): ?>
+    <p>Veuillez vous <a href="connexion.php">connecter</a> ou vous <a href="inscription.php">inscrire</a> pour réserver un trajet.</p>
+    <button type="submit" id="submitButton" class="buttonVert m-2" disabled>Je réserve mon trajet</button>
+<?php else: ?>
+    <button type="submit" id="submitButton" class="buttonVert m-2">Je réserve mon trajet</button>
+<?php endif; ?>
     </div>
 </div>
     </div>

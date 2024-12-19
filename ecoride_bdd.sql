@@ -234,3 +234,17 @@ INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id) VALUES
 INSERT INTO trajets (date_depart, heure_depart, lieu_depart, date_arrive, heure_arrive, lieu_arrive, statut, nb_places, prix_personnes, preferences)
 VALUES
 ('2024-12-20', '08:00:00', 'Lens', '2024-12-20', '10:30:00', 'Metz', 'Disponible', 4, 25.00, 'Voiture avec air conditionné');
+
+ALTER TABLE utilisateurs
+ADD COLUMN credits INT DEFAULT 0;
+
+ALTER TABLE utilisateurs
+ADD COLUMN role VARCHAR(50) DEFAULT 'passager';
+
+ALTER TABLE utilisateurs
+ADD COLUMN code_postal VARCHAR(5),
+ADD COLUMN ville VARCHAR(100);
+
+DESCRIBE voitures;
+
+DELETE FROM voitures WHERE id IN (45, 46, 47, 48, 49, 50, 51, 53);

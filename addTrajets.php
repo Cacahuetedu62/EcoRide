@@ -4,9 +4,9 @@ require_once('lib/config.php');
 
 
 // Récupération de l'ID de l'utilisateur connecté (à remplacer par l'ID réel de l'utilisateur connecté)
-$utilisateur_id = 4;
-echo ";ADUDPONT pour le test ici : utilisateur >";
-var_dump($utilisateur_id);
+// $utilisateur_id = 4;
+// echo "Test avec utilisateur 4 en attendant la session >";
+// var_dump($utilisateur_id);
 
 // Récupération de la liste des voitures de l'utilisateur
 $sql = "SELECT id, marque, modele FROM voitures WHERE utilisateur_id = :utilisateur_id";
@@ -78,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 
 <main class="form-page">    
-    <section class="custom-section">
+    <section class="custom-section1">
         <div class="custom-form-container">
             <h4>Créer un Nouveau Trajet</h4>
             <form action="addTrajets.php" method="post">
