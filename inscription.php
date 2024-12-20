@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
@@ -48,8 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    // Insérer l'utilisateur dans la base de données
-    $sql = "INSERT INTO utilisateurs (pseudo, email, password, nom, prenom) VALUES (:pseudo, :email, :password, :nom, :prenom)";
+    // Insérer l'utilisateur dans la base de données avec 20 crédits
+    $sql = "INSERT INTO utilisateurs (pseudo, email, password, nom, prenom, credits) VALUES (:pseudo, :email, :password, :nom, :prenom, 20)";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':pseudo', $pseudo, PDO::PARAM_STR);
     $stmt->bindParam(':email', $email, PDO::PARAM_STR);
@@ -58,13 +59,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bindParam(':prenom', $prenom, PDO::PARAM_STR);  // Ajouter le prénom
 
     if ($stmt->execute()) {
-     header('Location: mesInformations.php');
+        // Récupérer l'ID de l'utilisateur nouvellement inséré
+        $utilisateur_id = $pdo->lastInsertId();
+    
+        // Récupérer les informations de l'utilisateur
+        $sql = "SELECT * FROM utilisateurs WHERE id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['id' => $utilisateur_id]);
+        $utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        // Enregistrer les informations de l'utilisateur dans la session
+        $_SESSION['utilisateur'] = [
+            'id' => $utilisateur['id'],
+            'pseudo' => $utilisateur['pseudo'],
+            'credits' => $utilisateur['credits'],
+        ];
+    
+        // Redirection vers la page "mesInformations.php"
+        header('Location: mesInformations.php');
+        ob_end_flush(); // Envoyer le contenu capturé
         exit;
     } else {
         echo "Une erreur est survenue lors de la création de votre compte.";
     }
 }
-
 ?>
 
 <main>

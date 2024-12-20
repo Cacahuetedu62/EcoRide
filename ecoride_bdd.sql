@@ -248,3 +248,6 @@ ADD COLUMN ville VARCHAR(100);
 DESCRIBE voitures;
 
 DELETE FROM voitures WHERE id IN (45, 46, 47, 48, 49, 50, 51, 53);
+
+DELETE FROM utilisateurs
+WHERE id IN (22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32);

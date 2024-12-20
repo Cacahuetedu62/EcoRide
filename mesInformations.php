@@ -1,22 +1,35 @@
 <?php
+session_start();
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
-$utilisateur_id = 21;
 
-// Requête pour récupérer les informations de l'utilisateur
+// Vérifier si l'utilisateur est connecté
+if (!isset($_SESSION['utilisateur']) || empty($_SESSION['utilisateur']['id'])) {
+    echo "ID de l'utilisateur non défini.";
+    // Ou rediriger l'utilisateur vers la page de connexion
+    header('Location: connexion.php');
+    exit;
+}
+
+// Si la session est correcte, récupérer l'ID de l'utilisateur
+$utilisateur_id = $_SESSION['utilisateur']['id'];
+
+// Requête pour récupérer toutes les informations de l'utilisateur
 $sql = "SELECT * FROM utilisateurs WHERE id = :id";
 $stmt = $pdo->prepare($sql);
 $stmt->bindParam(':id', $utilisateur_id, PDO::PARAM_INT);
 $stmt->execute();
 
-// Récupérer les données
+// Récupérer les données et les stocker dans la session
 $utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// Mettre à jour la session avec les informations récupérées
 if ($utilisateur) {
-    // Les informations de l'utilisateur sont récupérées
+    $_SESSION['utilisateur'] = $utilisateur;  // Mettre à jour la session avec toutes les informations
 } else {
     echo "Aucun utilisateur trouvé.";
+    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -112,7 +125,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <h4>Mes informations</h4>
             <form action="mesInformations.php" method="post" id="form-info" enctype="multipart/form-data">
 
-                <!-- Pseudo -->
+            <p>Feliciation ! Vous être inscrit avec succès ! Pour pouvoir profiter de nos services veuillez renseigner tous les champs de votre profil</p>
+                            <!-- Bouton "Modifier mes informations" -->
+                            <button class="buttonVert m-2" type="button" id="edit-btn" onclick="editForm()">Modifier mes informations</button>  
+            <!-- Pseudo -->
                 <label for="pseudo">Pseudo</label>
                 <input type="text" id="pseudo" name="pseudo" value="<?php echo htmlspecialchars($utilisateur['pseudo']); ?>" disabled>
 
@@ -169,9 +185,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <option value="passager_chauffeur" <?php echo ($utilisateur['role'] == 'passager_chauffeur') ? 'selected' : ''; ?>>Passager/Chauffeur</option>
                 </select>
                 <p>Si vous êtes chauffeur ou passager/chuaffeur nous vous invitons à renseigner votre véhicule dans l'onglet "Mes véhicules" sur votre gauche</p>
-
-                <!-- Bouton "Modifier mes informations" -->
-                <button class="buttonVert m-2" type="button" id="edit-btn" onclick="editForm()">Modifier mes informations</button>
 
                 <!-- Bouton "Valider" -->
                 <button type="submit" id="submit-btn" style="display:none;">Valider les informations modifiées</button>
