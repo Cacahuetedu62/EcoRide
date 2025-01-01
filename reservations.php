@@ -2,6 +2,24 @@
 require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
+
+
+if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
+    
+    
+    // L'utilisateur est connecté, récupère son ID
+        $utilisateur_id = $_SESSION['utilisateur']['id'];
+        
+      
+    echo "L'utilisateur connecté a l'ID : " . $utilisateur_id;
+    } 
+    else {
+        // L'utilisateur n'est pas connecté
+        
+        
+    echo "Utilisateur non connecté.";
+    }
+
 ?>
 
 <main>
@@ -10,15 +28,15 @@ require_once('lib/config.php');
 if (isset($_GET['id'])) {
     $trajet_id = (int) $_GET['id'];
 
-    $sql = "SELECT t.*, u.pseudo, u.photo, u.note_moyenne, v.energie, v.nb_places AS voiture_places, t.prix_personnes,
-    t.preferences, u.id AS utilisateur_id, v.marque, v.modele, 
+    $sql = "SELECT t.*, u.pseudo, u.photo, u.note_moyenne, u.credits, v.energie, v.nb_places AS voiture_places, t.prix_personnes,
+    t.preferences, u.id AS utilisateur_id, v.marque, v.modele,
     TIMESTAMPDIFF(MINUTE, CONCAT(t.date_depart, ' ', t.heure_depart), CONCAT(t.date_arrive, ' ', t.heure_arrive)) AS duree_minutes,
     a.commentaires
 FROM trajets t
 JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
 JOIN utilisateurs u ON tu.utilisateur_id = u.id
 LEFT JOIN voitures v ON v.utilisateur_id = u.id
-LEFT JOIN avis a ON a.utilisateur_id = u.id  
+LEFT JOIN avis a ON a.utilisateur_id = u.id
 WHERE t.id = :id";
 
 
@@ -26,6 +44,18 @@ WHERE t.id = :id";
     $stmt->bindValue(':id', $trajet_id, PDO::PARAM_INT);
     $stmt->execute();
     $trajet = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $credits = $trajet['credits'];
+    $nb_places_dispo = $trajet['nb_places'];
+    $prix_personne = $trajet['prix_personnes'];
+    $nb_personnes = isset($_POST['nb_personnes']) ? intval($_POST['nb_personnes']) : 1;
+    $isUserLoggedIn = isset($_SESSION['user_id']);
+
+
+// Vérifiez si le nombre de places disponibles est suffisant
+        $places_suffisantes = $nb_places_dispo >= $nb_personnes;
+// Vérifiez si l'utilisateur a suffisamment de crédits
+        $credits_suffisants = $credits >= ($prix_personne * $nb_personnes);
 
     if ($trajet) {
         // Afficher les détails du trajet
@@ -68,7 +98,7 @@ WHERE t.id = :id";
         <div class="row mb-3">
             <div class="col-md-6 departArrive">
                 <h4>Détail du prix</h4>
-                <p>Votre solde est de : </p>
+                <p>Votre solde est de : <?= htmlspecialchars($credits, ENT_QUOTES, 'UTF-8') ?> crédits</p>
                 <p>Prix du trajet : <?= $trajet['prix_personnes'] ?> € par personne</p>
                 <p>Votre solde après ce trajet : *le solde sera mis à jour lors de la validation du trajet</p>
             </div>
@@ -118,21 +148,42 @@ WHERE t.id = :id";
         </div>
 
         <!-- Message d'erreur -->
-        <div id="errorMessage">Si vous n'acceptez pas les conditions vous ne pourrez pass réservé votre trajet</div>
+        <div id="errorMessage">
+                <?php if (!$places_suffisantes): ?>
+                    <p>Il n'y a pas assez de places disponibles pour ce trajet.</p>
+                <?php endif; ?>
+                <?php if (!$credits_suffisants): ?>
+                    <p>Vous n'avez pas assez de crédits pour réserver ce trajet.</p>
+                <?php endif; ?>
+                <?php if ($places_suffisantes && $credits_suffisants): ?>
+                    <p>Si vous n'acceptez pas les conditions, vous ne pourrez pas réserver votre trajet.</p>
+                <?php endif; ?>
+            </div>
 
         <!-- Bouton de validation -->
         <?php if (!$isUserLoggedIn): ?>
-    <p>Veuillez vous <a href="connexion.php">connecter</a> ou vous <a href="inscription.php">inscrire</a> pour réserver un trajet.</p>
-    <button type="submit" id="submitButton" class="buttonVert m-2" disabled>Je réserve mon trajet</button>
-<?php else: ?>
-    <button type="submit" id="submitButton" class="buttonVert m-2">Je réserve mon trajet</button>
-<?php endif; ?>
-    </div>
-</div>
+                <p>Veuillez vous <a href="connexion.php">connecter</a> ou vous <a href="inscription.php">inscrire</a> pour réserver un trajet.</p>
+            <?php endif; ?>
+            <form action="reserver_trajet.php" method="post">
+                <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet_id, ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="nb_personnes" value="<?= htmlspecialchars($nb_personnes, ENT_QUOTES, 'UTF-8') ?>">
+                <button type="submit" id="submitButton" class="buttonVert m-2" <?= (!$isUserLoggedIn || !$places_suffisantes || !$credits_suffisants || $alreadyReserved) ? 'disabled' : '' ?>>Je réserve mon trajet</button>
+            </form></div>
     </div>
 
 
 <script>
+
+
+function confirmReservation() {
+    if (confirm("Êtes-vous sûr de vouloir réserver ce trajet ?")) {
+        if (confirm("Confirmez-vous une deuxième fois ?")) {
+            // Rediriger vers la page "mesTrajets.php"
+            window.location.href = "mesTrajets.php";
+        }
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', function () {
     const conditionsVente = document.getElementById('conditionsVente');

@@ -2,16 +2,7 @@
 require_once('templates/header.php');
 require_once('lib/config.php');
 require_once('lib/pdo.php');
-
-
-//Récupération de tous les utilisateurs
-// $query = $pdo->prepare("SELECT * FROM trajets");
-// $query->execute();
-// $allUsers = $query->fetchAll(PDO::FETCH_ASSOC);
-// var_dump($allUsers);
-// ?>
-
-
+?>
 
 <main>
     

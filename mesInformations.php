@@ -1,16 +1,25 @@
 <?php
-session_start();
+require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
 
-// Vérifier si l'utilisateur est connecté
-if (!isset($_SESSION['utilisateur']) || empty($_SESSION['utilisateur']['id'])) {
-    echo "ID de l'utilisateur non défini.";
-    // Ou rediriger l'utilisateur vers la page de connexion
-    header('Location: connexion.php');
-    exit;
-}
+if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
+    
+    
+    // L'utilisateur est connecté, récupère son ID
+        $utilisateur_id = $_SESSION['utilisateur']['id'];
+        
+      
+    echo "L'utilisateur connecté a l'ID : " . $utilisateur_id;
+    } 
+    else {
+        // L'utilisateur n'est pas connecté
+        
+        
+    echo "Utilisateur non connecté.";
+    }
+
 
 // Si la session est correcte, récupérer l'ID de l'utilisateur
 $utilisateur_id = $_SESSION['utilisateur']['id'];

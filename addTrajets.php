@@ -1,13 +1,24 @@
 <?php
+require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
 
-// Récupération de l'ID de l'utilisateur connecté (à remplacer par l'ID réel de l'utilisateur connecté)
-// $utilisateur_id = 4;
-// echo "Test avec utilisateur 4 en attendant la session >";
-// var_dump($utilisateur_id);
-
+if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
+    
+    
+    // L'utilisateur est connecté, récupère son ID
+        $utilisateur_id = $_SESSION['utilisateur']['id'];
+        
+      
+    echo "L'utilisateur connecté a l'ID : " . $utilisateur_id;
+    } 
+    else {
+        // L'utilisateur n'est pas connecté
+        
+        
+    echo "Utilisateur non connecté.";
+    }
 // Récupération de la liste des voitures de l'utilisateur
 $sql = "SELECT id, marque, modele FROM voitures WHERE utilisateur_id = :utilisateur_id";
 $stmt = $pdo->prepare($sql);
@@ -60,22 +71,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $pdo = null;
 }
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="index, follow">
-    <meta name="description" content="EcoRide, quand économie rime avec écologie ! le covoiturage éléctrique, découvrez le covoiturage électrique pour des trajets plus verts et économiques.">
-    <title>EcoRide | Covoiturage écologique et éléctrique</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
-</head>
 
 <main class="form-page">    
     <section class="custom-section1">
@@ -118,7 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 <input type="hidden" name="utilisateur_id" value="<?php echo $utilisateur_id; ?>">
 
-                <button type="submit" id="submitButton" class="buttonVert m-2" disabled>Je créer le trajet</button>
+                <button type="submit" id="submitButton" class="buttonVert m-2">Je créer le trajet</button>
                 <p>*Veuillez prendre note que 2 crédits sont prélevés sur le prix pour assurer le bon fonctionement de votre plateforme</p>
 
             </form>

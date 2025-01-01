@@ -251,3 +251,49 @@ DELETE FROM voitures WHERE id IN (45, 46, 47, 48, 49, 50, 51, 53);
 
 DELETE FROM utilisateurs
 WHERE id IN (22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32);
+
+UPDATE utilisateurs
+SET credits = credits + 100
+WHERE id = 33;
+
+
+UPDATE utilisateurs
+SET credits = credits + 100
+WHERE id = 33;
+
+INSERT INTO trajets (
+    date_depart, heure_depart, lieu_depart, 
+    date_arrive, heure_arrive, lieu_arrive, 
+    statut, nb_places, prix_personnes, preferences
+) VALUES (
+    '2025-01-02', '08:00:00', 'Paris',
+    '2025-01-02', '10:00:00', 'Lyon',
+    'Disponible', 4, 50.00, 'Voyage confortable, climatisation et WiFi disponibles'
+);
+
+
+INSERT INTO trajets (
+    date_depart, heure_depart, lieu_depart, 
+    date_arrive, heure_arrive, lieu_arrive, 
+    statut, nb_places, prix_personnes, preferences
+) VALUES (
+    '2025-01-03', '08:00:00', 'Nice',
+    '2025-01-04', '10:00:00', 'Paris',
+    'Disponible', 4, 50.00, 'Voyage confortable, climatisation et WiFi disponibles'
+);
+
+
+INSERT INTO voitures (modele, immatriculation, marque, energie, couleur, nb_places, date_premiere_immatriculation, utilisateur_id)
+VALUES ('Tesla Model S', 'AB-123-ZZ', 'Tesla', 'Électrique', 'Noir', 5, '2021-06-15', 33);
+
+CREATE TABLE reservations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    trajet_id INT NOT NULL,
+    nb_personnes INT NOT NULL,
+    date_reservation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES utilisateurs(id),
+    FOREIGN KEY (trajet_id) REFERENCES trajets(id)
+);
+
+ALTER TABLE trajet_utilisateur ADD COLUMN role VARCHAR(50) NOT NULL;
