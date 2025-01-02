@@ -297,3 +297,35 @@ CREATE TABLE reservations (
 );
 
 ALTER TABLE trajet_utilisateur ADD COLUMN role VARCHAR(50) NOT NULL;
+
+ALTER TABLE trajets
+ADD COLUMN fumeur BOOLEAN DEFAULT FALSE,
+ADD COLUMN animaux BOOLEAN DEFAULT FALSE;
+
+DROP PROCEDURE IF EXISTS CreerTrajet;
+
+DELIMITER $$
+
+CREATE PROCEDURE CreerTrajet(
+    IN utilisateur_id INT,
+    IN date_depart DATE,
+    IN heure_depart TIME,
+    IN lieu_depart VARCHAR(255),
+    IN date_arrive DATE,
+    IN heure_arrive TIME,
+    IN lieu_arrive VARCHAR(255),
+    IN nb_places INT,
+    IN prix_personne DECIMAL(10, 2),
+    IN preferences TEXT,
+    IN voiture_id INT,
+    IN fumeur TINYINT(1),
+    IN animaux TINYINT(1)
+)
+BEGIN
+    INSERT INTO trajets 
+    (utilisateur_id, date_depart, heure_depart, lieu_depart, date_arrive, heure_arrive, lieu_arrive, nb_places, prix_personne, preferences, voiture_id, fumeur, animaux)
+    VALUES 
+    (utilisateur_id, date_depart, heure_depart, lieu_depart, date_arrive, heure_arrive, lieu_arrive, nb_places, prix_personne, preferences, voiture_id, fumeur, animaux);
+END
+
+DELIMITER ;

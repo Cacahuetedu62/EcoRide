@@ -3,8 +3,6 @@ require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 ?>
-
-<main>
     
 <section class="d-flex m-3 justify-content-center">
     <div class="colonne-formulaire">

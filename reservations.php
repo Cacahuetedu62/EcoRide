@@ -29,7 +29,7 @@ if (isset($_GET['id'])) {
     $trajet_id = (int) $_GET['id'];
 
     $sql = "SELECT t.*, u.pseudo, u.photo, u.note_moyenne, u.credits, v.energie, v.nb_places AS voiture_places, t.prix_personnes,
-    t.preferences, u.id AS utilisateur_id, v.marque, v.modele,
+    t.preferences, t.fumeur, t.animaux, u.id AS utilisateur_id, v.marque, v.modele,
     TIMESTAMPDIFF(MINUTE, CONCAT(t.date_depart, ' ', t.heure_depart), CONCAT(t.date_arrive, ' ', t.heure_arrive)) AS duree_minutes,
     a.commentaires
 FROM trajets t
@@ -38,6 +38,7 @@ JOIN utilisateurs u ON tu.utilisateur_id = u.id
 LEFT JOIN voitures v ON v.utilisateur_id = u.id
 LEFT JOIN avis a ON a.utilisateur_id = u.id
 WHERE t.id = :id";
+
 
 
     $stmt = $pdo->prepare($sql);
@@ -128,6 +129,9 @@ WHERE t.id = :id";
                         }
                     ?>
                 </p>
+                <p>Fumeur accepté : <?= $trajet['fumeur'] ? 'Oui' : 'Non' ?></p>
+<p>Animaux acceptés : <?= $trajet['animaux'] ? 'Oui' : 'Non' ?></p>
+
                 <p>Préférences : <?= htmlspecialchars($trajet['preferences']) ?></p>
         <p>Le trajet se fera en <?= htmlspecialchars($trajet['modele']) ?> de la marque <?= htmlspecialchars($trajet['marque'])?></p>
             </div>
