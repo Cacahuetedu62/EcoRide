@@ -270,6 +270,14 @@ width: 400px;
     padding: 15px;
 }
 
+.autresParticipants{
+    background-color: pink;
+    border: solid black 2px;
+    margin: 1vh;
+    padding: 1vh;
+}
+
+
 /* Rappel : 
 p-1 : applique un padding de 0.25rem.
 p-2 : applique un padding de 0.5rem.

@@ -13,15 +13,15 @@ $trajet_id = (int)$_GET['trajet_id'];
 
 try {
     // Requête pour récupérer les détails du trajet
-    $sql = "SELECT t.lieu_depart, t.date_arrive, t.heure_arrive, 
-                t.date_depart, t.heure_depart, 
-                t.lieu_arrive, t.statut, t.nb_places, 
-                t.prix_personnes, t.preferences, 
-                t.fumeur, t.animaux, 
+    $sql = "SELECT t.lieu_depart, t.date_arrive, t.heure_arrive,
+                t.date_depart, t.heure_depart,
+                t.lieu_arrive, t.nb_places,
+                t.prix_personnes, t.preferences,
+                t.fumeur, t.animaux,
                 u.pseudo, u.photo, u.telephone, u.note_moyenne
             FROM trajets t
-            JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
-            JOIN utilisateurs u ON u.id = tu.utilisateur_id
+            JOIN reservations r ON t.id = r.trajet_id
+            JOIN utilisateurs u ON u.id = r.utilisateur_id
             WHERE t.id = :trajet_id";
 
     $stmt = $pdo->prepare($sql);
@@ -34,6 +34,18 @@ try {
         echo "Le trajet demandé n'existe pas.";
         exit;
     }
+
+    // Requête pour récupérer les autres participants
+    $sql_participants = "SELECT u.pseudo, u.photo, u.telephone, u.note_moyenne
+                         FROM reservations r
+                         JOIN utilisateurs u ON u.id = r.utilisateur_id
+                         WHERE r.trajet_id = :trajet_id";
+
+    $stmt_participants = $pdo->prepare($sql_participants);
+    $stmt_participants->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+    $stmt_participants->execute();
+    $participants = $stmt_participants->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (Exception $e) {
     echo "Erreur lors de la récupération des détails du trajet : " . $e->getMessage();
     exit;
@@ -68,7 +80,6 @@ try {
         <div class="row mb-3">
             <div class="col-md-6">
                 <h4>Informations du trajet</h4>
-                <p>Statut : <?= htmlspecialchars($trajet['statut'], ENT_QUOTES, 'UTF-8') ?></p>
                 <p>Places disponibles : <?= htmlspecialchars($trajet['nb_places'], ENT_QUOTES, 'UTF-8') ?></p>
                 <p>Prix par personne : <?= htmlspecialchars($trajet['prix_personnes'], ENT_QUOTES, 'UTF-8') ?> €</p>
                 <p>Préférences : <?= htmlspecialchars($trajet['preferences'], ENT_QUOTES, 'UTF-8') ?></p>
@@ -81,10 +92,34 @@ try {
                 <p>Pseudo : <?= htmlspecialchars($trajet['pseudo'], ENT_QUOTES, 'UTF-8') ?></p>
                 <p>Téléphone : <?= htmlspecialchars($trajet['telephone'], ENT_QUOTES, 'UTF-8') ?></p>
                 <p>
-                    <img src="images/<?= htmlspecialchars($trajet['photo'], ENT_QUOTES, 'UTF-8') ?>" 
+                    <img src="images/<?= htmlspecialchars($trajet['photo'], ENT_QUOTES, 'UTF-8') ?>"
                          alt="Photo du créateur" class="rounded-circle" width="75" height="75">
                 </p>
                 <p>Note moyenne : <?= htmlspecialchars($trajet['note_moyenne'], ENT_QUOTES, 'UTF-8') ?>/5</p>
+            </div>
+        </div>
+
+        <!-- Autres participants -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <h4>Autres participants</h4>
+                <?php if (!empty($participants)): ?>
+                    <?php foreach ($participants as $participant): ?>
+                        <div class="participant">
+                            <div class="autresParticipants">
+                            <p>Pseudo : <?= htmlspecialchars($participant['pseudo'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <p>Téléphone : <?= htmlspecialchars($participant['telephone'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <p>
+                                <img src="images/<?= htmlspecialchars($participant['photo'], ENT_QUOTES, 'UTF-8') ?>"
+                                     alt="Photo du participant" class="rounded-circle" width="50" height="50">
+                            </p>
+                            <p>Note moyenne : <?= htmlspecialchars($participant['note_moyenne'], ENT_QUOTES, 'UTF-8') ?>/5</p>
+                       </div> 
+                    </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>Aucun autre participant pour ce trajet.</p>
+                <?php endif; ?>
             </div>
         </div>
     </div>

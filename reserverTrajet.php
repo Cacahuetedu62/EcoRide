@@ -3,9 +3,9 @@ require_once('lib/pdo.php');
 require_once('lib/config.php');
 require_once('templates/header.php');
 
-echo '<pre>';
-var_dump($_POST);
-echo '</pre>';
+// echo '<pre>';
+// var_dump($_POST);
+// echo '</pre>';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Vérifiez si l'utilisateur est connecté

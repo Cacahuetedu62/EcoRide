@@ -14,11 +14,11 @@ if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     exit;
 }
 
-// Préparer la requête pour récupérer les trajets de l'utilisateur connecté
+// Préparer la requête pour récupérer les trajets de l'utilisateur connecté depuis la table reservations
 $sql = "SELECT t.id, t.date_depart, t.heure_depart, t.lieu_depart
         FROM trajets t
-        JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
-        WHERE tu.utilisateur_id = :utilisateur_id";
+        JOIN reservations r ON t.id = r.trajet_id
+        WHERE r.utilisateur_id = :utilisateur_id";
 $stmt = $pdo->prepare($sql);
 $stmt->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
 
