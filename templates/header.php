@@ -101,6 +101,4 @@ if (isset($_SESSION['utilisateur'])) {
                 .catch(error => console.error('Error loading content:', error));
         }
 </script>
-
-</body>
-</html>
+<main>

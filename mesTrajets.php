@@ -15,7 +15,7 @@ if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
 }
 
 // Préparer la requête pour récupérer les trajets de l'utilisateur connecté depuis la table reservations
-$sql = "SELECT t.id, t.date_depart, t.heure_depart, t.lieu_depart
+$sql = "SELECT t.id, t.date_depart, t.heure_depart, t.lieu_depart, r.statut
         FROM trajets t
         JOIN reservations r ON t.id = r.trajet_id
         WHERE r.utilisateur_id = :utilisateur_id";
@@ -43,6 +43,17 @@ try {
                         <p>Heure de départ : <?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?></p>
                         <p>Lieu de départ : <?= htmlspecialchars($trajet['lieu_depart'], ENT_QUOTES, 'UTF-8') ?></p>
                         <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary">Voir les détails</a>
+                        <?php if ($trajet['statut'] == 'en_attente'): ?>
+                            <form action="lancerTrajet.php" method="post" style="display:inline;">
+                                <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                <button type="submit" class="btn btn-success">Lancer le trajet</button>
+                            </form>
+                        <?php elseif ($trajet['statut'] == 'en_cours'): ?>
+                            <form action="terminerTrajet.php" method="post" style="display:inline;">
+                                <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                <button type="submit" class="btn btn-danger">Terminer le trajet</button>
+                            </form>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>

@@ -277,6 +277,11 @@ width: 400px;
     padding: 1vh;
 }
 
+.commentaires{
+    border: solid black 2px;
+    padding: 1vh;
+    margin: 10vh;
+}
 
 /* Rappel : 
 p-1 : applique un padding de 0.25rem.

@@ -363,3 +363,6 @@ VALUES
 
 ALTER TABLE trajets
 DROP COLUMN statut;
+
+
+ALTER TABLE reservations ADD COLUMN statut ENUM('en_attente', 'en_cours', 'termine') DEFAULT 'en_attente';
