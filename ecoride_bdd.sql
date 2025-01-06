@@ -383,4 +383,4 @@ ALTER TABLE historique MODIFY date_fin_reel DATETIME NULL;
 
 ALTER TABLE trajets ADD COLUMN prix_total DECIMAL(10, 2);
 
-
+ALTER TABLE trajet_utilisateur DROP COLUMN role;

@@ -46,6 +46,17 @@ try {
     $stmt_participants->execute();
     $participants = $stmt_participants->fetchAll(PDO::FETCH_ASSOC);
 
+    // Calcul du nombre total de places réservées et du montant total
+    $sql_reservations = "SELECT SUM(r.nb_personnes) AS total_reserves
+                         FROM reservations r
+                         WHERE r.trajet_id = :trajet_id";
+    $stmt_reservations = $pdo->prepare($sql_reservations);
+    $stmt_reservations->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+    $stmt_reservations->execute();
+    $reservations = $stmt_reservations->fetch(PDO::FETCH_ASSOC);
+    $total_reserves = $reservations['total_reserves'] ?? 0;
+    $total_price = $total_reserves * $trajet['prix_personnes'];
+
 } catch (Exception $e) {
     echo "Erreur lors de la récupération des détails du trajet : " . $e->getMessage();
     exit;
@@ -80,8 +91,9 @@ try {
         <div class="row mb-3">
             <div class="col-md-6">
                 <h4>Informations du trajet</h4>
-                <p>Places disponibles : <?= htmlspecialchars($trajet['nb_places'], ENT_QUOTES, 'UTF-8') ?></p>
+                <p>Places réservées : <?= htmlspecialchars($total_reserves, ENT_QUOTES, 'UTF-8') ?></p>
                 <p>Prix par personne : <?= htmlspecialchars($trajet['prix_personnes'], ENT_QUOTES, 'UTF-8') ?> €</p>
+                <p>Prix total pour toutes les places réservées : <?= htmlspecialchars($total_price, ENT_QUOTES, 'UTF-8') ?> €</p>
                 <p>Préférences : <?= htmlspecialchars($trajet['preferences'], ENT_QUOTES, 'UTF-8') ?></p>
                 <p>Fumeur : <?= $trajet['fumeur'] ? 'Oui' : 'Non' ?></p>
                 <p>Animaux acceptés : <?= $trajet['animaux'] ? 'Oui' : 'Non' ?></p>
@@ -107,15 +119,15 @@ try {
                     <?php foreach ($participants as $participant): ?>
                         <div class="participant">
                             <div class="autresParticipants">
-                            <p>Pseudo : <?= htmlspecialchars($participant['pseudo'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p>Téléphone : <?= htmlspecialchars($participant['telephone'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p>
-                                <img src="images/<?= htmlspecialchars($participant['photo'], ENT_QUOTES, 'UTF-8') ?>"
-                                     alt="Photo du participant" class="rounded-circle" width="50" height="50">
-                            </p>
-                            <p>Note moyenne : <?= htmlspecialchars($participant['note_moyenne'], ENT_QUOTES, 'UTF-8') ?>/5</p>
-                       </div> 
-                    </div>
+                                <p>Pseudo : <?= htmlspecialchars($participant['pseudo'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <p>Téléphone : <?= htmlspecialchars($participant['telephone'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <p>
+                                    <img src="images/<?= htmlspecialchars($participant['photo'], ENT_QUOTES, 'UTF-8') ?>"
+                                         alt="Photo du participant" class="rounded-circle" width="50" height="50">
+                                </p>
+                                <p>Note moyenne : <?= htmlspecialchars($participant['note_moyenne'], ENT_QUOTES, 'UTF-8') ?>/5</p>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <p>Aucun autre participant pour ce trajet.</p>
@@ -123,6 +135,7 @@ try {
             </div>
         </div>
     </div>
+</main>
 
 <?php
 require_once('templates/footer.php');

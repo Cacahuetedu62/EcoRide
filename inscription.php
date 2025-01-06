@@ -1,5 +1,4 @@
 <?php
-ob_start();
 require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');

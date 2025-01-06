@@ -29,6 +29,7 @@ if (isset($_GET['id'])) {
     LEFT JOIN avis a ON a.utilisateur_id = u.id
     WHERE t.id = :id";
 
+
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':id', $trajet_id, PDO::PARAM_INT);
     $stmt->execute();
@@ -127,6 +128,23 @@ if (isset($_GET['id'])) {
             </div>
         </div>
 
+        <!-- Nombre de passagers -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <h4>Nombre de passagers</h4>
+                <form action="reserverTrajet.php" method="POST">
+                    <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet_id, ENT_QUOTES, 'UTF-8') ?>">
+                    <div class="mb-3">
+                        <label for="nb_personnes" class="form-label">Nombre de personnes :</label>
+                        <input type="number" id="nb_personnes" name="nb_personnes" class="form-control" min="1" required>
+                    </div>
+                    <div id="additionalPassengers" style="display: none;">
+                        <h5>Informations sur les passagers supplémentaires :</h5>
+                        <div id="passengerFields"></div>
+                    </div>
+            </div>
+        </div>
+
         <!-- Acceptation des conditions et validation -->
         <div class="row mb-3">
             <div class="col-12">
@@ -157,52 +175,96 @@ if (isset($_GET['id'])) {
                     <p>Veuillez vous <a href="connexion.php">connecter</a> ou vous <a href="inscription.php">inscrire</a> pour réserver un trajet.</p>
                 <?php endif; ?>
 
-                <form action="reserverTrajet.php" method="POST">
-            <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet_id, ENT_QUOTES, 'UTF-8') ?>">
-            <div class="mb-3">
-                <label for="nb_personnes" class="form-label">Nombre de personnes :</label>
-                <input type="number" id="nb_personnes" name="nb_personnes" class="form-control" min="1" required>
+                <div id="totalPrice" style="display: none;">
+                    <h5>Prix total : <span id="priceValue">0</span> €</h5>
+                </div>
+
+                <button type="submit" id="submitButton" class="buttonVert m-2" <?= (!$isUserLoggedIn || !$places_suffisantes || !$credits_suffisants) ? 'disabled' : '' ?>>Réserver</button>
+                </form>
             </div>
-            <div id="additionalPassengers" style="display: none;">
-                <h5>Informations sur les passagers supplémentaires :</h5>
-                <div id="passengerFields"></div>
-            </div>
-            <button type="submit" id="submitButton" class="buttonVert m-2" <?= (!$isUserLoggedIn || !$places_suffisantes || !$credits_suffisants) ? 'disabled' : '' ?>>Réserver</button>
-        </form>
-    </div>
+        </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const nbPersonnesInput = document.getElementById('nb_personnes');
-            const additionalPassengers = document.getElementById('additionalPassengers');
-            const passengerFields = document.getElementById('passengerFields');
+        <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const nbPersonnesInput = document.getElementById('nb_personnes');
+    const additionalPassengers = document.getElementById('additionalPassengers');
+    const passengerFields = document.getElementById('passengerFields');
+    const totalPriceDiv = document.getElementById('totalPrice');
+    const priceValue = document.getElementById('priceValue');
+    const pricePerPerson = <?= json_encode($trajet['prix_personnes']) ?>; // Utilise le prix par personne du trajet
+    const submitButton = document.getElementById('submitButton');
+    const conditionsVenteCheckbox = document.getElementById('conditionsVente');
+    const politiqueConfidentialiteCheckbox = document.getElementById('politiqueConfidentialite');
+    const errorMessage = document.getElementById('errorMessage');
 
-            nbPersonnesInput.addEventListener('input', function () {
-                const nbPersonnes = parseInt(nbPersonnesInput.value, 10);
+    if (!nbPersonnesInput || !additionalPassengers || !passengerFields || !totalPriceDiv || !priceValue || !submitButton || !conditionsVenteCheckbox || !politiqueConfidentialiteCheckbox || !errorMessage) {
+        console.error('One or more required elements are missing.');
+        return;
+    }
 
-                // Réinitialiser les champs des passagers supplémentaires
-                passengerFields.innerHTML = '';
+    nbPersonnesInput.addEventListener('input', function () {
+        const nbPersonnes = parseInt(nbPersonnesInput.value, 10);
 
-                if (nbPersonnes > 1) {
-                    additionalPassengers.style.display = 'block';
+        if (isNaN(nbPersonnes) || nbPersonnes < 1) {
+            additionalPassengers.style.display = 'none';
+            totalPriceDiv.style.display = 'none';
+            passengerFields.innerHTML = '';
+            return;
+        }
 
-                    // Ajouter des champs pour chaque passager supplémentaire
-                    for (let i = 2; i <= nbPersonnes; i++) {
-                        const passengerField = document.createElement('div');
-                        passengerField.className = 'mb-3 departArrive';
-                        passengerField.innerHTML = `
-                            <label for="nom_${i}_passager" class="form-label">Nom du passager ${i} :</label>
-                            <input type="text" id="nom_${i}_passager" name="noms[${i}][nom]" class="form-control" required>
-                            <label for="prenom_${i}_passager" class="form-label">Prénom du passager ${i} :</label>
-                            <input type="text" id="prenom_${i}_passager" name="noms[${i}][prenom]" class="form-control" required>
-                        `;
-                        passengerFields.appendChild(passengerField);
-                    }
-                } else {
-                    additionalPassengers.style.display = 'none';
-                }
-            });
-        });
+        // Réinitialiser les champs des passagers supplémentaires
+        passengerFields.innerHTML = '';
+
+        if (nbPersonnes > 1) {
+            additionalPassengers.style.display = 'block';
+
+            // Ajouter des champs pour chaque passager supplémentaire
+            for (let i = 2; i <= nbPersonnes; i++) {
+                const passengerField = document.createElement('div');
+                passengerField.className = 'mb-3 departArrive';
+                passengerField.innerHTML = `
+                    <label for="nom_${i}_passager" class="form-label">Nom du passager ${i} :</label>
+                    <input type="text" id="nom_${i}_passager" name="noms[${i}][nom]" class="form-control" required>
+                    <label for="prenom_${i}_passager" class="form-label">Prénom du passager ${i} :</label>
+                    <input type="text" id="prenom_${i}_passager" name="noms[${i}][prenom]" class="form-control" required>
+                `;
+                passengerFields.appendChild(passengerField);
+            }
+
+            // Calculer le prix total et l'afficher
+            const totalPrice = pricePerPerson * nbPersonnes;
+            priceValue.textContent = totalPrice.toFixed(2);
+            totalPriceDiv.style.display = 'block';
+        } else {
+            additionalPassengers.style.display = 'none';
+            totalPriceDiv.style.display = 'none';
+        }
+    });
+
+    // Fonction pour vérifier l'état des cases à cocher et mettre à jour le message d'erreur
+    function checkConditions() {
+        if (conditionsVenteCheckbox.checked && politiqueConfidentialiteCheckbox.checked) {
+            errorMessage.innerHTML = ""; // Efface le message d'erreur si les conditions sont acceptées
+        } else {
+            errorMessage.innerHTML = "<p>Vous devez accepter les conditions de vente et la politique de confidentialité pour réserver ce trajet.</p>";
+        }
+    }
+
+    // Validation avant la soumission du formulaire
+    submitButton.addEventListener('click', function(event) {
+        if (!conditionsVenteCheckbox.checked || !politiqueConfidentialiteCheckbox.checked) {
+            event.preventDefault();  // Empêche la soumission du formulaire si les conditions ne sont pas acceptées
+        }
+    });
+
+    // Ajouter des écouteurs d'événements pour les cases à cocher
+    conditionsVenteCheckbox.addEventListener('change', checkConditions);
+    politiqueConfidentialiteCheckbox.addEventListener('change', checkConditions);
+
+    // Vérifier l'état initial des cases à cocher
+    checkConditions();
+});
+
     </script>
 </body>
 </html>
