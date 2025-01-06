@@ -283,6 +283,73 @@ width: 400px;
     margin: 10vh;
 }
 
+.colonnesConducPassagers{
+    padding: 2vh;
+}
+
+.colonnesConducPassagers h4{
+    color : whitesmoke;
+    font-size: 40px;
+    background-color: #05521C;
+    padding: 1vh;
+}
+
+.colonnesConducPassagers h5{
+    color : whitesmoke;
+    font-size: 20px;
+    background-color: #8d8b2e;
+    padding: 1vh;
+}
+
+/* Effet givré */
+.givre {
+    position: relative;
+    overflow: hidden;
+    padding: 2vh;
+    margin: 2vh;
+    width: 50vh;
+    border-radius: 8px;
+}
+
+
+.givre::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.6); /* Voile blanc semi-transparent */
+    backdrop-filter: blur(8px); /* Flou pour l'effet givré */
+    z-index: 1;
+}
+
+/* Assurez-vous que le contenu est au-dessus de l'effet givré */
+.givre > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Amélioration de l'aspect de l'effet givré pour les éléments texte ou autres */
+.givre .vehicule {
+    background-color: rgba(255, 255, 255, 0.8); /* Fond clair et givré pour chaque trajet */
+    border-radius: 8px; /* Bord arrondi (facultatif) */
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.titleTrajets span{
+    font-size: 25px;          /* Taille du texte */
+    font-weight: bold;        /* Texte en gras */
+    text-align: center;       /* Centrer le texte */
+}
+
+.titleTrajets p{
+    font-size: 25px;          /* Taille du texte */
+    font-weight: bold;        /* Texte en gras */
+}
+
+
 /* Rappel : 
 p-1 : applique un padding de 0.25rem.
 p-2 : applique un padding de 0.5rem.

@@ -366,3 +366,21 @@ DROP COLUMN statut;
 
 
 ALTER TABLE reservations ADD COLUMN statut ENUM('en_attente', 'en_cours', 'termine') DEFAULT 'en_attente';
+
+
+CREATE TABLE historique (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    trajet_id INT NOT NULL,
+    utilisateur_id INT NOT NULL,
+    date_debut_reel DATETIME NOT NULL,
+    date_fin_reel DATETIME NOT NULL,
+    date_enregistrement TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (trajet_id) REFERENCES trajets(id) ON DELETE CASCADE,
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id) ON DELETE CASCADE
+);
+
+ALTER TABLE historique MODIFY date_fin_reel DATETIME NULL;
+
+ALTER TABLE trajets ADD COLUMN prix_total DECIMAL(10, 2);
+
+
