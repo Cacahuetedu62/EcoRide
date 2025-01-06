@@ -32,32 +32,33 @@ require_once('lib/config.php');
                             <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
                         </svg>
                         <span class="ms-2 text-black fs-5">
-                            <?php
-                            if (isset($_SESSION['utilisateur'])) {
-                                echo $_SESSION['utilisateur']['pseudo'] . " - Crédits : " . $_SESSION['utilisateur']['credits'];
-                                echo ' <a href="logout.php" class="text-decoration-none">Se déconnecter</a>';
-                            } else {
-                                echo '<a href="connexion.php" class="text-decoration-none">Se connecter</a>';
-                            }
-                            ?>
+                        <?php
+if (isset($_SESSION['utilisateur'])) {
+    echo $_SESSION['utilisateur']['pseudo'] . " - Crédits : " . $_SESSION['utilisateur']['credits'];
+    echo ' <a href="logout.php" class="text-decoration-none">Se déconnecter</a>';
+} else {
+    echo '<a href="connexion.php" class="text-decoration-none">Se connecter</a>';
+}
+?>
                         </span>
                     </div>
+
                     <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
-                    <li class="nav-item dropdown">
-    <a href="#" class="nav-link text-black d-flex flex-column align-items-center dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M2.5 5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0 3a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0 3a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11z"/>
-        </svg>
-        Menu
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-        <li><a class="dropdown-item" href="mesInformations.php">Mes informations</a></li>
-        <li><a class="dropdown-item" href="mesVehicules.php">Mes véhicules</a></li>
-        <li><a class="dropdown-item" href="mesTrajets.php">Mes trajets à venir</a></li>
-        <li><a class="dropdown-item" href="historiqueTrajets.php">Historique de mes trajets</a></li>
-        <li><a class="dropdown-item" href="addTrajets.php">Proposer un trajet</a></li>
-    </ul>
-</li>    
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link text-black d-flex flex-column align-items-center dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M2.5 5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0 3a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0 3a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11z" />
+                                </svg>
+                                Menu
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="mesInformations.php">Mes informations</a></li>
+                                <li><a class="dropdown-item" href="mesVehicules.php">Mes véhicules</a></li>
+                                <li><a class="dropdown-item" href="mesTrajets.php">Mes trajets à venir</a></li>
+                                <li><a class="dropdown-item" href="historiqueTrajets.php">Historique de mes trajets</a></li>
+                                <li><a class="dropdown-item" href="addTrajets.php">Proposer un trajet</a></li>
+                            </ul>
+                        </li>
                         <li>
                             <a href="covoiturages.php" class="nav-link text-black d-flex flex-column align-items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-ev-front" viewBox="0 0 16 16">
@@ -83,14 +84,14 @@ require_once('lib/config.php');
                                 Accueil
                             </a>
                         </li>
-                </ul>
+                    </ul>
                     <img src="images/Logo_EcoRide transparent.png" alt="Logo EcoRide" width="120" height="60">
                 </div>
             </div>
         </div>
     </header>
 
-    <script>
+<script>
         function loadContent(page) {
             fetch(page)
                 .then(response => response.text())
@@ -99,7 +100,7 @@ require_once('lib/config.php');
                 })
                 .catch(error => console.error('Error loading content:', error));
         }
-    </script>
+</script>
 
 </body>
 </html>

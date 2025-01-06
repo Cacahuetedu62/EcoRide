@@ -329,3 +329,37 @@ BEGIN
 END
 
 DELIMITER ;
+
+ALTER TABLE reservations CHANGE user_id utilisateur_id INT;
+
+ALTER TABLE reservations ADD COLUMN utilisateur_id INT;
+
+CREATE TABLE passagers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    reservation_id INT NOT NULL,
+    utilisateur_id INT NULL,
+    nom_passager VARCHAR(255) NOT NULL,
+    FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE CASCADE,
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id) ON DELETE SET NULL
+);
+
+ALTER TABLE passagers
+ADD COLUMN prenom_passager VARCHAR(255) NOT NULL AFTER nom_passager;
+
+
+INSERT INTO trajets (date_depart, heure_depart, lieu_depart, date_arrive, heure_arrive, lieu_arrive, statut, nb_places, prix_personnes, preferences, fumeur, animaux)
+VALUES
+('2025-01-07', '08:00:00', 'Paris', '2025-01-07', '15:00:00', 'Lyon', 'disponible', 2, 50.00, 'Vue dégagée, espace confortable', 0, 0);
+
+
+INSERT INTO trajets (date_depart, heure_depart, lieu_depart, date_arrive, heure_arrive, lieu_arrive, statut, nb_places, prix_personnes, preferences, fumeur, animaux)
+VALUES
+('2025-01-07', '06:00:00', 'Marseille', '2025-01-07', '09:00:00', 'Nice', 'disponible', 4, 30.00, 'Voyage silencieux, siège près de la fenêtre', 0, 1);
+
+
+INSERT INTO trajets (date_depart, heure_depart, lieu_depart, date_arrive, heure_arrive, lieu_arrive, statut, nb_places, prix_personnes, preferences, fumeur, animaux)
+VALUES
+('2025-01-07', '10:00:00', 'Bordeaux', '2025-01-07', '13:00:00', 'Toulouse', '', 3, 45.00, 'Confort et calme', 0, 1);
+
+ALTER TABLE trajets
+DROP COLUMN statut;
