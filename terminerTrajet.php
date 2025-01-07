@@ -2,6 +2,7 @@
 require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
+require_once 'vendor/autoload.php'; // Charger l'autoload de Composer pour PHPMailer
 
 // Vérifier si l'utilisateur est connecté
 if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
@@ -20,15 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
     $stmtUpdate = $pdo->prepare($sqlUpdate);
     $stmtUpdate->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
 
-    // Mettre à jour la table historique avec la date de fin réelle (si nécessaire)
+    // Mettre à jour la table historique avec la date de fin réelle
     $sqlHistorique = "UPDATE historique SET date_fin_reel = NOW() WHERE trajet_id = :trajet_id";
     $stmtHistorique = $pdo->prepare($sqlHistorique);
     $stmtHistorique->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
-
-    // Supprimer le trajet terminé de la table reservations (si nécessaire)
-    $sqlDelete = "DELETE FROM reservations WHERE trajet_id = :trajet_id";
-    $stmtDelete = $pdo->prepare($sqlDelete);
-    $stmtDelete->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
 
     try {
         $pdo->beginTransaction();
@@ -39,15 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
         // Mettre à jour la table historique (si applicable)
         $stmtHistorique->execute();
 
-        // Supprimer la réservation du trajet (si nécessaire)
-        $stmtDelete->execute();
-
         // Commit les changements dans la base de données
         $pdo->commit();
 
         // Envoi de l'email pour notifier l'utilisateur
-        $utilisateur_email = $_SESSION['utilisateur']['email']; // Récupère l'email de l'utilisateur
-
         $subject = "Votre trajet est terminé";
         $message = "
             <html>
@@ -63,16 +54,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
             </html>
         ";
 
-        // Fonction pour envoyer l'email
-        function envoyerEmail($to, $subject, $message) {
-            $headers = 'MIME-Version: 1.0' . "\r\n";
-            $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
-            $headers .= 'From: no-reply@votre-site.com' . "\r\n";
-            mail($to, $subject, $message, $headers);
+        // Création de l'instance PHPMailer
+        $mail = new PHPMailer\PHPMailer\PHPMailer();
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'testing.projets.siteweb@gmail.com'; // Ton email d'expéditeur
+        $mail->Password = 'sljw jlop qtyy mqae'; // Le mot de passe d'application pour testing.projets.siteweb@gmail.com
+        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+        
+        $mail->setFrom('testing.projets.siteweb@gmail.com', 'EcoRide'); // Email d'expéditeur
+        $mail->addAddress('rogez.aurore01@gmail.com'); // Teste l'email avec ta propre adresse (rogez.aurore01@gmail.com)
+        
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body    = $message;
+        
+        if ($mail->send()) {
+            echo 'Email envoyé avec succès.';
+        } else {
+            echo 'Erreur lors de l\'envoi de l\'email : ' . $mail->ErrorInfo;
         }
-
-        // Envoie de l'email
-        envoyerEmail($utilisateur_email, $subject, $message);
 
         // Afficher le modal de remerciement
         echo '<script>
@@ -83,7 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
                     }, 3000);
                 }
               </script>';
-
     } catch (PDOException $e) {
         // En cas d'erreur, on annule la transaction
         $pdo->rollBack();
@@ -94,21 +96,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
     echo "Aucun trajet valide spécifié.";
     exit;
 }
+
+require_once('templates/footer.php'); 
 ?>
-
-<!-- Modal Bootstrap -->
-<div class="modal fade" id="merciModal" tabindex="-1" aria-labelledby="merciModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="merciModalLabel">Merci !</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>Merci de nous avoir fait confiance ! Votre trajet est maintenant terminé. À bientôt.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<?php require_once('templates/footer.php'); ?>
