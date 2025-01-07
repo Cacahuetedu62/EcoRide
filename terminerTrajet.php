@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
         $mail->Username = 'testing.projets.siteweb@gmail.com'; // Ton email d'expéditeur
-        $mail->Password = 'sljw jlop qtyy mqae'; // Le mot de passe d'application pour testing.projets.siteweb@gmail.com
+        $mail->Password = '*'; // Le mot de passe d'application pour testing.projets.siteweb@gmail.com
         $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
         
