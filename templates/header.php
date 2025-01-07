@@ -32,15 +32,19 @@ require_once('lib/config.php');
                             <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
                         </svg>
                         <span class="ms-2 text-black fs-5">
-                        <?php
-if (isset($_SESSION['utilisateur'])) {
-    echo $_SESSION['utilisateur']['pseudo'] . " - Crédits : " . $_SESSION['utilisateur']['credits'];
-    echo ' <a href="logout.php" class="text-decoration-none">Se déconnecter</a>';
-} else {
-    echo '<a href="connexion.php" class="text-decoration-none">Se connecter</a>';
-}
+
+<?php
+if (isset($_SESSION['utilisateur'])) 
+   {
+        echo $_SESSION['utilisateur']['pseudo'] . " - Crédits : " . $_SESSION['utilisateur']['credits'];
+        echo ' <a href="logout.php" class="text-decoration-none">Se déconnecter</a>';
+                            } else {
+        echo '<a href="connexion.php" class="text-decoration-none">Se connecter</a>';
+    }
 ?>
-                        </span>
+
+
+</span>
                     </div>
 
                     <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
@@ -91,7 +95,7 @@ if (isset($_SESSION['utilisateur'])) {
         </div>
     </header>
 
-<script>
+    <script>
         function loadContent(page) {
             fetch(page)
                 .then(response => response.text())
@@ -100,5 +104,4 @@ if (isset($_SESSION['utilisateur'])) {
                 })
                 .catch(error => console.error('Error loading content:', error));
         }
-</script>
-<main>
+    </script>

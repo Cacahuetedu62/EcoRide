@@ -384,3 +384,10 @@ ALTER TABLE historique MODIFY date_fin_reel DATETIME NULL;
 ALTER TABLE trajets ADD COLUMN prix_total DECIMAL(10, 2);
 
 ALTER TABLE trajet_utilisateur DROP COLUMN role;
+
+SELECT h.id, r.id
+FROM historique h
+LEFT JOIN reservations r ON h.id = r.id;
+
+ALTER TABLE trajets
+ADD COLUMN statut ENUM('en cours', 'réservé_en_attente', 'annulé', 'terminé', 'disponible') DEFAULT 'disponible';

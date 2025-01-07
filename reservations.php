@@ -3,6 +3,7 @@ require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
+
 if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     $utilisateur_id = $_SESSION['utilisateur']['id'];
     echo "<div class='alert alert-info'>L'utilisateur connecté a l'ID : " . $utilisateur_id . "</div>";
@@ -203,43 +204,44 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     nbPersonnesInput.addEventListener('input', function () {
-        const nbPersonnes = parseInt(nbPersonnesInput.value, 10);
+    const nbPersonnes = parseInt(nbPersonnesInput.value, 10);
 
-        if (isNaN(nbPersonnes) || nbPersonnes < 1) {
-            additionalPassengers.style.display = 'none';
-            totalPriceDiv.style.display = 'none';
-            passengerFields.innerHTML = '';
-            return;
-        }
-
-        // Réinitialiser les champs des passagers supplémentaires
+    // Si le nombre de passagers est invalide ou inférieur à 1
+    if (isNaN(nbPersonnes) || nbPersonnes < 1) {
+        additionalPassengers.style.display = 'none';
+        totalPriceDiv.style.display = 'none';
         passengerFields.innerHTML = '';
+        return;
+    }
 
-        if (nbPersonnes > 1) {
-            additionalPassengers.style.display = 'block';
+    // Réinitialiser les champs des passagers supplémentaires
+    passengerFields.innerHTML = '';
 
-            // Ajouter des champs pour chaque passager supplémentaire
-            for (let i = 2; i <= nbPersonnes; i++) {
-                const passengerField = document.createElement('div');
-                passengerField.className = 'mb-3 departArrive';
-                passengerField.innerHTML = `
-                    <label for="nom_${i}_passager" class="form-label">Nom du passager ${i} :</label>
-                    <input type="text" id="nom_${i}_passager" name="noms[${i}][nom]" class="form-control" required>
-                    <label for="prenom_${i}_passager" class="form-label">Prénom du passager ${i} :</label>
-                    <input type="text" id="prenom_${i}_passager" name="noms[${i}][prenom]" class="form-control" required>
-                `;
-                passengerFields.appendChild(passengerField);
-            }
+    if (nbPersonnes > 1) {
+        additionalPassengers.style.display = 'block';
 
-            // Calculer le prix total et l'afficher
-            const totalPrice = pricePerPerson * nbPersonnes;
-            priceValue.textContent = totalPrice.toFixed(2);
-            totalPriceDiv.style.display = 'block';
-        } else {
-            additionalPassengers.style.display = 'none';
-            totalPriceDiv.style.display = 'none';
+        // Ajouter des champs pour chaque passager supplémentaire
+        for (let i = 2; i <= nbPersonnes; i++) {
+            const passengerField = document.createElement('div');
+            passengerField.className = 'mb-3 departArrive';
+            passengerField.innerHTML = `
+                <label for="nom_${i}_passager" class="form-label">Nom du passager ${i} :</label>
+                <input type="text" id="nom_${i}_passager" name="noms[${i}][nom]" class="form-control" required>
+                <label for="prenom_${i}_passager" class="form-label">Prénom du passager ${i} :</label>
+                <input type="text" id="prenom_${i}_passager" name="noms[${i}][prenom]" class="form-control" required>
+            `;
+            passengerFields.appendChild(passengerField);
         }
-    });
+    } else {
+        additionalPassengers.style.display = 'none';
+    }
+
+    // Calculer le prix total et l'afficher
+    const totalPrice = pricePerPerson * nbPersonnes;
+    priceValue.textContent = totalPrice.toFixed(2);
+    totalPriceDiv.style.display = 'block';
+});
+
 
     // Fonction pour vérifier l'état des cases à cocher et mettre à jour le message d'erreur
     function checkConditions() {

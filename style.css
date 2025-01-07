@@ -350,6 +350,24 @@ width: 400px;
 }
 
 
+.point-en-cours {
+    width: 10px;
+    height: 10px;
+    background-color: orange;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.point-termine {
+    width: 10px;
+    height: 10px;
+    background-color: green;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 10px;
+}
+
 /* Rappel : 
 p-1 : applique un padding de 0.25rem.
 p-2 : applique un padding de 0.5rem.
