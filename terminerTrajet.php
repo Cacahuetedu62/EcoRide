@@ -3,6 +3,7 @@ require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 require_once 'vendor/autoload.php'; // Charger l'autoload de Composer pour PHPMailer
+require_once 'vendor/autoload.php'; // Charger l'autoload de Composer pour PHPMailer
 
 // Vérifier si l'utilisateur est connecté
 if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
@@ -55,29 +56,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
             </html>
         ";
 
-        // Création de l'instance PHPMailer
-        $mail = new PHPMailer\PHPMailer\PHPMailer();
-        $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'testing.projets.siteweb@gmail.com'; // Ton email d'expéditeur
-        $mail->Password = 'sljw jlop qtyy mqae'; // Le mot de passe d'application pour testing.projets.siteweb@gmail.com
-        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
-
-        $mail->setFrom('testing.projets.siteweb@gmail.com', 'EcoRide'); // Email d'expéditeur
-        $mail->addAddress('rogez.aurore01@gmail.com'); // Teste l'email avec ta propre adresse (rogez.aurore01@gmail.com)
-
-        $mail->isHTML(true);
-        $mail->Subject = $subject;
-        $mail->Body    = $message;
-        $mail->CharSet = 'UTF-8'; // Spécifier l'encodage des caractères
-
-        if ($mail->send()) {
-            echo 'Email envoyé avec succès.';
-        } else {
-            echo 'Erreur lors de l\'envoi de l\'email : ' . $mail->ErrorInfo;
+        // Fonction pour envoyer l'email
+        function envoyerEmail($to, $subject, $message) {
+            $headers = 'MIME-Version: 1.0' . "\r\n";
+            $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
+            $headers .= 'From: no-reply@votre-site.com' . "\r\n";
+            mail($to, $subject, $message, $headers);
         }
+
+        // Envoie de l'email
+        envoyerEmail($utilisateur_email, $subject, $message);
 
         // Afficher le modal de remerciement
         echo '<script>
@@ -98,6 +86,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
     echo "Aucun trajet valide spécifié.";
     exit;
 }
-
-require_once('templates/footer.php');
 ?>
+
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="merciModal" tabindex="-1" aria-labelledby="merciModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="merciModalLabel">Merci !</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Merci de nous avoir fait confiance ! Votre trajet est maintenant terminé. À bientôt.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<?php require_once('templates/footer.php'); ?>
