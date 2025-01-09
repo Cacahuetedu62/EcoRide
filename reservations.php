@@ -133,6 +133,7 @@ if (isset($_GET['id'])) {
         <div class="row mb-3">
             <div class="col-12">
                 <h4>Nombre de passagers</h4>
+                
                 <form action="reserverTrajet.php" method="POST">
                     <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet_id, ENT_QUOTES, 'UTF-8') ?>">
                     <div class="mb-3">

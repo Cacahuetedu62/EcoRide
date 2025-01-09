@@ -44,11 +44,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
             <html>
             <head>
                 <title>Votre trajet est terminé</title>
+                <meta charset='UTF-8'>
             </head>
             <body>
                 <p>Bonjour,</p>
                 <p>Le trajet que vous avez effectué est maintenant terminé. Rendez-vous sur votre espace pour donner votre avis et votre note.</p>
-                <p><a href='http://votre-site.com/avis.php?trajet_id=$trajet_id'>Cliquez ici pour accéder à votre espace et soumettre votre avis</a></p>
+                 <p><a href='http://localhost:3000/avis.php?trajet_id=$trajet_id'>Cliquez ici pour accéder à votre espace et soumettre votre avis</a></p>
                 <p>Merci pour votre participation!</p>
             </body>
             </html>
@@ -63,14 +64,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
         $mail->Password = 'sljw jlop qtyy mqae'; // Le mot de passe d'application pour testing.projets.siteweb@gmail.com
         $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
-        
+
         $mail->setFrom('testing.projets.siteweb@gmail.com', 'EcoRide'); // Email d'expéditeur
         $mail->addAddress('rogez.aurore01@gmail.com'); // Teste l'email avec ta propre adresse (rogez.aurore01@gmail.com)
-        
+
         $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body    = $message;
-        
+        $mail->CharSet = 'UTF-8'; // Spécifier l'encodage des caractères
+
         if ($mail->send()) {
             echo 'Email envoyé avec succès.';
         } else {
@@ -97,5 +99,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
     exit;
 }
 
-require_once('templates/footer.php'); 
+require_once('templates/footer.php');
 ?>

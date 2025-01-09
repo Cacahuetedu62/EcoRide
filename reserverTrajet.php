@@ -3,6 +3,9 @@ require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
+// echo "<pre>";
+// print_r($_POST); // Affiche toutes les données reçues par la page
+// echo "</pre>";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Vérifiez si l'utilisateur est connecté
@@ -14,15 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Récupérer les données des passagers
         $noms = isset($_POST['noms']) ? $_POST['noms'] : [];
-
-        // Vérifiez si des passagers supplémentaires ont été envoyés
-        if (!empty($noms)) {
-            foreach ($noms as $index => $passenger) {
-                $nom = isset($passenger['nom']) ? $passenger['nom'] : null;
-                $prenom = isset($passenger['prenom']) ? $passenger['prenom'] : null;
-                echo "Passager $index - Nom: $nom, Prénom: $prenom<br>";
-            }
-        }
 
         // Récupérer l'ID du trajet
         $trajet_id = isset($_POST['trajet_id']) ? $_POST['trajet_id'] : null;
@@ -49,10 +43,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo '<form method="POST" action="confirmationReservation.php">
                         <input type="hidden" name="trajet_id" value="' . $trajet_id . '">
                         <input type="hidden" name="nb_personnes" value="' . $nb_personnes . '">
-                        <input type="hidden" name="total_cost" value="' . $total_cost . '">
-                        <button type="submit" name="confirm" value="1">Oui, réserver maintenant</button>
+                        <input type="hidden" name="total_cost" value="' . $total_cost . '">';
+
+                // Ajouter des champs cachés pour chaque passager
+                foreach ($noms as $index => $passenger) {
+                    $nom = isset($passenger['nom']) ? $passenger['nom'] : '';
+                    $prenom = isset($passenger['prenom']) ? $passenger['prenom'] : '';
+                    echo '<input type="hidden" name="nom_passager' . $index . '" value="' . $nom . '">';
+                    echo '<input type="hidden" name="prenom_passager' . $index . '" value="' . $prenom . '">';
+                }
+
+                echo '<button type="submit" name="confirm" value="1">Oui, réserver maintenant</button>
                       </form>';
-                echo '<a href="mesTrajets.php</a>';
+                echo '<a href="mesTrajets.php">Retour à mes trajets</a>';
             } else {
                 echo "Il n'y a pas assez de places disponibles pour cette réservation.";
             }

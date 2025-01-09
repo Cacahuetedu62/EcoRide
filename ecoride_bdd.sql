@@ -391,3 +391,31 @@ LEFT JOIN reservations r ON h.id = r.id;
 
 ALTER TABLE trajets
 ADD COLUMN statut ENUM('en cours', 'réservé_en_attente', 'annulé', 'terminé', 'disponible') DEFAULT 'disponible';
+
+DESCRIBE avis;
+
+-- Ajouter un avis avec le statut "en attente"
+INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id)
+VALUES ('Cet avis est en attente de validation.', 4, 'en attente', 1, 1);
+
+-- Ajouter un avis avec le statut "validé"
+INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id)
+VALUES ('Cet avis a été validé par un membre de l\'équipe.', 5, 'validé', 2, 2);
+
+-- Ajouter un avis avec le statut "rejeté"
+INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id)
+VALUES ('Cet avis a été rejeté par un membre de l\'équipe.', 2, 'rejeté', 3, 3);
+
+
+-- Ajouter un avis avec le statut "en attente" pour l'utilisateur 37
+INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id)
+VALUES ('Cet avis est en attente de validation.', 4, 'en attente', 37, 1);
+
+-- Ajouter un avis avec le statut "validé" pour l'utilisateur 37
+INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id)
+VALUES ('Cet avis a été validé par un membre de l\'équipe.', 5, 'validé', 37, 2);
+
+-- Ajouter un avis avec le statut "rejeté" pour l'utilisateur 37
+INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id)
+VALUES ('Cet avis a été rejeté par un membre de l\'équipe.', 2, 'rejeté', 37, 3);
+

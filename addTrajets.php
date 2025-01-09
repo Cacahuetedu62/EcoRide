@@ -35,11 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // Préparer l'insertion du trajet
-        $query = "INSERT INTO trajets (lieu_depart, date_depart, heure_depart, lieu_arrive, date_arrive, heure_arrive, nb_places, prix_personnes, preferences, fumeur, animaux)
-                  VALUES (:lieu_depart, :date_depart, :heure_depart, :lieu_arrive, :date_arrive, :heure_arrive, :nb_places, :prix_personnes, :preferences, :fumeur, :animaux)";
-    
+        $query = "INSERT INTO trajets (lieu_depart, date_depart, heure_depart, lieu_arrive, date_arrive, heure_arrive, nb_places, prix_personnes, preferences, fumeur, animaux, statut)
+                  VALUES (:lieu_depart, :date_depart, :heure_depart, :lieu_arrive, :date_arrive, :heure_arrive, :nb_places, :prix_personnes, :preferences, :fumeur, :animaux, 'disponible')";
+
         $stmt = $pdo->prepare($query);
-    
+
         // Lier les paramètres
         $stmt->bindParam(':lieu_depart', $lieu_depart, PDO::PARAM_STR);
         $stmt->bindParam(':date_depart', $date_depart, PDO::PARAM_STR);
@@ -52,18 +52,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(':preferences', $preferences, PDO::PARAM_STR);
         $stmt->bindParam(':fumeur', $fumeur, PDO::PARAM_INT);
         $stmt->bindParam(':animaux', $animaux, PDO::PARAM_INT);
-    
+
         if ($stmt->execute()) {
             // Récupérer l'ID du trajet créé
             $trajet_id = $pdo->lastInsertId();
-    
+
             // Associer l'utilisateur et la voiture au trajet dans la table trajet_utilisateur
-            $query_assoc = "INSERT INTO trajet_utilisateur (utilisateur_id, trajet_id, role)
-                            VALUES (:utilisateur_id, :trajet_id, 'conducteur')";
+            $query_assoc = "INSERT INTO trajet_utilisateur (utilisateur_id, trajet_id)
+                            VALUES (:utilisateur_id, :trajet_id)";
             $stmt_assoc = $pdo->prepare($query_assoc);
             $stmt_assoc->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
             $stmt_assoc->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
-    
+
             if ($stmt_assoc->execute()) {
                 echo "Trajet créé et associé à l'utilisateur avec succès !";
             } else {
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (Exception $e) {
         // Gestion des erreurs
         echo "Une erreur est survenue : " . $e->getMessage();
-    } // <--- Fermeture correcte du bloc try
+    }
 }
 
 // Récupérer les voitures de l'utilisateur
@@ -85,7 +85,6 @@ $stmt->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
 $stmt->execute();
 $voitures = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 
 <!-- Formulaire de création de trajet -->
 <main class="form-page">

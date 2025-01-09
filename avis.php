@@ -1,88 +1,84 @@
 <?php
-session_start();
+require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
-// Vérification de l'utilisateur connecté
+// Vérifier si l'utilisateur est connecté
 if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     $utilisateur_id = $_SESSION['utilisateur']['id'];
 } else {
+    // L'utilisateur n'est pas connecté
     echo "Utilisateur non connecté.";
     exit;
 }
 
-// Vérification de l'ID du trajet
+// Vérifier si le paramètre trajet_id est présent dans l'URL
 if (isset($_GET['trajet_id'])) {
     $trajet_id = (int)$_GET['trajet_id'];
 
-    // Récupérer les détails du trajet
-    $sql = "SELECT * FROM trajets WHERE id = :trajet_id";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
-    $stmt->execute();
-    $trajet = $stmt->fetch();
+    // Vérifier si le trajet existe dans la base de données en utilisant la table de jonction
+    $sqlCheck = "
+        SELECT t.*
+        FROM trajets t
+        JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
+        WHERE t.id = :trajet_id AND tu.utilisateur_id = :utilisateur_id
+    ";
+    $stmtCheck = $pdo->prepare($sqlCheck);
+    $stmtCheck->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+    $stmtCheck->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
+    $stmtCheck->execute();
 
-    if (!$trajet) {
-        echo "Trajet non trouvé.";
-        exit;
+    if ($stmtCheck->rowCount() > 0) {
+        // Le trajet existe et appartient à l'utilisateur connecté
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Traiter la soumission du formulaire
+            if (isset($_POST['avis']) && isset($_POST['note'])) {
+                $commentaires = $_POST['avis'];
+                $note = (int)$_POST['note'];
+                $statut = 'en attente'; // Définir le statut par défaut à "en attente"
+
+                // Insérer l'avis dans la base de données
+                $sqlInsert = "INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id) VALUES (:commentaires, :note, :statut, :utilisateur_id, :trajet_id)";
+                $stmtInsert = $pdo->prepare($sqlInsert);
+                $stmtInsert->bindParam(':commentaires', $commentaires, PDO::PARAM_STR);
+                $stmtInsert->bindParam(':note', $note, PDO::PARAM_INT);
+                $stmtInsert->bindParam(':statut', $statut, PDO::PARAM_STR);
+                $stmtInsert->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
+                $stmtInsert->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+
+                try {
+                    $stmtInsert->execute();
+                    echo "Votre avis a été soumis avec succès et est en attente de validation.";
+                } catch (PDOException $e) {
+                    echo "Erreur lors de la soumission de l'avis : " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+                }
+            } else {
+                echo "Données de formulaire invalides.";
+            }
+        } else {
+            // Afficher le formulaire pour soumettre un avis
+            ?>
+            <form method="POST" action="avis.php?trajet_id=<?php echo $trajet_id; ?>">
+                <label for="avis">Votre avis :</label>
+                <textarea name="avis" id="avis" required></textarea>
+                <label for="note">Votre note :</label>
+                <select name="note" id="note" required>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+                <button type="submit">Soumettre</button>
+            </form>
+            <?php
+        }
+    } else {
+        echo "Le trajet spécifié n'existe pas ou ne vous appartient pas.";
     }
-
-    // Récupérer les détails du conducteur
-    $sqlConducteur = "SELECT * FROM utilisateurs WHERE id = :conducteur_id";
-    $stmtConducteur = $pdo->prepare($sqlConducteur);
-    $stmtConducteur->bindParam(':conducteur_id', $trajet['conducteur_id'], PDO::PARAM_INT);
-    $stmtConducteur->execute();
-    $conducteur = $stmtConducteur->fetch();
 } else {
-    echo "Aucun trajet spécifié.";
-    exit;
+    echo "Aucun trajet valide spécifié.";
 }
 
-// Traitement du formulaire d'avis
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['note'])) {
-    $note = (int)$_POST['note'];
-    $commentaire = htmlspecialchars($_POST['commentaire'], ENT_QUOTES, 'UTF-8');
-
-    // Insérer l'avis dans la base de données avec le statut 'en_attente'
-    $sqlAvis = "INSERT INTO avis (utilisateur_id, trajet_id, note, commentaire, statut) 
-                VALUES (:utilisateur_id, :trajet_id, :note, :commentaire, 'en_attente')";
-    $stmtAvis = $pdo->prepare($sqlAvis);
-    $stmtAvis->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
-    $stmtAvis->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
-    $stmtAvis->bindParam(':note', $note, PDO::PARAM_INT);
-    $stmtAvis->bindParam(':commentaire', $commentaire, PDO::PARAM_STR);
-
-    try {
-        $stmtAvis->execute();
-        echo "Merci ! Votre avis a été soumis et est en attente de validation.";
-    } catch (PDOException $e) {
-        echo "Erreur lors de la soumission de l'avis : " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
-    }
-}
+require_once('templates/footer.php');
 ?>
-
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Récapitulatif de votre trajet</title>
-</head>
-<body>
-    <h1>Récapitulatif du trajet</h1>
-    <p><strong>Lieu de départ :</strong> <?php echo htmlspecialchars($trajet['depart'], ENT_QUOTES, 'UTF-8'); ?></p>
-    <p><strong>Lieu d'arrivée :</strong> <?php echo htmlspecialchars($trajet['arrivee'], ENT_QUOTES, 'UTF-8'); ?></p>
-    <p><strong>Date :</strong> <?php echo date("d/m/Y H:i", strtotime($trajet['date_depart'])); ?></p>
-    <p><strong>Conducteur :</strong> <?php echo htmlspecialchars($conducteur['prenom'], ENT_QUOTES, 'UTF-8') . " " . htmlspecialchars($conducteur['nom'], ENT_QUOTES, 'UTF-8'); ?></p>
-
-    <h2>Évaluez ce trajet</h2>
-    <form method="POST">
-        <label for="note">Note (obligatoire) :</label>
-        <input type="number" id="note" name="note" min="1" max="5" required><br><br>
-
-        <label for="commentaire">Commentaire (facultatif) :</label><br>
-        <textarea id="commentaire" name="commentaire" rows="4" cols="50"></textarea><br><br>
-
-        <button type="submit">Soumettre</button>
-    </form>
-</body>
-</html>
