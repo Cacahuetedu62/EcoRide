@@ -3,13 +3,15 @@ require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 require_once 'vendor/autoload.php'; // Charger l'autoload de Composer pour PHPMailer
-require_once 'vendor/autoload.php'; // Charger l'autoload de Composer pour PHPMailer
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 // Vérifier si l'utilisateur est connecté
 if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     $utilisateur_id = $_SESSION['utilisateur']['id'];
+    $utilisateur_email = $_SESSION['utilisateur']['email']; // Assurez-vous que l'email de l'utilisateur est stocké dans la session
 } else {
-    // L'utilisateur n'est pas connecté
     echo "Utilisateur non connecté.";
     exit;
 }
@@ -17,7 +19,7 @@ if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
     $trajet_id = (int)$_POST['trajet_id'];
 
-    // Mettre à jour le statut du trajet à "terminé" dans la table trajets
+    // Mettre à jour le statut du trajet à "terminé"
     $sqlUpdate = "UPDATE trajets SET statut = 'terminé' WHERE id = :trajet_id";
     $stmtUpdate = $pdo->prepare($sqlUpdate);
     $stmtUpdate->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
@@ -28,18 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
     $stmtHistorique->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
 
     try {
+        // Démarre la transaction
         $pdo->beginTransaction();
-
-        // Mettre à jour le statut du trajet
         $stmtUpdate->execute();
-
-        // Mettre à jour la table historique (si applicable)
         $stmtHistorique->execute();
-
-        // Commit les changements dans la base de données
         $pdo->commit();
 
-        // Envoi de l'email pour notifier l'utilisateur
+        // Envoi de l'email avec PHPMailer
         $subject = "Votre trajet est terminé";
         $message = "
             <html>
@@ -50,24 +47,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
             <body>
                 <p>Bonjour,</p>
                 <p>Le trajet que vous avez effectué est maintenant terminé. Rendez-vous sur votre espace pour donner votre avis et votre note.</p>
-                 <p><a href='http://localhost:3000/avis.php?trajet_id=$trajet_id'>Cliquez ici pour accéder à votre espace et soumettre votre avis</a></p>
+                <p><a href='http://localhost:3000/avis.php?trajet_id=$trajet_id'>Cliquez ici pour accéder à votre espace et soumettre votre avis</a></p>
                 <p>Merci pour votre participation!</p>
             </body>
             </html>
         ";
 
-        // Fonction pour envoyer l'email
-        function envoyerEmail($to, $subject, $message) {
-            $headers = 'MIME-Version: 1.0' . "\r\n";
-            $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
-            $headers .= 'From: no-reply@votre-site.com' . "\r\n";
-            mail($to, $subject, $message, $headers);
+        // Crée une instance de PHPMailer
+        $mail = new PHPMailer(true);
+        try {
+            // Configuration SMTP
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'testing.projets.siteweb@gmail.com'; // Adresse email d'expéditeur
+            $mail->Password = 'sljw jlop qtyy mqae'; // Mot de passe d'application Gmail
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+
+            // Destinataire
+            $mail->setFrom('rogez.aurore01@gmail.com', 'EcoRide');
+            $mail->addAddress('rogez.aurore01@gmail.com'); // Envoi à ton adresse email pour les tests
+
+
+            // Contenu de l'email
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body = $message;
+
+            // Envoie de l'email
+            $mail->send();
+            echo "Message envoyé avec succès !"; // Message de débogage
+        } catch (Exception $e) {
+            echo "L'email n'a pas pu être envoyé : {$mail->ErrorInfo}"; // Message d'erreur si l'email échoue
         }
 
-        // Envoie de l'email
-        envoyerEmail($utilisateur_email, $subject, $message);
-
-        // Afficher le modal de remerciement
+        // Afficher le modal de remerciement et redirection
         echo '<script>
                 window.onload = function() {
                     $("#merciModal").modal("show");
@@ -76,8 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
                     }, 3000);
                 }
               </script>';
-    } catch (PDOException $e) {
-        // En cas d'erreur, on annule la transaction
+    } catch (Exception $e) {
         $pdo->rollBack();
         echo "Erreur lors de la fin du trajet : " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         exit;
