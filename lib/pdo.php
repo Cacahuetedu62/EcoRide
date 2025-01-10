@@ -10,4 +10,3 @@ try {
     error_log("Erreur PDO : " . $e->getMessage(), 3, "/var/log/mon_log_erreurs.log");
     die('Une erreur est survenue, veuillez réessayer plus tard.');
 }
-

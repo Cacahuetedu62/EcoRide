@@ -419,3 +419,32 @@ VALUES ('Cet avis a été validé par un membre de l\'équipe.', 5, 'validé', 3
 INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id)
 VALUES ('Cet avis a été rejeté par un membre de l\'équipe.', 2, 'rejeté', 37, 3);
 
+SHOW DATABASES;
+
+SHOW TABLES;
+
+SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT, COLUMN_KEY 
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_NAME = 'trajets' AND TABLE_SCHEMA = 'trajets';
+
+DESCRIBE avis;
+DESCRIBE historique;
+
+DESCRIBE passagers;
+
+DESCRIBE reservations;
+
+DESCRIBE trajet_utilisateur;
+
+DESCRIBE trajets;
+
+DESCRIBE utilisateurs;
+
+DESCRIBE voitures;
+
+ALTER TABLE utilisateurs 
+ADD COLUMN type_acces ENUM('utilisateur', 'employe', 'administrateur') DEFAULT 'utilisateur';
+INSERT INTO utilisateurs (nom, prenom, pseudo, email, password, type_acces)
+VALUES ('SuperAdmin', 'Admin', 'SuperAdminPseudo', 'testing.projets.siteweb@gmail.com', '$2y$10$7d4qWvBLPeRkxh9/XOGacOhEUDbg.1YcldgpyalwJP/ghvbYL.K0W', 'administrateur');
+
+

@@ -63,8 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajouter_vehicule'])) 
             $stmt->bindParam(':date_premiere_immatriculation', $date_premiere_immatriculation, PDO::PARAM_STR);
             $stmt->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
             $stmt->execute();
-            header('Location: ' . $_SERVER['PHP_SELF']);
-            exit;
         }
     }
 }

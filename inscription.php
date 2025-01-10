@@ -3,6 +3,7 @@ require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
+$redirect = false;
 
 // Vérifier si le formulaire a été soumis
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -60,26 +61,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($stmt->execute()) {
         // Récupérer l'ID de l'utilisateur nouvellement inséré
         $utilisateur_id = $pdo->lastInsertId();
-    
+
         // Récupérer les informations de l'utilisateur
         $sql = "SELECT * FROM utilisateurs WHERE id = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->execute(['id' => $utilisateur_id]);
         $utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
         // Enregistrer les informations de l'utilisateur dans la session
         $_SESSION['utilisateur'] = [
             'id' => $utilisateur['id'],
             'pseudo' => $utilisateur['pseudo'],
             'credits' => $utilisateur['credits'],
         ];
-    
-        // Redirection vers la page "mesInformations.php"
-        header('Location: mesInformations.php');
-        ob_end_flush(); // Envoyer le contenu capturé
-        exit;
-    } else {
-        echo "Une erreur est survenue lors de la création de votre compte.";
+
+        // Définir l'indicateur de redirection
+        $redirect = true;
     }
 }
 ?>
@@ -91,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <h2 class="text-center">S'inscrire</h2>
         <p class="text-center">Faites un geste pour la planète, on s'occupe du reste. Profitez de <strong>20 crédits offerts</strong> en souscrivant dès aujourd'hui.</p>
         <form action="inscription.php" method="post">
-            
+
             <!-- Pseudo -->
             <div class="form-group p-2">
                 <label for="pseudo">Pseudo</label>
@@ -109,7 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <label for="prenom">Prénom</label>
                 <input type="text" id="prenom" name="prenom" class="form-control" required placeholder="Entrez votre prénom">
             </div>
-
 
             <!-- Email -->
             <div class="form-group p-2">
@@ -173,6 +169,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Si tout est correct, on cache le message d'erreur
         document.getElementById("error-message").style.display = "none";
     });
+
+    // Redirection vers la page d'accueil après l'inscription
+    <?php if ($redirect): ?>
+        window.location.href = 'index.php';
+    <?php endif; ?>
 </script>
 
 </main>
