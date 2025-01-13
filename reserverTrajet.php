@@ -39,6 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Afficher un récapitulatif et demander confirmation
                 echo "Le coût total pour votre réservation est de : " . $total_cost . " crédits.<br>";
                 echo "Souhaitez-vous vraiment utiliser vos crédits pour cette réservation ?<br>";
+                echo "Le montant total des crédits vous sera déduit après la validation du trajet<br>";
+                echo "Sachez que 2 crédits sont prélevés sur le prix pour assuré le bon fonctionnement de la plateforme";
 
                 echo '<form method="POST" action="confirmationReservation.php">
                         <input type="hidden" name="trajet_id" value="' . $trajet_id . '">
