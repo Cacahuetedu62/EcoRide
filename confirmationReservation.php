@@ -43,12 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm']) && $_POST[
                     $stmt_passager->execute();
                 }
 
-                // Mettre à jour le statut du trajet à 'réservé_en_attente'
-                $sql_update_statut = "UPDATE trajets SET statut = 'réservé_en_attente' WHERE id = :trajet_id";
-                $stmt_update_statut = $pdo->prepare($sql_update_statut);
-                $stmt_update_statut->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
-                $stmt_update_statut->execute();
-
                 // Mettre à jour le nombre de places disponibles
                 $sql_update_places = "UPDATE trajets SET nb_places = nb_places - :nb_personnes WHERE id = :trajet_id";
                 $stmt_update_places = $pdo->prepare($sql_update_places);
@@ -56,12 +50,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm']) && $_POST[
                 $stmt_update_places->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
                 $stmt_update_places->execute();
 
-                // Réduire les crédits de l'utilisateur
-                $sql_update_credits = "UPDATE utilisateurs SET credits = credits - :total_cost WHERE id = :utilisateur_id";
-                $stmt_update_credits = $pdo->prepare($sql_update_credits);
-                $stmt_update_credits->bindParam(':total_cost', $total_cost, PDO::PARAM_INT);
-                $stmt_update_credits->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
-                $stmt_update_credits->execute();
+                // Vérifier si le trajet n'a plus de places disponibles
+                $sql_check_places = "SELECT nb_places FROM trajets WHERE id = :trajet_id";
+                $stmt_check_places = $pdo->prepare($sql_check_places);
+                $stmt_check_places->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+                $stmt_check_places->execute();
+                $trajet = $stmt_check_places->fetch();
+
+                if ($trajet && $trajet['nb_places'] == 0) {
+                    // Mettre à jour le statut du trajet à 'terminé'
+                    $sql_update_statut = "UPDATE trajets SET statut = 'terminé' WHERE id = :trajet_id";
+                    $stmt_update_statut = $pdo->prepare($sql_update_statut);
+                    $stmt_update_statut->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+                    $stmt_update_statut->execute();
+                }
 
                 // Rediriger vers une page de confirmation de succès
                 header('Location: mesTrajets.php');

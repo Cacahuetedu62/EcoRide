@@ -447,4 +447,7 @@ ADD COLUMN type_acces ENUM('utilisateur', 'employe', 'administrateur') DEFAULT '
 INSERT INTO utilisateurs (nom, prenom, pseudo, email, password, type_acces)
 VALUES ('SuperAdmin', 'Admin', 'SuperAdminPseudo', 'testing.projets.siteweb@gmail.com', '$2y$10$7d4qWvBLPeRkxh9/XOGacOhEUDbg.1YcldgpyalwJP/ghvbYL.K0W', 'administrateur');
 
+ALTER TABLE utilisateurs DROP COLUMN role;
+
+ALTER TABLE utilisateurs ADD COLUMN role ENUM('passager', 'chauffeur', 'passager-chauffeur') DEFAULT 'passager';
 

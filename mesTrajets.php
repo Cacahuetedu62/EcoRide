@@ -27,6 +27,7 @@ JOIN reservations r ON t.id = r.trajet_id
 LEFT JOIN passagers p ON r.id = p.reservation_id
 JOIN utilisateurs u ON r.utilisateur_id = u.id
 WHERE r.utilisateur_id = :utilisateur_id
+  AND r.statut != 'terminé'
 GROUP BY t.id
 ORDER BY u.role, t.date_depart;
 ";
@@ -68,7 +69,8 @@ try {
                                 </div>
                                 <p>Date : <?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?></p>
                                 <p>Heure de départ : <?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?></p>
-                                <p>Participants : <?= !empty($trajet['participants']) ? htmlspecialchars($trajet['participants'], ENT_QUOTES, 'UTF-8') : 'Aucun participant'; ?></p>                                <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary">Voir les détails</a>
+                                <p>Participants : <?= !empty($trajet['participants']) ? htmlspecialchars($trajet['participants'], ENT_QUOTES, 'UTF-8') : 'Aucun participant'; ?></p>
+                                <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary">Voir les détails</a>
                                 <?php if ($trajet['statut'] == 'en_attente'): ?>
                                     <form id="lancer-form-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" action="lancerTrajet.php" method="post" style="display:inline;">
                                         <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
@@ -105,7 +107,8 @@ try {
                                 </p>
                                 <p>Date : <?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?></p>
                                 <p>Heure de départ : <?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?></p>
-                                <p>Participants : <?= !empty($trajet['participants']) ? htmlspecialchars($trajet['participants'], ENT_QUOTES, 'UTF-8') : 'Aucun participant'; ?></p>                                <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary">Voir les détails</a>
+                                <p>Participants : <?= !empty($trajet['participants']) ? htmlspecialchars($trajet['participants'], ENT_QUOTES, 'UTF-8') : 'Aucun participant'; ?></p>
+                                <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary">Voir les détails</a>
 
                                 <!-- Permettre à un passager de terminer un trajet si le statut est 'en_cours' -->
                                 <?php if ($trajet['statut'] == 'en_cours' && $trajet['role'] == 'passager'): ?>

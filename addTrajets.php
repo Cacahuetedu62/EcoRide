@@ -7,13 +7,11 @@ if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     $utilisateur_id = $_SESSION['utilisateur']['id'];
 } else {
     echo "Utilisateur non connecté.";
-    exit; // Arrêter l'exécution du script si l'utilisateur n'est pas connecté
+    exit;
 }
 
-var_dump($utilisateur_id);
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Récupérer les données du formulaire
+    // Récupération des données du formulaire
     $lieu_depart = $_POST['lieu_depart'] ?? null;
     $date_depart = $_POST['date_depart'] ?? null;
     $heure_depart = $_POST['heure_depart'] ?? null;
@@ -34,57 +32,76 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        // Préparer l'insertion du trajet
-        $query = "INSERT INTO trajets (lieu_depart, date_depart, heure_depart, lieu_arrive, date_arrive, heure_arrive, nb_places, prix_personnes, preferences, fumeur, animaux, statut)
-                  VALUES (:lieu_depart, :date_depart, :heure_depart, :lieu_arrive, :date_arrive, :heure_arrive, :nb_places, :prix_personnes, :preferences, :fumeur, :animaux, 'disponible')";
+        $pdo->beginTransaction(); // Début de la transaction
+
+        // Première requête : Mettre à jour le rôle de l'utilisateur en tant que chauffeur dans la table utilisateurs
+        $query_update_role = "UPDATE utilisateurs SET role = 'chauffeur' WHERE id = :utilisateur_id AND role = 'passager'";
+        $stmt_update_role = $pdo->prepare($query_update_role);
+        $stmt_update_role->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
+        $stmt_update_role->execute();
+
+        // Deuxième requête : Insertion du trajet
+        $query = "INSERT INTO trajets (lieu_depart, date_depart, heure_depart, lieu_arrive, date_arrive, heure_arrive, 
+                                     nb_places, prix_personnes, preferences, fumeur, animaux, statut)
+                  VALUES (:lieu_depart, :date_depart, :heure_depart, :lieu_arrive, :date_arrive, :heure_arrive, 
+                         :nb_places, :prix_personnes, :preferences, :fumeur, :animaux, 'disponible')";
 
         $stmt = $pdo->prepare($query);
-
-        // Lier les paramètres
-        $stmt->bindParam(':lieu_depart', $lieu_depart, PDO::PARAM_STR);
-        $stmt->bindParam(':date_depart', $date_depart, PDO::PARAM_STR);
-        $stmt->bindParam(':heure_depart', $heure_depart, PDO::PARAM_STR);
-        $stmt->bindParam(':lieu_arrive', $lieu_arrive, PDO::PARAM_STR);
-        $stmt->bindParam(':date_arrive', $date_arrive, PDO::PARAM_STR);
-        $stmt->bindParam(':heure_arrive', $heure_arrive, PDO::PARAM_STR);
+        $stmt->bindParam(':lieu_depart', $lieu_depart);
+        $stmt->bindParam(':date_depart', $date_depart);
+        $stmt->bindParam(':heure_depart', $heure_depart);
+        $stmt->bindParam(':lieu_arrive', $lieu_arrive);
+        $stmt->bindParam(':date_arrive', $date_arrive);
+        $stmt->bindParam(':heure_arrive', $heure_arrive);
         $stmt->bindParam(':nb_places', $nb_places, PDO::PARAM_INT);
-        $stmt->bindParam(':prix_personnes', $prix_personnes, PDO::PARAM_STR);
-        $stmt->bindParam(':preferences', $preferences, PDO::PARAM_STR);
+        $stmt->bindParam(':prix_personnes', $prix_personnes);
+        $stmt->bindParam(':preferences', $preferences);
         $stmt->bindParam(':fumeur', $fumeur, PDO::PARAM_INT);
         $stmt->bindParam(':animaux', $animaux, PDO::PARAM_INT);
 
         if ($stmt->execute()) {
-            // Récupérer l'ID du trajet créé
             $trajet_id = $pdo->lastInsertId();
 
-            // Associer l'utilisateur et la voiture au trajet dans la table trajet_utilisateur
-            $query_assoc = "INSERT INTO trajet_utilisateur (utilisateur_id, trajet_id)
-                            VALUES (:utilisateur_id, :trajet_id)";
+            // Troisième requête : Association de l'utilisateur au trajet
+            $query_assoc = "INSERT INTO trajet_utilisateur (utilisateur_id, trajet_id) 
+                           VALUES (:utilisateur_id, :trajet_id)";
+            
             $stmt_assoc = $pdo->prepare($query_assoc);
             $stmt_assoc->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
             $stmt_assoc->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
 
             if ($stmt_assoc->execute()) {
-                echo "Trajet créé et associé à l'utilisateur avec succès !";
+                // Quatrième requête : Mise à jour du rôle en passager-chauffeur si nécessaire
+                $query_update_passager_chauffeur = "UPDATE utilisateurs SET role = 'passager-chauffeur' 
+                                                  WHERE id = :utilisateur_id AND role = 'passager'";
+                $stmt_update_passager_chauffeur = $pdo->prepare($query_update_passager_chauffeur);
+                $stmt_update_passager_chauffeur->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
+                $stmt_update_passager_chauffeur->execute();
+
+                $pdo->commit(); // Validation de la transaction
+                echo '<div class="alert alert-success">Trajet créé avec succès!</div>';
             } else {
-                echo "Erreur lors de l'association du trajet à l'utilisateur.";
+                $pdo->rollBack();
+                echo '<div class="alert alert-danger">Erreur lors de l\'association du trajet.</div>';
             }
         } else {
-            echo "Erreur lors de la création du trajet.";
+            $pdo->rollBack();
+            echo '<div class="alert alert-danger">Erreur lors de la création du trajet.</div>';
         }
     } catch (Exception $e) {
-        // Gestion des erreurs
-        echo "Une erreur est survenue : " . $e->getMessage();
+        $pdo->rollBack();
+        echo '<div class="alert alert-danger">Une erreur est survenue : ' . $e->getMessage() . '</div>';
     }
 }
 
-// Récupérer les voitures de l'utilisateur
+// Récupération des voitures de l'utilisateur
 $query = "SELECT id, marque, modele FROM voitures WHERE utilisateur_id = :utilisateur_id";
 $stmt = $pdo->prepare($query);
 $stmt->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
 $stmt->execute();
 $voitures = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 <!-- Formulaire de création de trajet -->
 <main class="form-page">

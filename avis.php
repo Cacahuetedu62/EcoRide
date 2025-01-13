@@ -16,12 +16,12 @@ if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
 if (isset($_GET['trajet_id'])) {
     $trajet_id = (int)$_GET['trajet_id'];
 
-    // Vérifier si le trajet existe dans la base de données en utilisant la table de jonction
+    // Vérifier si le trajet existe dans la base de données en utilisant la table reservations
     $sqlCheck = "
         SELECT t.*
         FROM trajets t
-        JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
-        WHERE t.id = :trajet_id AND tu.utilisateur_id = :utilisateur_id
+        JOIN reservations r ON t.id = r.trajet_id
+        WHERE t.id = :trajet_id AND r.utilisateur_id = :utilisateur_id
     ";
     $stmtCheck = $pdo->prepare($sqlCheck);
     $stmtCheck->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
@@ -75,6 +75,46 @@ if (isset($_GET['trajet_id'])) {
         }
     } else {
         echo "Le trajet spécifié n'existe pas ou ne vous appartient pas.";
+        // Ajoutez des messages de débogage
+        echo "<br>Trajet ID : " . htmlspecialchars($trajet_id, ENT_QUOTES, 'UTF-8');
+        echo "<br>Utilisateur ID : " . htmlspecialchars($utilisateur_id, ENT_QUOTES, 'UTF-8');
+
+        // Vérifiez si le trajet existe dans la table trajets
+        $sqlCheckTrajet = "SELECT * FROM trajets WHERE id = :trajet_id";
+        $stmtCheckTrajet = $pdo->prepare($sqlCheckTrajet);
+        $stmtCheckTrajet->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+        $stmtCheckTrajet->execute();
+
+        if ($stmtCheckTrajet->rowCount() > 0) {
+            echo "<br>Le trajet existe dans la table trajets.";
+        } else {
+            echo "<br>Le trajet n'existe pas dans la table trajets.";
+        }
+
+        // Vérifiez si l'utilisateur existe dans la table utilisateurs
+        $sqlCheckUtilisateur = "SELECT * FROM utilisateurs WHERE id = :utilisateur_id";
+        $stmtCheckUtilisateur = $pdo->prepare($sqlCheckUtilisateur);
+        $stmtCheckUtilisateur->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
+        $stmtCheckUtilisateur->execute();
+
+        if ($stmtCheckUtilisateur->rowCount() > 0) {
+            echo "<br>L'utilisateur existe dans la table utilisateurs.";
+        } else {
+            echo "<br>L'utilisateur n'existe pas dans la table utilisateurs.";
+        }
+
+        // Vérifiez si l'entrée existe dans la table reservations
+        $sqlCheckReservation = "SELECT * FROM reservations WHERE trajet_id = :trajet_id AND utilisateur_id = :utilisateur_id";
+        $stmtCheckReservation = $pdo->prepare($sqlCheckReservation);
+        $stmtCheckReservation->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+        $stmtCheckReservation->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
+        $stmtCheckReservation->execute();
+
+        if ($stmtCheckReservation->rowCount() > 0) {
+            echo "<br>L'entrée existe dans la table reservations.";
+        } else {
+            echo "<br>L'entrée n'existe pas dans la table reservations.";
+        }
     }
 } else {
     echo "Aucun trajet valide spécifié.";

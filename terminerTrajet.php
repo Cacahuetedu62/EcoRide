@@ -10,7 +10,6 @@ use PHPMailer\PHPMailer\Exception;
 // Vérifier si l'utilisateur est connecté
 if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     $utilisateur_id = $_SESSION['utilisateur']['id'];
-    $utilisateur_email = $_SESSION['utilisateur']['email']; // Assurez-vous que l'email de l'utilisateur est stocké dans la session
 } else {
     echo "Utilisateur non connecté.";
     exit;
@@ -19,10 +18,11 @@ if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
     $trajet_id = (int)$_POST['trajet_id'];
 
-    // Mettre à jour le statut du trajet à "terminé"
-    $sqlUpdate = "UPDATE trajets SET statut = 'terminé' WHERE id = :trajet_id";
+    // Mettre à jour le statut de la réservation à "terminé"
+    $sqlUpdate = "UPDATE reservations SET statut = 'terminé' WHERE trajet_id = :trajet_id AND utilisateur_id = :utilisateur_id";
     $stmtUpdate = $pdo->prepare($sqlUpdate);
     $stmtUpdate->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+    $stmtUpdate->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
 
     // Mettre à jour la table historique avec la date de fin réelle
     $sqlHistorique = "UPDATE historique SET date_fin_reel = NOW() WHERE trajet_id = :trajet_id";
@@ -69,7 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
             $mail->setFrom('rogez.aurore01@gmail.com', 'EcoRide');
             $mail->addAddress('rogez.aurore01@gmail.com'); // Envoi à ton adresse email pour les tests
 
-
             // Contenu de l'email
             $mail->isHTML(true);
             $mail->Subject = $subject;
@@ -81,16 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
         } catch (Exception $e) {
             echo "L'email n'a pas pu être envoyé : {$mail->ErrorInfo}"; // Message d'erreur si l'email échoue
         }
-
-        // Afficher le modal de remerciement et redirection
-        echo '<script>
-                window.onload = function() {
-                    $("#merciModal").modal("show");
-                    setTimeout(function() {
-                        window.location.href = "espace.php"; // Rediriger après 3 secondes
-                    }, 3000);
-                }
-              </script>';
     } catch (Exception $e) {
         $pdo->rollBack();
         echo "Erreur lors de la fin du trajet : " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
@@ -101,20 +90,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
     exit;
 }
 ?>
-
-<!-- Modal Bootstrap -->
-<div class="modal fade" id="merciModal" tabindex="-1" aria-labelledby="merciModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="merciModalLabel">Merci !</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>Merci de nous avoir fait confiance ! Votre trajet est maintenant terminé. À bientôt.</p>
-      </div>
-    </div>
-  </div>
-</div>
 
 <?php require_once('templates/footer.php'); ?>
