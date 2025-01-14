@@ -572,6 +572,37 @@ width: 400px;
     padding: 12px;
 }
 
+.admin-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.stats-container {
+    background: white;
+    padding: 90px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 30px auto; /* Centrer horizontalement */
+    border: 2px solid #000; /* Ajouter un contour */
+    width: 80%; /* Ajuster la largeur pour le centrage */
+    max-width: 600px; /* Limiter la largeur maximale */
+}
+
+
+.employee-form-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.employee-form {
+    display: grid;
+    gap: 15px;
+    max-width: 500px;
+}
+
 /* Rappel : 
 p-1 : applique un padding de 0.25rem.
 p-2 : applique un padding de 0.5rem.
