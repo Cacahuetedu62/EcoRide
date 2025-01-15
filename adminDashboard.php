@@ -66,7 +66,7 @@ try {
 $message = "";
 
 // Traitement du formulaire de création de compte employé
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_employee'])) {
     $pseudo = isset($_POST['pseudo']) ? htmlspecialchars($_POST['pseudo']) : '';
     $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
@@ -124,17 +124,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Traitement de la suspension d'un utilisateur
-if (isset($_POST['suspend_user'])) {
+// Traitement de la suspension/désuspension d'un utilisateur
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['suspend_user']) || isset($_POST['unsuspend_user']))) {
     $user_id = $_POST['user_id'];
+    $action = isset($_POST['suspend_user']) ? 'suspend' : 'unsuspend';
 
     // Mettre à jour la colonne "suspendu" dans la table utilisateurs
-    $sql = "UPDATE utilisateurs SET suspendu = 1 WHERE id = :id";
+    $sql = "UPDATE utilisateurs SET suspendu = :suspendu WHERE id = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+    $stmt->bindValue(':suspendu', $action == 'suspend' ? 1 : 0, PDO::PARAM_INT);
 
     if ($stmt->execute()) {
-        // Récupérer l'email de l'utilisateur suspendu
+        // Récupérer l'email de l'utilisateur suspendu/désuspendu
         $sql = "SELECT email FROM utilisateurs WHERE id = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
@@ -147,17 +149,18 @@ if (isset($_POST['suspend_user'])) {
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'testing.projets.siteweb@gmail.com'; // Remplacez par votre adresse e-mail
-            $mail->Password = 'sljw jlop qtyy mqae'; // Remplacez par votre mot de passe
+            $mail->Username = 'testing.projets.siteweb@gmail.com'; // Adresse email d'expéditeur
+            $mail->Password = 'sljw jlop qtyy mqae'; // Mot de passe d'application Gmail
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
+            // Destinataire
             $mail->setFrom('rogez.aurore01@gmail.com', 'EcoRide');
             $mail->addAddress('rogez.aurore01@gmail.com'); // Envoi à ton adresse email pour les tests
 
             $mail->isHTML(true);
-            $mail->Subject = "Supension du compte Ecoride";
-            $mail->Body    = "<html>
+            $mail->Subject = $action == 'suspend' ? 'Votre compte a été suspendu' : 'Votre compte a été désuspendu';
+            $mail->Body    = $action == 'suspend' ? "<html>
 <head>
     <title>Notification de Suspension de Compte</title>
     <meta charset='UTF-8'>
@@ -179,14 +182,33 @@ if (isset($_POST['suspend_user'])) {
 
     <p>Cordialement,<br>L'équipe d'Ecoride</p>
 </body>
+</html>" 
+: 
+"<html>
+<head>
+    <title>Notification de Réactivation de Compte</title>
+    <meta charset='UTF-8'>
+</head>
+<body>
+    <p>Bonjour,</p>
+    
+    <p>Nous avons le plaisir de vous informer que votre compte a été réactivé avec succès ! Vous pouvez à nouveau accéder à tous nos services.</p>
+
+    <p>Nous vous remercions de votre patience et de votre compréhension durant cette période. Nous sommes heureux de vous retrouver parmi nous.</p>
+
+    <p>Nous vous souhaitons une excellente expérience avec Ecoride !</p>
+
+    <p>Cordialement,<br>L'équipe d'Ecoride</p>
+</body>
 </html>";
+
             $mail->send();
-            $message = "L'utilisateur a été suspendu et un email de notification a été envoyé.";
+            $message = "L'utilisateur a été " . ($action == 'suspend' ? 'suspendu' : 'désuspendu') . " et un email de notification a été envoyé.";
         } catch (Exception $e) {
             $message = "Erreur lors de l'envoi de l'email: " . $mail->ErrorInfo;
         }
     } else {
-        $message = "Erreur lors de la suspension de l'utilisateur.";
+        $message = "Erreur lors de la " . ($action == 'suspend' ? 'suspension' : 'désuspension') . " de l'utilisateur.";
     }
 }
 ?>
@@ -204,135 +226,142 @@ if (isset($_POST['suspend_user'])) {
 
 <section>
     <div class="admin-container">
+        <div class="employee-form-container">
+            <h2>Créer un compte employé</h2>
+            <?php if (!empty($message)): ?>
+                <div class="message"><?php echo $message; ?></div>
+            <?php endif; ?>
 
-    <div class="employee-form-container">
-        <h2>Créer un compte employé</h2>
-        <?php if (!empty($message)): ?>
-            <div class="message"><?php echo $message; ?></div>
-        <?php endif; ?>
+            <form method="POST" action="adminDashboard.php">
+                <input type="hidden" name="create_employee" value="1">
+                <label for="pseudo">Pseudo:</label>
+                <input type="text" id="pseudo" name="pseudo" required><br>
 
-        <form method="POST" action="adminDashboard.php">
-            <label for="pseudo">Pseudo:</label>
-            <input type="text" id="pseudo" name="pseudo" required><br>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required><br>
 
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required><br>
+                <label for="password">Mot de passe:</label>
+                <input type="password" id="password" name="password" required><br>
+                <div class="form-group p-2">
+                    <p>Votre mot de passe doit contenir au moins 8 caractères, dont : <br> - Une majuscule, <br>
+                    - Une minuscule, <br>
+                    - Un chiffre et <br>
+                    - Un caractère spécial (par exemple, @, #, $, %).</p>
+                </div>
 
-            <label for="password">Mot de passe:</label>
-            <input type="password" id="password" name="password" required><br>
-            <div class="form-group p-2">
-                <p>Votre mot de passe doit contenir au moins 8 caractères, dont : <br> - Une majuscule, <br>
-                - Une minuscule, <br>
-                - Un chiffre et <br>
-                - Un caractère spécial (par exemple, @, #, $, %).</p>
+                <label for="confirm_password">Confirmer le mot de passe:</label>
+                <input type="password" id="confirm_password" name="confirm_password" required><br>
+
+                <label for="nom">Nom:</label>
+                <input type="text" id="nom" name="nom" required><br>
+
+                <label for="prenom">Prénom:</label>
+                <input type="text" id="prenom" name="prenom" required><br>
+
+                <button type="submit">Créer</button>
+            </form>
+        </div>
+
+        <div class="user-management-container">
+            <h2>Gestion des utilisateurs</h2>
+            <div class="search-container">
+                <form method="GET" action="adminDashboard.php">
+                    <input type="email" name="search" placeholder="Rechercher par email..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>" required>
+                    <button type="submit">Rechercher</button>
+                </form>
             </div>
+            <?php
+            // Vérifier si une recherche a été effectuée
+            if (isset($_GET['search'])) {
+                $search = $_GET['search'];
 
-            <label for="confirm_password">Confirmer le mot de passe:</label>
-            <input type="password" id="confirm_password" name="confirm_password" required><br>
+                // Récupérer l'utilisateur correspondant à l'email recherché
+                $sql = "SELECT id, pseudo, email, suspendu FROM utilisateurs WHERE email = :email";
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':email', $search, PDO::PARAM_STR);
+                $stmt->execute();
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            <label for="nom">Nom:</label>
-            <input type="text" id="nom" name="nom" required><br>
-
-            <label for="prenom">Prénom:</label>
-            <input type="text" id="prenom" name="prenom" required><br>
-
-            <button type="submit">Créer</button>
-        </form>
-    </div>
-
-    <div class="user-management-container">
-        <h2>Gestion des utilisateurs</h2>
-        <?php
-        // Récupérer la liste des utilisateurs
-        $sql = "SELECT id, pseudo, email, suspendu FROM utilisateurs";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute();
-        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Pseudo</th>
-                    <th>Email</th>
-                    <th>Suspendu</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($users as $user): ?>
-                    <tr>
-                        <td><?php echo $user['id']; ?></td>
-                        <td><?php echo $user['pseudo']; ?></td>
-                        <td><?php echo $user['email']; ?></td>
-                        <td><?php echo $user['suspendu'] ? 'Oui' : 'Non'; ?></td>
-                        <td>
+                if ($user) {
+                    // Afficher les informations de l'utilisateur et les options de suspension/désuspension
+                    ?>
+                    <div class="user-details">
+                        <h3>Détails de l'utilisateur</h3>
+                        <p><strong>ID:</strong> <?php echo $user['id']; ?></p>
+                        <p><strong>Pseudo:</strong> <?php echo $user['pseudo']; ?></p>
+                        <p><strong>Email:</strong> <?php echo $user['email']; ?></p>
+                        <p><strong>Suspendu:</strong> <?php echo $user['suspendu'] ? 'Oui' : 'Non'; ?></p>
+                        <form method="POST" action="adminDashboard.php" style="display:inline;">
+                            <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
                             <?php if (!$user['suspendu']): ?>
-                                <form method="POST" action="adminDashboard.php" style="display:inline;">
-                                    <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                    <button type="submit" name="suspend_user">Suspendre</button>
-                                </form>
+                                <button type="submit" name="suspend_user">Suspendre</button>
+                            <?php else: ?>
+                                <button type="submit" name="unsuspend_user">Désuspendre</button>
                             <?php endif; ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                        </form>
+                    </div>
+                    <?php
+                } else {
+                    echo "<p>Aucun utilisateur trouvé avec cet email.</p>";
+                }
+            }
+            ?>
+        </div>
     </div>
 </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-    <script>
-        const ctx = document.getElementById('creditsChart').getContext('2d');
-        const creditsData = <?php echo json_encode($credits_par_jour); ?>;
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script>
+    const ctx = document.getElementById('creditsChart').getContext('2d');
+    const creditsData = <?php echo json_encode($credits_par_jour); ?>;
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: creditsData.map(item => item.date),
-                datasets: [{
-                    label: 'Crédits gagnés par jour',
-                    data: creditsData.map(item => item.credits),
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Nombre de crédits'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Date'
-                        }
-                    }
-                },
-                plugins: {
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: creditsData.map(item => item.date),
+            datasets: [{
+                label: 'Crédits gagnés par jour',
+                data: creditsData.map(item => item.credits),
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Évolution des crédits de la plateforme sur les 30 derniers jours'
-                    },
-                    datalabels: {
+                        text: 'Nombre de crédits'
+                    }
+                },
+                x: {
+                    title: {
                         display: true,
-                        color: 'black',
-                        anchor: 'end',
-                        align: 'end',
-                        formatter: function(value, context) {
-                            return value;
-                        }
+                        text: 'Date'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Évolution des crédits de la plateforme sur les 30 derniers jours'
+                },
+                datalabels: {
+                    display: true,
+                    color: 'black',
+                    anchor: 'end',
+                    align: 'end',
+                    formatter: function(value, context) {
+                        return value;
                     }
                 }
             }
-        });
-    </script>
+        }
+    });
+</script>
 </div>
 
 <?php
