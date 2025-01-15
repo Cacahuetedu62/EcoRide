@@ -5,6 +5,8 @@ require_once('lib/config.php');
 require_once __DIR__ . '/vendor/autoload.php';
 
 use MongoDB\Client;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 // Vérification de la session administrateur
 if (!isset($_SESSION['utilisateur']) || !isset($_SESSION['utilisateur']['type_acces'])
@@ -65,12 +67,12 @@ $message = "";
 
 // Traitement du formulaire de création de compte employé
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $pseudo = htmlspecialchars($_POST['pseudo']);
-    $email = htmlspecialchars($_POST['email']);
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
-    $nom = htmlspecialchars($_POST['nom']);
-    $prenom = htmlspecialchars($_POST['prenom']);
+    $pseudo = isset($_POST['pseudo']) ? htmlspecialchars($_POST['pseudo']) : '';
+    $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '';
+    $password = isset($_POST['password']) ? $_POST['password'] : '';
+    $confirm_password = isset($_POST['confirm_password']) ? $_POST['confirm_password'] : '';
+    $nom = isset($_POST['nom']) ? htmlspecialchars($_POST['nom']) : '';
+    $prenom = isset($_POST['prenom']) ? htmlspecialchars($_POST['prenom']) : '';
 
     // Vérification si les champs nom et prénom sont remplis
     if (empty($nom) || empty($prenom)) {
@@ -121,7 +123,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
-?> 
+
+// Traitement de la suspension d'un utilisateur
+if (isset($_POST['suspend_user'])) {
+    $user_id = $_POST['user_id'];
+
+    // Mettre à jour la colonne "suspendu" dans la table utilisateurs
+    $sql = "UPDATE utilisateurs SET suspendu = 1 WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+
+    if ($stmt->execute()) {
+        // Récupérer l'email de l'utilisateur suspendu
+        $sql = "SELECT email FROM utilisateurs WHERE id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $user_email = $stmt->fetch(PDO::FETCH_ASSOC)['email'];
+
+        // Envoyer un email de notification
+        $mail = new PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host = 'smtp.example.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'your_email@example.com';
+            $mail->Password = 'your_email_password';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+
+            $mail->setFrom('your_email@example.com', 'Admin');
+            $mail->addAddress($user_email);
+
+            $mail->isHTML(true);
+            $mail->Subject = 'Votre compte a été suspendu';
+            $mail->Body    = 'Bonjour,<br>Votre compte a été suspendu par l\'administrateur.';
+            $mail->AltBody = 'Bonjour,\nVotre compte a été suspendu par l\'administrateur.';
+
+            $mail->send();
+            $message = "L'utilisateur a été suspendu et un email de notification a été envoyé.";
+        } catch (Exception $e) {
+            $message = "Erreur lors de l'envoi de l'email: " . $mail->ErrorInfo;
+        }
+    } else {
+        $message = "Erreur lors de la suspension de l'utilisateur.";
+    }
+}
+?>
 <h1>Tableau de bord Administrateur</h1>
 
 <section>
@@ -136,7 +184,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <section>
     <div class="admin-container">
-   
 
     <div class="employee-form-container">
         <h2>Créer un compte employé</h2>
@@ -172,8 +219,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <button type="submit">Créer</button>
         </form>
     </div>
-</section>
 
+    <div class="user-management-container">
+        <h2>Gestion des utilisateurs</h2>
+        <?php
+        // Récupérer la liste des utilisateurs
+        $sql = "SELECT id, pseudo, email, suspendu FROM utilisateurs";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        ?>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Pseudo</th>
+                    <th>Email</th>
+                    <th>Suspendu</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($users as $user): ?>
+                    <tr>
+                        <td><?php echo $user['id']; ?></td>
+                        <td><?php echo $user['pseudo']; ?></td>
+                        <td><?php echo $user['email']; ?></td>
+                        <td><?php echo $user['suspendu'] ? 'Oui' : 'Non'; ?></td>
+                        <td>
+                            <?php if (!$user['suspendu']): ?>
+                                <form method="POST" action="adminDashboard.php" style="display:inline;">
+                                    <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                                    <button type="submit" name="suspend_user">Suspendre</button>
+                                </form>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</section>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>

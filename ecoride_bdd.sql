@@ -451,3 +451,5 @@ ALTER TABLE utilisateurs DROP COLUMN role;
 
 ALTER TABLE utilisateurs ADD COLUMN role ENUM('passager', 'chauffeur', 'passager-chauffeur') DEFAULT 'passager';
 
+ALTER TABLE utilisateurs ADD COLUMN suspendu TINYINT DEFAULT 0;
+
