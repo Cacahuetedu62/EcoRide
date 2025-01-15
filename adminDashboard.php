@@ -121,10 +121,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
-?>
+?> 
+<h1>Tableau de bord Administrateur</h1>
+
+<section>
+    <div class="stats-container">
+        <h2>Statistiques des Crédits</h2>
+        <div class="total-credits">
+            <h3>Total des crédits gagnés depuis le <?php echo $date_debut->format('Y-m-d'); ?> : <?php echo $total_credits; ?> crédits</h3>
+        </div>
+        <canvas id="creditsChart"></canvas>
+    </div>
+</section>
+
 <section>
     <div class="admin-container">
-    <h1>Tableau de bord Administrateur</h1>
+   
 
     <div class="employee-form-container">
         <h2>Créer un compte employé</h2>
@@ -161,18 +173,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </form>
     </div>
 </section>
-
-
-<section>
-    <div class="stats-container">
-        <h2>Statistiques des Crédits</h2>
-        <div class="total-credits">
-            <h3>Total des crédits gagnés depuis le <?php echo $date_debut->format('Y-m-d'); ?> : <?php echo $total_credits; ?> crédits</h3>
-        </div>
-        <canvas id="creditsChart"></canvas>
-    </div>
-</section>
-
 
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -228,3 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         });
     </script>
 </div>
+
+<?php
+require_once('templates/footer.php');
+?>

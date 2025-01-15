@@ -11,8 +11,6 @@ use MongoDB\Client;
 // Vérification de la session employé
 if (!isset($_SESSION['utilisateur']) || !isset($_SESSION['utilisateur']['type_acces']) 
     || ($_SESSION['utilisateur']['type_acces'] != 'employe' && $_SESSION['utilisateur']['type_acces'] != 'administrateur')) {
-    header('Location: login.php');
-    exit();
 }
 
 // Initialize MongoDB connection
@@ -32,22 +30,38 @@ function tronquer_texte($texte, $limite = 50) {
     return $texte;
 }
 
-// Fonction pour gérer les crédits
 function gererCredits($pdo, $creditsCollection, $avis_utilisateur_id, $trajet_id) {
     try {
         // Début de la transaction MySQL
         $pdo->beginTransaction();
 
-        // Récupérer le prix du trajet
-        $sql = "SELECT prix_par_personne, nb_places FROM trajets WHERE id = :trajet_id";
+        // Récupérer le prix du trajet et l'ID du chauffeur via la jointure
+        $sql = "SELECT 
+                t.prix_personnes, 
+                t.prix_total, 
+                t.nb_places,
+                tu.utilisateur_id as chauffeur_id
+                FROM trajets t
+                JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
+                JOIN utilisateurs u ON tu.utilisateur_id = u.id
+                WHERE t.id = :trajet_id 
+                AND u.role = 'chauffeur'";
+                
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
         $stmt->execute();
         $trajetInfo = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        if (!$trajetInfo) {
+            throw new Exception("Trajet non trouvé ou chauffeur non trouvé");
+        }
+
         // Calculer commission plateforme (2 crédits)
         $commission = 2;
-        $montant_final = $trajetInfo['prix_par_personne'] - $commission;
+        
+        // On utilise prix_personnes car c'est le prix par personne
+        $prix_pour_passager = $trajetInfo['prix_personnes'];
+        $montant_final = $prix_pour_passager - $commission;
 
         // 1. Ajouter les crédits de commission à MongoDB (plateforme)
         $dateNow = new DateTime();
@@ -62,18 +76,15 @@ function gererCredits($pdo, $creditsCollection, $avis_utilisateur_id, $trajet_id
         // 2. Débiter les crédits de l'utilisateur dans MySQL
         $sql = "UPDATE utilisateurs SET credits = credits - :montant WHERE id = :user_id";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':montant', $trajetInfo['prix_par_personne'], PDO::PARAM_INT);
+        $stmt->bindParam(':montant', $prix_pour_passager, PDO::PARAM_STR);
         $stmt->bindParam(':user_id', $avis_utilisateur_id, PDO::PARAM_INT);
         $stmt->execute();
 
         // 3. Créditer le chauffeur
-        $sql = "UPDATE utilisateurs u 
-                JOIN trajets t ON t.chauffeur_id = u.id 
-                SET u.credits = u.credits + :montant_final 
-                WHERE t.id = :trajet_id";
+        $sql = "UPDATE utilisateurs SET credits = credits + :montant_final WHERE id = :chauffeur_id";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':montant_final', $montant_final, PDO::PARAM_INT);
-        $stmt->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+        $stmt->bindParam(':montant_final', $montant_final, PDO::PARAM_STR);
+        $stmt->bindParam(':chauffeur_id', $trajetInfo['chauffeur_id'], PDO::PARAM_INT);
         $stmt->execute();
 
         // Si tout s'est bien passé, on valide la transaction
@@ -239,7 +250,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<!-- Le reste du code HTML et JavaScript reste identique -->
+
 <div id="commentModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -247,15 +258,83 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <p id="modalCommentText"></p>
     </div>
 </div>
-
 <div class="dashboard-container">
     <h1 class="dashboard-title">Gestion des Avis Clients</h1>
-
     <table class="dashboard-table">
-        <!-- Le reste du code de la table reste identique -->
+        <thead>
+            <tr>
+                <th>N° Trajet</th>
+                <th>Participants</th>
+                <th>Emails</th>
+                <th>Départ</th>
+                <th>Arrivée</th>
+                <th>Commentaires</th>
+                <th>Note</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if (count($results) > 0): ?>
+                <?php foreach ($results as $row): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row["trajet_id"]); ?></td>
+                    <td>
+                        <?php echo format_with_badges($row["participants_info"]); ?>
+                        <?php echo format_with_badges($row["additional_passengers_info"]); ?>
+                        <?php echo format_with_badges($row["reservation_passengers_info"]); ?>
+                    </td>
+                    <td>
+                        <?php echo format_with_badges($row["emails_info"]); ?>
+                        <?php echo format_with_badges($row["additional_passengers_emails"]); ?>
+                    </td>
+                    <td><?php echo htmlspecialchars($row["lieu_depart"]); ?></td>
+                    <td><?php echo htmlspecialchars($row["lieu_arrive"]); ?></td>
+                    <td>
+                        <?php
+                        $commentaire_tronque = tronquer_texte($row["commentaires"]);
+                        echo htmlspecialchars($commentaire_tronque);
+                        if (strlen($row["commentaires"]) > 50) {
+                            echo ' <button class="btn-voir-plus" onclick="afficherCommentaire(\'' . htmlspecialchars(addslashes($row["commentaires"])) . '\')">Voir plus</button>';
+                        }
+                        ?>
+                    </td>
+                    <td><?php echo htmlspecialchars($row["note"]); ?></td>
+                    <td><?php echo htmlspecialchars($row["statut"]); ?></td>
+                    <td class="actions">
+                        <form method="post" action="" class="action-buttons">
+                            <input type="hidden" name="avis_id" value="<?php echo $row["avis_id"]; ?>">
+                            <button type="submit" name="action" value="valider" class="btn btn-validate">Valider</button>
+                            <button type="submit" name="action" value="rejeter" class="btn btn-reject">Rejeter</button>
+                        </form>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="9" class="no-data">Aucun avis en attente pour les trajets terminés.</td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
     </table>
 </div>
-
 <script>
-// Le code JavaScript reste identique
+// Fonction pour afficher la modal avec le commentaire
+function afficherCommentaire(commentaire) {
+    const modal = document.getElementById('commentModal');
+    const modalText = document.getElementById('modalCommentText');
+    modalText.textContent = commentaire;
+    modal.style.display = "block";
+}
+// Fermer la modal quand on clique sur le X
+document.querySelector('.close').onclick = function() {
+    document.getElementById('commentModal').style.display = "none";
+}
+// Fermer la modal quand on clique en dehors
+window.onclick = function(event) {
+    const modal = document.getElementById('commentModal');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
 </script>
