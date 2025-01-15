@@ -145,21 +145,41 @@ if (isset($_POST['suspend_user'])) {
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host = 'smtp.example.com';
+            $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'your_email@example.com';
-            $mail->Password = 'your_email_password';
+            $mail->Username = 'testing.projets.siteweb@gmail.com'; // Remplacez par votre adresse e-mail
+            $mail->Password = 'sljw jlop qtyy mqae'; // Remplacez par votre mot de passe
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
-            $mail->setFrom('your_email@example.com', 'Admin');
-            $mail->addAddress($user_email);
+            $mail->setFrom('rogez.aurore01@gmail.com', 'EcoRide');
+            $mail->addAddress('rogez.aurore01@gmail.com'); // Envoi à ton adresse email pour les tests
 
             $mail->isHTML(true);
-            $mail->Subject = 'Votre compte a été suspendu';
-            $mail->Body    = 'Bonjour,<br>Votre compte a été suspendu par l\'administrateur.';
-            $mail->AltBody = 'Bonjour,\nVotre compte a été suspendu par l\'administrateur.';
+            $mail->Subject = "Supension du compte Ecoride";
+            $mail->Body    = "<html>
+<head>
+    <title>Notification de Suspension de Compte</title>
+    <meta charset='UTF-8'>
+</head>
+<body>
+    <p>Bonjour,</p>
+    
+    <p>Nous vous informons que votre compte a été suspendu pour les raisons suivantes :</p>
+    <ul>
+        <li><strong>Violation des Conditions d'Utilisation :
+        </strong> Votre utilisation du service ne respecte pas nos conditions.</li>
+        <li><strong>Comportement Inapproprié :</strong> Des comportements inappropriés ont été signalés lors de vos interactions sur la plateforme.</li>
+        <li><strong>Paiement Non Réglé :</strong> Votre compte présente un solde impayé qui nécessite une régularisation.</li>
+    </ul>
 
+    <p>Pour toute question ou clarification concernant cette suspension, n'hésitez pas à contacter notre service client à l'adresse suivante : contact@ecoride.fr</p>
+
+    <p>Nous vous remercions de votre compréhension.</p>
+
+    <p>Cordialement,<br>L'équipe d'Ecoride</p>
+</body>
+</html>";
             $mail->send();
             $message = "L'utilisateur a été suspendu et un email de notification a été envoyé.";
         } catch (Exception $e) {
