@@ -453,3 +453,5 @@ ALTER TABLE utilisateurs ADD COLUMN role ENUM('passager', 'chauffeur', 'passager
 
 ALTER TABLE utilisateurs ADD COLUMN suspendu TINYINT DEFAULT 0;
 
+ALTER TABLE avis ADD COLUMN date_validation DATETIME DEFAULT NULL;
+

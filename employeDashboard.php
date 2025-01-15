@@ -209,14 +209,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bindParam(':avis_id', $avis_id, PDO::PARAM_INT);
             $stmt->execute();
             $avis_info = $stmt->fetch(PDO::FETCH_ASSOC);
-
+        
             if (gererCredits($pdo, $creditsCollection, $avis_info['utilisateur_id'], $avis_info['trajet_id'])) {
-                // Mettre à jour le statut de l'avis
-                $sql = "UPDATE avis SET statut = :new_status WHERE id = :avis_id";
+                // Mettre à jour le statut de l'avis ET la date de validation
+                $sql = "UPDATE avis 
+                        SET statut = :new_status, 
+                            date_validation = NOW() 
+                        WHERE id = :avis_id";
                 $stmt = $pdo->prepare($sql);
                 $stmt->bindParam(':new_status', $new_status);
                 $stmt->bindParam(':avis_id', $avis_id, PDO::PARAM_INT);
-
+        
                 if ($stmt->execute()) {
                     echo "<div class='alert alert-success'>Avis validé et crédits mis à jour avec succès.</div>";
                 } else {
@@ -249,7 +252,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
 
 <div id="commentModal" class="modal">
     <div class="modal-content">
@@ -338,3 +340,4 @@ window.onclick = function(event) {
     }
 }
 </script>
+

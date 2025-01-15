@@ -214,6 +214,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['suspend_user']) || is
 ?>
 <h1>Tableau de bord Administrateur</h1>
 
+<a href="graphiques.php">Graphiques</a>
+<a href="manage.php">Gérer les utilisateurs</a>
+
+
 <section>
     <div class="stats-container">
         <h2>Statistiques des Crédits</h2>
@@ -223,6 +227,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['suspend_user']) || is
         <canvas id="creditsChart"></canvas>
     </div>
 </section>
+
+
+<section>
+    <div class="stats-container">
+        <h2>Nombre de Covoiturages Réalisés</h2>
+        <canvas id="covoituragesChart"></canvas>
+    </div>
+</section>
+
 
 <section>
     <div class="admin-container">
@@ -313,6 +326,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['suspend_user']) || is
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script>
+
+
+
     const ctx = document.getElementById('creditsChart').getContext('2d');
     const creditsData = <?php echo json_encode($credits_par_jour); ?>;
 

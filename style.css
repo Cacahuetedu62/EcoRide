@@ -449,6 +449,7 @@ h1, h2, h3 {
 
 .employee-form-container {
     margin-bottom: 40px;
+    width: 500px;
 }
 
 .employee-form-container form {
