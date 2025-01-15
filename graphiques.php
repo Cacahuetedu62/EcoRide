@@ -12,22 +12,12 @@ $mongoClient = new MongoDB\Client("mongodb://localhost:27017");
 $creditsPlateforme = $mongoClient->creditsPlateforme;
 $creditsCollection = $creditsPlateforme->credits;
 
-// Récupérer les crédits par jour pour les 30 derniers jours
+// Récupérer les crédits depuis MongoDB (tous les crédits enregistrés)
 $credits_par_jour = [];
 $total_credits = 0;
-$date_debut = new DateTime('-30 days');
-$date_fin = new DateTime();
 
 try {
     $pipeline = [
-        [
-            '$match' => [
-                'date' => [
-                    '$gte' => $date_debut->format('Y-m-d H:i:s'),
-                    '$lte' => $date_fin->format('Y-m-d H:i:s')
-                ]
-            ]
-        ],
         [
             '$group' => [
                 '_id' => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => ['$dateFromString' => ['dateString' => '$date']]]],
@@ -52,9 +42,9 @@ try {
     error_log("Erreur lors de la récupération des crédits: " . $e->getMessage());
 }
 
-// Récupérer le nombre de trajets réalisés par jour
+// Récupérer le nombre total de trajets validés depuis le début
 $trajets_par_jour = [];
-
+$total_trajets_valides = 0;
 
 try {
     // Requête SQL pour récupérer les trajets validés (statut 'validé')
@@ -65,36 +55,44 @@ try {
         AND date_validation IS NOT NULL
         GROUP BY DATE(date_validation)
         ORDER BY DATE(date_validation) ASC;
-");
-$stmt->execute();
+    ");
+    $stmt->execute();
 
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    // Formatage des dates pour ne récupérer que la date sans l'heure
-    $trajets_par_jour[] = [
-        'date' => $row['date'], // La date est déjà au format 'YYYY-MM-DD'
-        'trajets' => (int) $row['total']
-    ];
-}
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Ajout des trajets validés au tableau
+        $trajets_par_jour[] = [
+            'date' => $row['date'], // La date est déjà au format 'YYYY-MM-DD'
+            'trajets' => (int) $row['total']
+        ];
+
+        // Calcul du total des trajets validés
+        $total_trajets_valides += (int) $row['total'];
+    }
 } catch (Exception $e) {
-error_log("Erreur lors de la récupération des trajets: " . $e->getMessage());
+    error_log("Erreur lors de la récupération des trajets: " . $e->getMessage());
 }
-
-// Afficher les données du tableau $trajets_par_jour[]
-var_dump($trajets_par_jour);
 
 ?>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <h1>Statistiques des Crédits et Covoiturages</h1>
+
 <section>
     <div class="stats-container">
         <h2>Nombre de Covoiturages Réalisés</h2>
+        <div id="trajets-summary">
+            <p id="total-trajets">Nombre total de trajets effectués depuis le début: <strong><?php echo $total_trajets_valides; ?></strong></p>
+        </div>
         <canvas id="covoituragesChart"></canvas>
     </div>
 </section>
 
 <script>
+// Trajets Data (pour afficher le graphique des trajets)
 const ctx2 = document.getElementById('covoituragesChart').getContext('2d');
 const trajetsData = <?php echo json_encode($trajets_par_jour); ?>;
+console.log(trajetsData); // Vérification du contenu des données
 
 new Chart(ctx2, {
     type: 'line',
@@ -127,16 +125,7 @@ new Chart(ctx2, {
         plugins: {
             title: {
                 display: true,
-                text: 'Nombre de trajets effectués par jour sur les 30 derniers jours'
-            },
-            datalabels: {
-                display: true,
-                color: 'black',
-                anchor: 'end',
-                align: 'end',
-                formatter: function(value, context) {
-                    return value;
-                }
+                text: 'Nombre de trajets effectués par jour'
             }
         }
     }
@@ -147,14 +136,14 @@ new Chart(ctx2, {
     <div class="stats-container">
         <h2>Statistiques des Crédits</h2>
         <div class="total-credits">
-            <h3>Total des crédits gagnés depuis le <?php echo $date_debut->format('Y-m-d'); ?> : <?php echo $total_credits; ?> crédits</h3>
+            <h3>Total des crédits gagnés depuis le début : <?php echo $total_credits; ?> crédits</h3>
         </div>
         <canvas id="creditsChart"></canvas>
     </div>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// Crédits Data (pour afficher le graphique des crédits)
 const ctx = document.getElementById('creditsChart').getContext('2d');
 const creditsData = <?php echo json_encode($credits_par_jour); ?>;
 
@@ -189,16 +178,7 @@ new Chart(ctx, {
         plugins: {
             title: {
                 display: true,
-                text: 'Évolution des crédits de la plateforme sur les 30 derniers jours'
-            },
-            datalabels: {
-                display: true,
-                color: 'black',
-                anchor: 'end',
-                align: 'end',
-                formatter: function(value, context) {
-                    return value;
-                }
+                text: 'Évolution des crédits de la plateforme'
             }
         }
     }
