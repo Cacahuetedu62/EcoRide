@@ -2,21 +2,21 @@
 session_start();
 require_once('lib/pdo.php');
 require_once('lib/config.php');
+require_once('vendor/autoload.php'); // Assurez-vous que PHPMailer est inclus
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 // Vérification de la connexion
 if (!isset($_SESSION['utilisateur']) || !isset($_SESSION['utilisateur']['id'])) {
     $_SESSION['message'] = "Vous devez être connecté pour effectuer cette action.";
     $_SESSION['message_type'] = "danger";
-    header('Location: mesTrajets.php');
-    exit;
 }
 
 // Vérification des données POST
 if (!isset($_POST['trajet_id']) || !isset($_POST['role'])) {
     $_SESSION['message'] = "Données manquantes pour l'annulation.";
     $_SESSION['message_type'] = "danger";
-    header('Location: mesTrajets.php');
-    exit;
 }
 
 $utilisateur_id = $_SESSION['utilisateur']['id'];
@@ -52,6 +52,9 @@ try {
 
             $_SESSION['message'] = "Le trajet a été annulé avec succès.";
             $_SESSION['message_type'] = "success";
+
+            // Envoi de l'email de notification
+            sendNotificationEmail($trajet_id, 'conducteur');
         } else {
             throw new Exception('Vous n\'êtes pas le conducteur de ce trajet');
         }
@@ -75,7 +78,7 @@ try {
         if ($reservation) {
             // Mise à jour du nombre de places
             $stmt = $pdo->prepare("
-                UPDATE trajets 
+                UPDATE trajets
                 SET nb_places = nb_places + :nb_personnes
                 WHERE id = :trajet_id
             ");
@@ -94,6 +97,9 @@ try {
 
             $_SESSION['message'] = "Votre réservation a été annulée avec succès.";
             $_SESSION['message_type'] = "success";
+
+            // Envoi de l'email de notification
+            sendNotificationEmail($trajet_id, 'passager');
         } else {
             throw new Exception('Réservation non trouvée');
         }
@@ -108,4 +114,47 @@ try {
 
 header('Location: mesTrajets.php');
 exit;
+
+function sendNotificationEmail($trajet_id, $role) {
+    global $pdo;
+
+    // Récupération des emails des participants
+    $stmt = $pdo->prepare("
+        SELECT u.email
+        FROM utilisateurs u
+        JOIN reservations r ON u.id = r.utilisateur_id
+        WHERE r.trajet_id = :trajet_id
+    ");
+    $stmt->execute(['trajet_id' => $trajet_id]);
+    $emails = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    // Crée une instance de PHPMailer
+    $mail = new PHPMailer(true);
+    try {
+        // Configuration SMTP
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'testing.projets.siteweb@gmail.com'; // Adresse email d'expéditeur
+        $mail->Password = 'sljw jlop qtyy mqae'; // Mot de passe d'application Gmail
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+
+        // Destinataire
+        $mail->setFrom('rogez.aurore01@gmail.com', 'EcoRide');
+        $mail->addAddress('rogez.aurore01@gmail.com'); // Envoi à ton adresse email pour les tests
+
+
+        // Contenu de l'email
+        $mail->isHTML(true);
+        $mail->Subject = 'Annulation de trajet';
+        $mail->Body = "Le trajet avec l'ID $trajet_id a été annulé par le $role.";
+
+        // Envoie de l'email
+        $mail->send();
+        echo "Message envoyé avec succès !"; // Message de débogage
+    } catch (Exception $e) {
+        echo "L'email n'a pas pu être envoyé : {$mail->ErrorInfo}"; // Message d'erreur si l'email échoue
+    }
+}
 ?>
