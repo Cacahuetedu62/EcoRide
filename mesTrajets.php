@@ -20,27 +20,29 @@ if (isset($_SESSION['message'])) {
     unset($_SESSION['message_type']);
 }
 
-// Préparer la requête pour récupérer les trajets de l'utilisateur connecté depuis la table reservations
-$sql = "SELECT
+$sql = "SELECT DISTINCT
     t.id,
     t.date_depart,
     t.heure_depart,
     t.lieu_arrive,
     t.lieu_depart,
-    MAX(r.statut) AS statut,
-    GROUP_CONCAT(DISTINCT CONCAT(p.prenom_passager, ' ', p.nom_passager) SEPARATOR ', ') AS participants,
-    r.id AS id_reservation,  -- Récupérer l'ID de réservation
-    u.role AS role
+    COALESCE(r.statut, 'en_attente') AS statut,
+    GROUP_CONCAT(DISTINCT CONCAT(u_passager.prenom, ' ', u_passager.nom) SEPARATOR ' | ') AS participants,
+    GROUP_CONCAT(DISTINCT CONCAT('Invité : ', p.prenom_passager, ' ', p.nom_passager) SEPARATOR ' | ') AS invites,
+    r.id AS id_reservation,
+    CASE
+        WHEN tu.utilisateur_id = :utilisateur_id THEN 'chauffeur'
+        ELSE 'passager'
+    END AS role
 FROM trajets t
-JOIN reservations r ON t.id = r.trajet_id
+JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
+LEFT JOIN reservations r ON t.id = r.trajet_id
 LEFT JOIN passagers p ON r.id = p.reservation_id
-JOIN utilisateurs u ON r.utilisateur_id = u.id
-WHERE r.utilisateur_id = :utilisateur_id
-  AND r.statut != 'terminé'
-GROUP BY t.id, r.id  -- Ajoutez ici r.id pour résoudre l'erreur
-ORDER BY u.role, t.date_depart;
-";
-
+LEFT JOIN utilisateurs u_passager ON p.utilisateur_id = u_passager.id
+WHERE (tu.utilisateur_id = :utilisateur_id OR p.utilisateur_id = :utilisateur_id)
+  AND (r.statut != 'termine' OR r.statut IS NULL)
+GROUP BY t.id, r.id, tu.utilisateur_id
+ORDER BY t.date_depart";
 
 
 $stmt = $pdo->prepare($sql);
@@ -54,6 +56,9 @@ try {
     echo "Erreur lors de la récupération des trajets : " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
     exit;
 }
+
+var_dump($trajets);
+
 ?>
 
 
@@ -65,13 +70,13 @@ try {
             <h4>Mes trajets à venir</h4>
 
             <div class="row">
-                <!-- Section pour les trajets en tant que conducteur -->
+                <!-- Section pour les trajets en tant que chauffeur -->
                 <div class="col-md-6">
-                    <h5>Trajets en tant que conducteur</h5>
+                    <h5>Trajets en tant que chauffeur</h5>
                     <?php
-                    $trajets_conducteur = array_filter($trajets, fn($trajet) => $trajet['role'] === 'conducteur');
-                    if (!empty($trajets_conducteur)): ?>
-                        <?php foreach ($trajets_conducteur as $trajet): ?>
+                    $trajets_chauffeur = array_filter($trajets, fn($trajet) => $trajet['role'] === 'chauffeur');
+                    if (!empty($trajets_chauffeur)): ?>
+                        <?php foreach ($trajets_chauffeur as $trajet): ?>
                             <div class="vehicule givre" id="trajet-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
                                 <!-- Affichage de l'ID, Lieu de départ, Flèche et Lieu d'arrivée -->
                                 <div class="titleTrajets">
@@ -82,9 +87,44 @@ try {
                                 </div>
                                 <p>Date : <?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?></p>
                                 <p>Heure de départ : <?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?></p>
-                                <p>Participants : <?= !empty($trajet['participants']) ? htmlspecialchars($trajet['participants'], ENT_QUOTES, 'UTF-8') : 'Aucun participant'; ?></p>
+
+ <!-- Liste des participants -->
+ <p><strong>Participants :</strong></p>
+        <p><?php echo htmlspecialchars($trajet['participants']); ?></p>
+
+        <!-- Liste des invités -->
+        <p><strong>Invités :</strong></p>
+        <p><?php echo htmlspecialchars($trajet['invites']); ?></p>
+</p>
+
+
+
+
+                                <p><strong>Statut du trajet :</strong> 
+        <?php
+            switch ($trajet['statut']) {
+                case 'en_attente':
+                    echo 'En attente';
+                    break;
+                case 'en_cours':
+                    echo 'En cours';
+                    break;
+                case 'termine':
+                    echo 'Terminé';
+                    break;
+                case 'annule':
+                    echo 'Annulé';
+                    break;
+                default:
+                    echo 'Statut inconnu';
+            }
+
+        ?>
+    </p>
                                 <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary">Voir les détails</a>
-                                <?php if ($trajet['statut'] == 'en_attente'): ?>
+                                
+                                
+                                <!-- <?php if ($trajet['statut'] == 'en_attente'): ?>                
                                     <form id="lancer-form-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" action="lancerTrajet.php" method="post" style="display:inline;">
                                         <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
                                         <input type="hidden" name="utilisateur_id" value="<?= htmlspecialchars($utilisateur_id, ENT_QUOTES, 'UTF-8') ?>">
@@ -95,7 +135,10 @@ try {
                                         <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
                                         <button type="submit" class="btn btn-danger terminer-btn">Terminer le trajet</button>
                                     </form>
-                                <?php endif; ?>
+                                <?php endif; ?> -->
+
+
+
                                 <form method="POST" action="annulerTrajet.php" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce trajet ? Tous les passagers seront notifiés.');">
                 <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
                 <input type="hidden" name="role" value="conducteur">
@@ -125,10 +168,36 @@ try {
                                 </p>
                                 <p>Date : <?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?></p>
                                 <p>Heure de départ : <?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?></p>
-                                <p>Participants : <?= !empty($trajet['participants']) ? htmlspecialchars($trajet['participants'], ENT_QUOTES, 'UTF-8') : 'Aucun participant'; ?></p>
+                                <p><strong>Participants :</strong></p>
+        <p><?php echo htmlspecialchars($trajet['participants']); ?></p>
+
+        <!-- Liste des invités -->
+        <p><strong>Invités :</strong></p>
+        <p><?php echo htmlspecialchars($trajet['invites']); ?></p>
+</p>                                <p><strong>Statut du trajet :</strong> 
+        <?php
+            switch ($trajet['statut']) {
+                case 'en_attente':
+                    echo 'En attente';
+                    break;
+                case 'en_cours':
+                    echo 'En cours';
+                    break;
+                case 'termine':
+                    echo 'Terminé';
+                    break;
+                case 'annule':
+                    echo 'Annulé';
+                    break;
+                default:
+                    echo 'Statut inconnu';
+            }
+        ?>
+    </p>
+                               
                                 <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary">Voir les détails</a>
 
-                                <!-- Permettre à un passager de terminer un trajet si le statut est 'en_cours' -->
+
                                 <?php if ($trajet['statut'] == 'en_cours' && $trajet['role'] == 'passager'): ?>
                                     <form id="terminer-form-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" action="terminerTrajet.php" method="post" style="display:inline;">
                                         <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
@@ -138,12 +207,6 @@ try {
                                 <?php endif; ?>
 
 
-
-
-
-
-
-                                <!-- Ajouter un bouton "Lancer le trajet" pour les passagers (optionnel) -->
                                 <?php if ($trajet['statut'] == 'en_attente' && $trajet['role'] == 'passager'): ?>
                                     <form id="lancer-form-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" action="lancerTrajet.php" method="post" style="display:inline;">
                                         <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
@@ -151,6 +214,8 @@ try {
                                         <button type="submit" class="btn btn-success lancer-btn">Lancer le trajet</button>
                                     </form>
                                 <?php endif; ?>
+
+
                                 <form method="POST" action="annulerTrajet.php" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler votre réservation ?');">
                 <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
                 <input type="hidden" name="role" value="passager">
