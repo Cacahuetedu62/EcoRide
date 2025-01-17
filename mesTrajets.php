@@ -12,6 +12,14 @@ if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     exit;
 }
 
+if (isset($_SESSION['message'])) {
+    $alertClass = isset($_SESSION['message_type']) ? $_SESSION['message_type'] : 'info';
+    echo "<div class='alert alert-{$alertClass} message-container'>" . htmlspecialchars($_SESSION['message']) . "</div>";
+    // On supprime le message après l'avoir affiché
+    unset($_SESSION['message']);
+    unset($_SESSION['message_type']);
+}
+
 // Préparer la requête pour récupérer les trajets de l'utilisateur connecté depuis la table reservations
 $sql = "SELECT
     t.id,
@@ -21,6 +29,7 @@ $sql = "SELECT
     t.lieu_depart,
     MAX(r.statut) AS statut,
     GROUP_CONCAT(DISTINCT CONCAT(p.prenom_passager, ' ', p.nom_passager) SEPARATOR ', ') AS participants,
+    r.id AS id_reservation,  -- Récupérer l'ID de réservation
     u.role AS role
 FROM trajets t
 JOIN reservations r ON t.id = r.trajet_id
@@ -28,9 +37,11 @@ LEFT JOIN passagers p ON r.id = p.reservation_id
 JOIN utilisateurs u ON r.utilisateur_id = u.id
 WHERE r.utilisateur_id = :utilisateur_id
   AND r.statut != 'terminé'
-GROUP BY t.id
+GROUP BY t.id, r.id  -- Ajoutez ici r.id pour résoudre l'erreur
 ORDER BY u.role, t.date_depart;
 ";
+
+
 
 $stmt = $pdo->prepare($sql);
 $stmt->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
@@ -43,8 +54,10 @@ try {
     echo "Erreur lors de la récupération des trajets : " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
     exit;
 }
-
 ?>
+
+
+
 
 <main class="form-page">
     <section class="custom-section2">
@@ -83,6 +96,11 @@ try {
                                         <button type="submit" class="btn btn-danger terminer-btn">Terminer le trajet</button>
                                     </form>
                                 <?php endif; ?>
+                                <form method="POST" action="annulerTrajet.php" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce trajet ? Tous les passagers seront notifiés.');">
+                <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="role" value="conducteur">
+                <button type="submit" class="btn btn-danger">Annuler le trajet</button>
+            </form>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -119,6 +137,12 @@ try {
                                     </form>
                                 <?php endif; ?>
 
+
+
+
+
+
+
                                 <!-- Ajouter un bouton "Lancer le trajet" pour les passagers (optionnel) -->
                                 <?php if ($trajet['statut'] == 'en_attente' && $trajet['role'] == 'passager'): ?>
                                     <form id="lancer-form-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" action="lancerTrajet.php" method="post" style="display:inline;">
@@ -127,6 +151,11 @@ try {
                                         <button type="submit" class="btn btn-success lancer-btn">Lancer le trajet</button>
                                     </form>
                                 <?php endif; ?>
+                                <form method="POST" action="annulerTrajet.php" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler votre réservation ?');">
+                <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="role" value="passager">
+                <button type="submit" class="btn btn-danger">Annuler la réservation</button>
+            </form>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -179,6 +208,19 @@ try {
             });
         });
     });
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const messageContainer = document.querySelector('.message-container');
+    if (messageContainer) {
+        setTimeout(() => {
+            messageContainer.remove();
+        }, 5000);
+    }
+});
+
+
     </script>
 
 <?php
