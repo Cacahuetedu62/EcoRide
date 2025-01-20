@@ -7,11 +7,20 @@ require_once('lib/config.php');
 if (isset($_GET['id'])) {
     $utilisateur_id = (int) $_GET['id'];
 
-    // Récupérer les commentaires validés
-    $sql = "SELECT a.commentaires, a.note, u.pseudo
-            FROM avis a
-            JOIN utilisateurs u ON a.utilisateur_id = u.id
-            WHERE a.utilisateur_id = :utilisateur_id AND a.statut = 'validé'";
+    // Structure de requête améliorée
+    $sql = "
+        SELECT 
+            a.commentaires, 
+            a.note, 
+            u.pseudo
+        FROM 
+            avis a
+        JOIN 
+            utilisateurs u ON a.utilisateur_id = u.id
+        WHERE 
+            a.utilisateur_id = :utilisateur_id 
+            AND a.statut = 'validé'
+    ";
 
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
@@ -19,35 +28,51 @@ if (isset($_GET['id'])) {
     $commentaires = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if ($commentaires) {
-        // Afficher les commentaires
+        // Amélioration de la présentation des commentaires
 ?>
+<section class="commentaires container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="display-6 text-center mb-4">
+                Commentaires de <?= htmlspecialchars($commentaires[0]['pseudo']) ?>
+            </h2>
 
-    <section class="commentaires">
-        <h4 class="mb-3 text-center">Commentaires de <?= htmlspecialchars($commentaires[0]['pseudo']) ?></h4>
-        <div class="departArrive">
-            <div class="row g-3 cardCommentaires">
+            <div class="comments-wrapper">
                 <?php foreach ($commentaires as $commentaire) : ?>
-                    <div class="commentaire">
-                        <p>Note :
-                            <?php
+                    <div class="comment-card mb-3 p-3 border rounded shadow-sm">
+                        <div class="comment-header d-flex justify-content-between align-items-center mb-2">
+                            <div class="rating">
+                                <?php
                                 $note = $commentaire['note'];
-                                for ($i = 0; $i < $note; $i++) {
-                                    echo "🚗";
-                                }
-                            ?>
-                        </p>
-                        <p><?= htmlspecialchars($commentaire['commentaires']) ?></p>
+                                $rating_html = implode('', array_fill(0, $note, '🚗'));
+                                echo htmlspecialchars($rating_html);
+                                ?>
+                            </div>
+                        </div>
+                        
+                        <div class="comment-body">
+                            <p class="text-muted">
+                                <?= htmlspecialchars($commentaire['commentaires']) ?>
+                            </p>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 <?php
     } else {
-        echo "Aucun commentaire trouvé.";
+        // Message d'absence de commentaires plus élégant
+        echo "<div class='container text-center py-5'>
+                <p class='alert alert-info'>Aucun commentaire trouvé pour cet utilisateur.</p>
+              </div>";
     }
 } else {
-    echo "Aucun utilisateur sélectionné.";
+    // Message d'absence de sélection d'utilisateur plus élégant
+    echo "<div class='container text-center py-5'>
+            <p class='alert alert-warning'>Aucun utilisateur n'a été sélectionné.</p>
+          </div>";
 }
 
 require_once('templates/footer.php');

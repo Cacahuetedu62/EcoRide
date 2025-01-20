@@ -1,23 +1,31 @@
 <?php
 session_start();
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
-if (isset($_SESSION['utilisateur'])) {
-    $utilisateur_id = $_SESSION['utilisateur']['id'];
-
+function getUserInfo($pdo, $utilisateur_id) {
     $query = "SELECT pseudo, credits, type_acces FROM utilisateurs WHERE id = :id";
     $stmt = $pdo->prepare($query);
     $stmt->execute(['id' => $utilisateur_id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 
-    $utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
+$pseudo = 'Invité';
+$credits = 0;
+$type_acces = 'utilisateur';
+$afficher_bouton_dashboard = false;
+$dashboard_url = '';
+
+if (isset($_SESSION['utilisateur'])) {
+    $utilisateur_id = $_SESSION['utilisateur']['id'];
+    $utilisateur = getUserInfo($pdo, $utilisateur_id);
 
     $pseudo = $utilisateur['pseudo'];
     $credits = $utilisateur['credits'];
     $type_acces = $utilisateur['type_acces'];
-
-    $afficher_bouton_dashboard = false;
-    $dashboard_url = '';
 
     if ($type_acces == 'administrateur') {
         $credits = 0;
@@ -27,11 +35,6 @@ if (isset($_SESSION['utilisateur'])) {
         $afficher_bouton_dashboard = true;
         $dashboard_url = 'employeDashboard.php';
     }
-} else {
-    $pseudo = 'Invité';
-    $credits = 0;
-    $type_acces = 'utilisateur';
-    $afficher_bouton_dashboard = false;
 }
 ?>
 
@@ -64,11 +67,8 @@ if (isset($_SESSION['utilisateur'])) {
                     <span class="ms-2 text-black fs-5">
                         <?php
                         if (isset($_SESSION['utilisateur'])) {
-                            $pseudo = isset($_SESSION['utilisateur']['pseudo']) ? $_SESSION['utilisateur']['pseudo'] : 'Invité';
-                            $type_acces = isset($_SESSION['utilisateur']['type_acces']) ? $_SESSION['utilisateur']['type_acces'] : 'utilisateur';
                             echo $pseudo;
                             if ($type_acces !== 'administrateur') {
-                                $credits = isset($_SESSION['utilisateur']['credits']) ? $_SESSION['utilisateur']['credits'] : 0;
                                 echo " - Crédits : " . $credits;
                             }
                             echo ' <a href="logout.php" class="text-decoration-none">Se déconnecter</a>';
@@ -79,7 +79,6 @@ if (isset($_SESSION['utilisateur'])) {
                     </span>
                 </div>
                 <?php
-                // Si l'utilisateur est un administrateur ou un employé, afficher le bouton avec un SVG
                 if ($afficher_bouton_dashboard) {
                     echo '<a href="' . $dashboard_url . '" class="btn-dashboard">';
                     echo '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h240v-560H200v560Zm320 0h240v-280H520v280Zm0-360h240v-200H520v200Z"/></svg>';
@@ -146,3 +145,4 @@ if (isset($_SESSION['utilisateur'])) {
             .catch(error => console.error('Error loading content:', error));
     }
 </script>
+<main>
