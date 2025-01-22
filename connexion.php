@@ -1,49 +1,41 @@
 <?php
-session_start();
-
-// Générer le token CSRF s'il n'existe pas
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
-// Variable pour stocker le message d'erreur
-$error = null;
-$redirect = false;
-
-// Traitement du formulaire de connexion
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-        $error = 'Session expirée. Veuillez rafraîchir la page.';
-    } else if (isset($_POST['pseudo']) && isset($_POST['password'])) {
-        $pseudo = htmlspecialchars(trim($_POST['pseudo']));
+    if (isset($_POST['pseudo']) && isset($_POST['password'])) {
+        $pseudo = $_POST['pseudo'];
         $password = $_POST['password'];
 
+        // Recherche de l'utilisateur dans la base de données
         $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE pseudo = :pseudo");
         $stmt->execute(['pseudo' => $pseudo]);
         $utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($utilisateur) {
+            // Vérification si le compte est suspendu
             if ($utilisateur['suspendu'] == 1) {
-                $error = "Votre compte a été suspendu. Veuillez contacter le support.";
-            } elseif (password_verify($password, $utilisateur['password'])) {
+                echo "<div class='alert alert-danger'>Votre compte a été suspendu. Veuillez contacter le support.</div>";
+                exit;
+            }
+
+            if (password_verify($password, $utilisateur['password'])) {
+                session_start();
                 $_SESSION['utilisateur'] = [
                     'id' => $utilisateur['id'],
                     'pseudo' => $utilisateur['pseudo'],
                     'credits' => $utilisateur['credits'],
                     'type_acces' => $utilisateur['type_acces']
                 ];
-                
-                session_regenerate_id(true);
+
+                // Redirige vers la page d'accueil après la connexion avec une animation de transition
                 header('Location: index.php');
                 exit;
             } else {
-                $error = "Identifiants incorrects.";
+                echo "<div class='alert alert-danger'>Identifiants incorrects! Veuillez réessayer.</div>";
             }
         } else {
-            $error = "Identifiants incorrects.";
+            echo "<div class='alert alert-danger'>Identifiants incorrects! Veuillez réessayer.</div>";
         }
     } else {
         $error = "Veuillez remplir tous les champs.";
@@ -54,61 +46,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once('templates/header.php');
 ?>
 
+<main>
+<section class="loginRegister d-flex justify-content-center mt-5">
+    <div class="loginRegister-container p-2">
+        <h2 class="text-center">Se connecter</h2>
+        <form method="POST" class="login-form">
+            <label for="pseudo">Pseudo :</label>
+            <input type="text" name="pseudo" id="pseudo" required>
 
-<main class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h2 class="card-title text-center mb-4">Connexion</h2>
-                    
-                    <?php if (isset($error)): ?>
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <?= $error ?>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    <?php endif; ?>
+            <label for="password">Mot de passe :</label>
+            <input type="password" name="password" id="password" required>
 
-                    <form method="POST" class="login-form" action="connexion.php" novalidate>
-                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                        
-                        <div class="mb-3">
-                            <label for="pseudo" class="form-label">Pseudo</label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="pseudo" 
-                                   name="pseudo" 
-                                   required 
-                                   maxlength="50" 
-                                   value="<?= isset($_POST['pseudo']) ? htmlspecialchars($_POST['pseudo']) : '' ?>">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Mot de passe</label>
-                            <div class="input-group">
-                                <input type="password" 
-                                       class="form-control" 
-                                       id="password" 
-                                       name="password" 
-                                       required>
-                                <button class="btn btn-outline-secondary" 
-                                        type="button" 
-                                        id="togglePassword" 
-                                        aria-label="Afficher/masquer le mot de passe">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100 py-2 mb-3">Se connecter</button>
-                        
-                        <p class="text-center mb-0">
-                            Pas encore de compte ? 
-                            <a href="inscription.php" class="text-decoration-none">S'inscrire</a>
-                        </p>
-                    </form>
-                </div>
-            </div>
+            <button class="btnInscription p-3" type="submit">Se connecter</button>
+        </form>
+        <div class="text-center">
+            <p>Pas de compte ? <a href="inscription.php">Créer un compte</a></p>
         </div>
     </div>
 </main>
