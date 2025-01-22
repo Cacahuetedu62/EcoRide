@@ -204,10 +204,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="row mb-4">
                             <div class="col-md-4 text-center">
                                 <div class="profile-photo-container mb-3">
-                                    <img src="<?= $utilisateur['photo'] ?? 'images/default-avatar.png' ?>"
-                                         alt="Photo de profil"
-                                         class="profile-photo"
-                                         id="photoPreview">
+                                <img src="<?= $utilisateur['photo'] ?? 'images/default.png.webp' ?>"
+     alt="Photo de profil"
+     class="profile-photo"
+     id="photoPreview">
                                 </div>
                                 <div class="mb-3">
                                     <label for="photo" class="btn btn-outline-primary">
