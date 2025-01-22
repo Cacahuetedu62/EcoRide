@@ -3,224 +3,344 @@ require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
+// Activer le mode de débogage pour PDO
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
-    
-    
-    // L'utilisateur est connecté, récupère son ID
-        $utilisateur_id = $_SESSION['utilisateur']['id'];
-        
-      
-    echo "L'utilisateur connecté a l'ID : " . $utilisateur_id;
-    } 
-    else {
-        // L'utilisateur n'est pas connecté
-        
-        
-    echo "Utilisateur non connecté.";
-    }
+// Chemins absolus pour les dossiers
+$base_path = __DIR__;
+$upload_path = $base_path . DIRECTORY_SEPARATOR . 'uploads';
+$photos_path = $upload_path . DIRECTORY_SEPARATOR . 'photos';
 
+// Création des dossiers avec les bonnes permissions
+if (!file_exists($upload_path)) {
+    mkdir($upload_path, 0755, true);
+}
 
-// Si la session est correcte, récupérer l'ID de l'utilisateur
-$utilisateur_id = $_SESSION['utilisateur']['id'];
+if (!file_exists($photos_path)) {
+    mkdir($photos_path, 0755, true);
+}
 
-// Requête pour récupérer toutes les informations de l'utilisateur
-$sql = "SELECT * FROM utilisateurs WHERE id = :id";
-$stmt = $pdo->prepare($sql);
-$stmt->bindParam(':id', $utilisateur_id, PDO::PARAM_INT);
-$stmt->execute();
-
-// Récupérer les données et les stocker dans la session
-$utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
-
-// Mettre à jour la session avec les informations récupérées
-if ($utilisateur) {
-    $_SESSION['utilisateur'] = $utilisateur;  // Mettre à jour la session avec toutes les informations
-} else {
-    echo "Aucun utilisateur trouvé.";
+// Vérification de la session
+if (!isset($_SESSION['utilisateur']) || !isset($_SESSION['utilisateur']['id'])) {
+    header('Location: connexion.php');
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Sécuriser les données envoyées
-    $pseudo = htmlspecialchars($_POST['pseudo']);
-    $nom = htmlspecialchars($_POST['nom']);
-    $prenom = htmlspecialchars($_POST['prenom']);
-    $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
-    $adresse = htmlspecialchars($_POST['adresse']);
-    $code_postal = htmlspecialchars($_POST['code_postal']);
-    $ville = htmlspecialchars($_POST['ville']);
-    $credits = (int) $_POST['credits'];
-    $role = htmlspecialchars($_POST['role']);
+function validateImage($file) {
+    $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+    $max_size = 5 * 1024 * 1024; // 5MB
 
-    // Ajouter des crédits si spécifié
-    $ajouter_credits = isset($_POST['ajouter_credits']) ? (int) $_POST['ajouter_credits'] : 0;
-
-    if ($ajouter_credits > 0) {
-        $credits += $ajouter_credits; // Ajouter les crédits au solde existant
+    if ($file['size'] > $max_size) {
+        return "L'image ne doit pas dépasser 5MB.";
     }
 
-    // Vérification du champ photo (si une photo a été téléchargée)
+    if (!in_array($file['type'], $allowed_types)) {
+        return "Format d'image non supporté. Utilisez JPG, PNG ou GIF.";
+    }
+
+    return true;
+}
+
+// Récupération des informations utilisateur
+$utilisateur_id = $_SESSION['utilisateur']['id'];
+$stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE id = :id");
+$stmt->execute(['id' => $utilisateur_id]);
+$utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Gestion du formulaire
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $errors = [];
     $photo = null;
-    if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
-        $photo_dir = 'uploads/photos/'; // Dossier où les photos seront stockées
-        $photo_file = $photo_dir . basename($_FILES['photo']['name']);
-        $photo_tmp = $_FILES['photo']['tmp_name'];
-        
-        // Vérifier que le fichier est une image
-        $image_info = getimagesize($photo_tmp);
-        if ($image_info !== false) {
-            if (move_uploaded_file($photo_tmp, $photo_file)) {
-                $photo = $photo_file; // Stocker le chemin de la photo téléchargée
-            } else {
-                echo "Erreur lors du téléchargement de la photo.";
-            }
-        } else {
-            echo "Le fichier téléchargé n'est pas une image.";
+
+    // Validation des champs obligatoires
+    $required_fields = ['pseudo', 'nom', 'prenom', 'email', 'telephone', 'date_naissance', 'adresse', 'code_postal', 'ville', 'role'];
+    foreach ($required_fields as $field) {
+        if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
+            $errors[] = "Le champ $field est obligatoire.";
         }
     }
 
-    // Validation des données
-    if (empty($pseudo) || empty($nom) || empty($prenom) || empty($email) || empty($role)) {
-        echo "Tous les champs doivent être remplis.";
-    } elseif (!$email) {
-        echo "L'adresse e-mail n'est pas valide.";
-    } else {
-        // Mise à jour des informations dans la base de données
-        $sql = "UPDATE utilisateurs SET pseudo = ?, nom = ?, prenom = ?, email = ?, adresse = ?, code_postal = ?, ville = ?, credits = ?, role = ?, photo = ? WHERE id = ?";
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(1, $pseudo);
-        $stmt->bindParam(2, $nom);
-        $stmt->bindParam(3, $prenom);
-        $stmt->bindParam(4, $email);
-        $stmt->bindParam(5, $adresse);
-        $stmt->bindParam(6, $code_postal);
-        $stmt->bindParam(7, $ville);
-        $stmt->bindParam(8, $credits);
-        $stmt->bindParam(9, $role);
-        $stmt->bindParam(10, $photo);
-        $stmt->bindParam(11, $utilisateur_id);
+    if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
+        $validation = validateImage($_FILES['photo']);
+        if ($validation === true) {
+            $photo_name = uniqid() . '_' . basename($_FILES['photo']['name']);
+            $photo_destination = $photos_path . DIRECTORY_SEPARATOR . $photo_name;
+            $photo_db_path = 'uploads/photos/' . $photo_name;
 
-        if ($stmt->execute()) {
-            echo "Informations mises à jour avec succès.";
+            // Vérification supplémentaire pour s'assurer que le dossier existe et est accessible
+            if (!file_exists($photos_path)) {
+                $errors[] = "Le dossier de destination n'existe pas.";
+            } elseif (!is_writable($photos_path)) {
+                $errors[] = "Le dossier de destination n'est pas accessible en écriture.";
+            } else {
+                try {
+                    if (move_uploaded_file($_FILES['photo']['tmp_name'], $photo_destination)) {
+                        $photo = $photo_db_path;
+                        error_log("Upload réussi ! Photo enregistrée en : " . $photo_destination);
+                    } else {
+                        throw new Exception("Échec de l'upload");
+                    }
+                } catch (Exception $e) {
+                    $errors[] = "Détails de l'erreur d'upload :";
+                    $errors[] = "- Message : " . $e->getMessage();
+                    $errors[] = "- Fichier source : " . $_FILES['photo']['tmp_name'];
+                    $errors[] = "- Destination : " . $photo_destination;
+                    $errors[] = "- Permissions du dossier : " . substr(sprintf('%o', fileperms($photos_path)), -4);
+                    $errors[] = "- Le dossier existe ? : " . (file_exists($photos_path) ? 'Oui' : 'Non');
+                    $errors[] = "- Droits d'écriture ? : " . (is_writable($photos_path) ? 'Oui' : 'Non');
+
+                    // Debug supplémentaire
+                    error_log("Erreur upload photo: " . print_r($_FILES, true));
+                    error_log("Destination: " . $photo_destination);
+                    error_log("Permissions dossier: " . substr(sprintf('%o', fileperms($photos_path)), -4));
+                }
+            }
         } else {
-            echo "Erreur lors de la mise à jour des informations.";
+            $errors[] = $validation;
+        }
+    }
+
+    // Mise à jour des informations si pas d'erreur
+    if (empty($errors)) {
+        try {
+            // Préparer la requête SQL
+            $sql = "UPDATE utilisateurs SET
+                    pseudo = :pseudo,
+                    nom = :nom,
+                    prenom = :prenom,
+                    email = :email,
+                    telephone = :telephone,
+                    date_naissance = :date_naissance,
+                    adresse = :adresse,
+                    code_postal = :code_postal,
+                    ville = :ville,
+                    role = :role";
+
+            // Ajouter la photo à la requête si elle a été mise à jour
+            if ($photo) {
+                $sql .= ", photo = :photo";
+            }
+
+            $sql .= " WHERE id = :id";
+
+            // Préparer les paramètres
+            $params = [
+                'pseudo' => htmlspecialchars($_POST['pseudo']),
+                'nom' => htmlspecialchars($_POST['nom']),
+                'prenom' => htmlspecialchars($_POST['prenom']),
+                'email' => filter_var($_POST['email'], FILTER_SANITIZE_EMAIL),
+                'telephone' => htmlspecialchars($_POST['telephone']),
+                'date_naissance' => $_POST['date_naissance'],
+                'adresse' => htmlspecialchars($_POST['adresse']),
+                'code_postal' => htmlspecialchars($_POST['code_postal']),
+                'ville' => htmlspecialchars($_POST['ville']),
+                'role' => htmlspecialchars($_POST['role']),
+                'photo' => $photo ?? $utilisateur['photo'], // Utiliser la photo existante si aucune nouvelle photo n'est téléchargée
+                'id' => $utilisateur_id
+            ];
+
+            // Ajouter la photo aux paramètres si elle existe
+            if ($photo) {
+                $params['photo'] = $photo;
+            }
+
+            // Debug des paramètres
+            foreach ($params as $key => $value) {
+                error_log("Paramètre $key : " . var_export($value, true));
+            }
+
+            // Exécuter la requête
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+
+            $success_message = "Vos informations ont été mises à jour avec succès.";
+            
+            // Rafraîchir les informations utilisateur
+            $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE id = :id");
+            $stmt->execute(['id' => $utilisateur_id]);
+            $utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            // Gestion détaillée des erreurs
+            $errors[] = "Erreur lors de la mise à jour des informations : " . $e->getMessage();
+            error_log("Erreur SQL: " . $e->getMessage());
+            error_log("Requête SQL: " . $sql);
+            error_log("Paramètres: " . print_r($params, true));
+            
+            // Afficher les détails de l'erreur
+            $errorInfo = $stmt->errorInfo();
+            error_log("Détails de l'erreur : " . print_r($errorInfo, true));
         }
     }
 }
 ?>
 
+<section class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-center mb-4">Mon Profil</h2>
 
-<!DOCTYPE html>
-<html lang="fr">
+                    <?php if (!empty($success_message)): ?>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <?= $success_message ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php endif; ?>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="index, follow">
-    <meta name="description" content="EcoRide, quand économie rime avec écologie ! le covoiturage éléctrique, découvrez le covoiturage électrique pour des trajets plus verts et économiques.">
-    <title>EcoRide | Covoiturage écologique et éléctrique</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
-</head>
+                    <?php if (!empty($errors)): ?>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <ul class="mb-0">
+                                <?php foreach ($errors as $error): ?>
+                                    <li><?= $error ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php endif; ?>
 
-<main class="form-page">
-    <section class="custom-section2">
-        <div class="custom-form-container">
-            <h4>Mes informations</h4>
-            <form action="mesInformations.php" method="post" id="form-info" enctype="multipart/form-data">
+                    <form id="profileForm" method="POST" enctype="multipart/form-data">
+                        <div class="row mb-4">
+                            <div class="col-md-4 text-center">
+                                <div class="profile-photo-container mb-3">
+                                    <img src="<?= $utilisateur['photo'] ?? 'images/default-avatar.png' ?>"
+                                         alt="Photo de profil"
+                                         class="profile-photo"
+                                         id="photoPreview">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="photo" class="btn btn-outline-primary">
+                                        Changer la photo
+                                    </label>
+                                    <input type="file" class="d-none" id="photo" name="photo" accept="image/*">
+                                </div>
+                            </div>
 
-            <p>Feliciation ! Vous être inscrit avec succès ! Pour pouvoir profiter de nos services veuillez renseigner tous les champs de votre profil</p>
-                            <!-- Bouton "Modifier mes informations" -->
-                            <button class="buttonVert m-2" type="button" id="edit-btn" onclick="editForm()">Modifier mes informations</button>  
-            <!-- Pseudo -->
-                <label for="pseudo">Pseudo</label>
-                <input type="text" id="pseudo" name="pseudo" value="<?php echo htmlspecialchars($utilisateur['pseudo']); ?>" disabled>
+                            <div class="col-md-8">
+                                <div class="form-group mb-3">
+                                    <label for="pseudo">Pseudo</label>
+                                    <input type="text" class="form-control" id="pseudo" name="pseudo"
+                                           value="<?= htmlspecialchars($utilisateur['pseudo']) ?>" disabled>
+                                </div>
 
-                <!-- Nom -->
-                <label for="nom">Nom</label>
-                <input type="text" id="nom" name="nom" value="<?php echo htmlspecialchars($utilisateur['nom']); ?>" disabled>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="nom">Nom</label>
+                                        <input type="text" class="form-control" id="nom" name="nom"
+                                               value="<?= htmlspecialchars($utilisateur['nom']) ?>" disabled>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="prenom">Prénom</label>
+                                        <input type="text" class="form-control" id="prenom" name="prenom"
+                                               value="<?= htmlspecialchars($utilisateur['prenom']) ?>" disabled>
+                                    </div>
+                                </div>
 
-                <!-- Prénom -->
-                <label for="prenom">Prénom</label>
-                <input type="text" id="prenom" name="prenom" value="<?php echo htmlspecialchars($utilisateur['prenom']); ?>" disabled>
+                                <div class="mb-3">
+                                    <label for="email">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                           value="<?= htmlspecialchars($utilisateur['email']) ?>" disabled>
+                                </div>
 
-                <!-- Téléphone -->
-                <label for="telephone">Téléphone</label>
-                <input type="tel" id="telephone" name="telephone" value="<?php echo htmlspecialchars($utilisateur['telephone']); ?>" pattern="^(\+33|0)[1-9](?:[ .-]?[0-9]{2}){4}$" placeholder="Ex : 0612345678" disabled>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="telephone">Téléphone</label>
+                                        <input type="tel" class="form-control" id="telephone" name="telephone"
+                                               value="<?= htmlspecialchars($utilisateur['telephone']) ?>" disabled>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="date_naissance">Date de naissance</label>
+                                        <input type="date" class="form-control" id="date_naissance" name="date_naissance"
+                                               value="<?= htmlspecialchars($utilisateur['date_naissance']) ?>" disabled>
+                                    </div>
+                                </div>
 
-                <!-- Date de naissance -->
-                <label for="date_naissance">Date de naissance</label>
-                <input type="date" id="date_naissance" name="date_naissance" value="<?php echo htmlspecialchars($utilisateur['date_naissance']); ?>" disabled>
+                                <div class="mb-3">
+                                    <label for="adresse">Adresse</label>
+                                    <input type="text" class="form-control" id="adresse" name="adresse"
+                                           value="<?= htmlspecialchars($utilisateur['adresse']) ?>" disabled>
+                                </div>
 
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="code_postal">Code Postal</label>
+                                        <input type="text" class="form-control" id="code_postal" name="code_postal"
+                                               value="<?= htmlspecialchars($utilisateur['code_postal']) ?>" disabled>
+                                    </div>
+                                    <div class="col-md-8 mb-3">
+                                        <label for="ville">Ville</label>
+                                        <input type="text" class="form-control" id="ville" name="ville"
+                                               value="<?= htmlspecialchars($utilisateur['ville']) ?>" disabled>
+                                    </div>
+                                </div>
 
-                <!-- Adresse mail -->
-                <label for="email">Adresse mail</label>
-                <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($utilisateur['email']); ?>" disabled>
+                                <div class="mb-3">
+                                    <label for="role">Je suis</label>
+                                    <select class="form-control" id="role" name="role" disabled>
+                                        <option value="passager" <?= $utilisateur['role'] == 'passager' ? 'selected' : '' ?>>Passager</option>
+                                        <option value="chauffeur" <?= $utilisateur['role'] == 'chauffeur' ? 'selected' : '' ?>>Chauffeur</option>
+                                        <option value="passager_chauffeur" <?= $utilisateur['role'] == 'passager_chauffeur' ? 'selected' : '' ?>>Passager/Chauffeur</option>
+                                    </select>
+                                </div>
 
-                <!-- Crédits -->
-                <label for="credits">Mes crédits</label>
-                <input type="text" id="credits" name="credits" value="<?php echo htmlspecialchars($utilisateur['credits']); ?>" disabled>
-
-                <!-- Ajouter des crédits -->
-                <label for="ajouter_credits">Ajouter des crédits</label>
-                <input type="number" id="ajouter_credits" name="ajouter_credits" min="1" step="1" value="" placeholder="Entrez le nombre de crédits à ajouter" disabled>
-
-                <!-- Photo de profil -->
-                <label for="photo">Ajouter une photo de profil</label>
-                <input type="file" id="photo" name="photo" accept="image/*">
-
-                <!-- Adresse -->
-                <label for="adresse">Adresse</label>
-                <input type="text" id="adresse" name="adresse" value="<?php echo $utilisateur['adresse']; ?>" disabled>
-
-                <!-- Code Postal -->
-                <label for="code_postal">Code Postal</label>
-                <input type="text" id="code_postal" name="code_postal" value="<?php echo htmlspecialchars($utilisateur['code_postal']); ?>" disabled>
-
-                <!-- Ville -->
-                <label for="ville">Ville</label>
-                <input type="text" id="ville" name="ville" value="<?php echo htmlspecialchars($utilisateur['ville']); ?>" disabled>
-
-                <!-- Rôle (avec liste déroulante) -->
-                <label for="role">Je suis</label>
-                <select id="role" name="role" disabled>
-                    <option value="passager" <?php echo ($utilisateur['role'] == 'passager') ? 'selected' : ''; ?>>Passager</option>
-                    <option value="chauffeur" <?php echo ($utilisateur['role'] == 'chauffeur') ? 'selected' : ''; ?>>Chauffeur</option>
-                    <option value="passager_chauffeur" <?php echo ($utilisateur['role'] == 'passager_chauffeur') ? 'selected' : ''; ?>>Passager/Chauffeur</option>
-                </select>
-                <p>Si vous êtes chauffeur ou passager/chuaffeur nous vous invitons à renseigner votre véhicule dans l'onglet "Mes véhicules" sur votre gauche</p>
-
-                <!-- Bouton "Valider" -->
-                <button type="submit" id="submit-btn" style="display:none;">Valider les informations modifiées</button>
-            </form>
+                                <div class="text-center mt-4">
+                                    <button type="button" class="btn btn-primary" id="edit-btn" onclick="editForm()">
+                                        Modifier mes informations
+                                    </button>
+                                    <button type="submit" class="btn btn-success" id="submit-btn" style="display:none;">
+                                        Enregistrer les modifications
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="cancel-btn" onclick="cancelEdit()" style="display:none;">
+                                        Annuler
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-    </section>
-</main>
+    </div>
+</section>
 
 <script>
-    // Fonction pour rendre les champs modifiables
-    function editForm() {
-        // Rendre les champs modifiables
-        document.getElementById('pseudo').disabled = false;
-        document.getElementById('nom').disabled = false;
-        document.getElementById('prenom').disabled = false;
-        document.getElementById('email').disabled = false;
-        document.getElementById('credits').disabled = false;
-        document.getElementById('ajouter_credits').disabled = false;
-        document.getElementById('adresse').disabled = false;
-        document.getElementById('code_postal').disabled = false;
-        document.getElementById('ville').disabled = false;
-        document.getElementById('role').disabled = false;
-        document.getElementById('telephone').disabled = false; 
-        document.getElementById('date_naissance').disabled = false; 
+document.addEventListener('DOMContentLoaded', function() {
+    // Prévisualisation de la photo
+    const photoInput = document.getElementById('photo');
+    const photoPreview = document.getElementById('photoPreview');
 
-        // Masquer le bouton "Modifier" et afficher le bouton "Valider"
-        document.getElementById('edit-btn').style.display = 'none';
-        document.getElementById('submit-btn').style.display = 'inline-block';
-    }
+    photoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                photoPreview.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+});
+
+function editForm() {
+    // Activer tous les champs
+    document.querySelectorAll('#profileForm input, #profileForm select').forEach(input => {
+        input.disabled = false;
+    });
+
+    // Afficher/masquer les boutons
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('submit-btn').style.display = 'inline-block';
+    document.getElementById('cancel-btn').style.display = 'inline-block';
+
+    // Ajouter la classe edit-mode au formulaire
+    document.getElementById('profileForm').classList.add('edit-mode');
+}
+
+function cancelEdit() {
+    // Recharger la page pour annuler les modifications
+    window.location.reload();
+}
 </script>
+
+<?php require_once('templates/footer.php'); ?>

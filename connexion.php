@@ -1,42 +1,34 @@
 <?php
-// Inclusion des fichiers nécessaires
+session_start();
+
+// Générer le token CSRF s'il n'existe pas
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
-// Fonction pour logger les tentatives de connexion
-function logLoginAttempt($pdo, $pseudo, $success) {
-    $ip = $_SERVER['REMOTE_ADDR'];
-    $stmt = $pdo->prepare("INSERT INTO login_attempts (pseudo, ip_address, success, attempt_date) VALUES (?, ?, ?, NOW())");
-    $stmt->execute([$pseudo, $ip, $success]);
-}
+// Variable pour stocker le message d'erreur
+$error = null;
+$redirect = false;
 
 // Traitement du formulaire de connexion
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Vérification du token CSRF
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-        die('Session expirée. Veuillez rafraîchir la page.');
-    }
-
-    if (isset($_POST['pseudo']) && isset($_POST['password'])) {
-        // Nettoyage des entrées
+        $error = 'Session expirée. Veuillez rafraîchir la page.';
+    } else if (isset($_POST['pseudo']) && isset($_POST['password'])) {
         $pseudo = htmlspecialchars(trim($_POST['pseudo']));
         $password = $_POST['password'];
 
-        // Recherche de l'utilisateur dans la base de données
         $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE pseudo = :pseudo");
         $stmt->execute(['pseudo' => $pseudo]);
         $utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($utilisateur) {
-            // Vérification si le compte est suspendu
             if ($utilisateur['suspendu'] == 1) {
-                logLoginAttempt($pdo, $pseudo, false);
                 $error = "Votre compte a été suspendu. Veuillez contacter le support.";
-            } 
-            // Vérification du mot de passe
-            elseif (password_verify($password, $utilisateur['password'])) {
-                // Connexion réussie
-                logLoginAttempt($pdo, $pseudo, true);
+            } elseif (password_verify($password, $utilisateur['password'])) {
                 $_SESSION['utilisateur'] = [
                     'id' => $utilisateur['id'],
                     'pseudo' => $utilisateur['pseudo'],
@@ -44,17 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'type_acces' => $utilisateur['type_acces']
                 ];
                 
-                // Régénération de l'ID de session pour la sécurité
                 session_regenerate_id(true);
-                
                 header('Location: index.php');
                 exit;
             } else {
-                logLoginAttempt($pdo, $pseudo, false);
                 $error = "Identifiants incorrects.";
             }
         } else {
-            logLoginAttempt($pdo, $pseudo, false);
             $error = "Identifiants incorrects.";
         }
     } else {
@@ -62,8 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Maintenant seulement, on inclut le header et le contenu HTML
 require_once('templates/header.php');
 ?>
+
 
 <main class="container py-5">
     <div class="row justify-content-center">
@@ -79,7 +69,7 @@ require_once('templates/header.php');
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" class="login-form" novalidate>
+                    <form method="POST" class="login-form" action="connexion.php" novalidate>
                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                         
                         <div class="mb-3">

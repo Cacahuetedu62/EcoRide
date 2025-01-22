@@ -1,7 +1,6 @@
 <?php
-session_start();
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 require_once('lib/pdo.php');
 require_once('lib/config.php');
