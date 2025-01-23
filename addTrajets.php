@@ -211,7 +211,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
 
                         <div class="form-group">
-                            <label for="prix_personnes">Prix par personne (€) :</label>
+                            <label for="prix_personnes">Prix par personne (€) :<br> *Veuillez noter que 2 crédits seront prélevé de ce montant pour
+                        les frais de gestion de la plateforme</label>
                             <input type="number" id="prix_personnes" name="prix_personnes" 
                                    min="1" step="0.01" required>
                         </div>

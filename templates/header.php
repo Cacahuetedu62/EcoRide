@@ -5,6 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
+
 function getUserInfo($pdo, $utilisateur_id) {
     $query = "SELECT pseudo, credits, type_acces FROM utilisateurs WHERE id = :id";
     $stmt = $pdo->prepare($query);

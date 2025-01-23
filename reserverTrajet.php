@@ -3,9 +3,6 @@ require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
-// echo "<pre>";
-// print_r($_POST); // Affiche toutes les données reçues par la page
-// echo "</pre>";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Vérifiez si l'utilisateur est connecté
@@ -37,35 +34,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $total_cost = $trajet['prix_personnes'] * $nb_personnes;
 
                 // Afficher un récapitulatif et demander confirmation
-                echo "Le coût total pour votre réservation est de : " . $total_cost . " crédits.<br>";
-                echo "Souhaitez-vous vraiment utiliser vos crédits pour cette réservation ?<br>";
-                echo "Le montant total des crédits vous sera déduit après la validation du trajet<br>";
-                echo "Sachez que 2 crédits sont prélevés sur le prix pour assuré le bon fonctionnement de la plateforme";
-
-                echo '<form method="POST" action="confirmationReservation.php">
-                        <input type="hidden" name="trajet_id" value="' . $trajet_id . '">
-                        <input type="hidden" name="nb_personnes" value="' . $nb_personnes . '">
-                        <input type="hidden" name="total_cost" value="' . $total_cost . '">';
+                echo '<div class="container mt-5">
+                        <div class="alert alert-info">
+                            Le coût total pour votre réservation est de : ' . $total_cost . ' crédits.<br>
+                            Souhaitez-vous vraiment utiliser vos crédits pour cette réservation ?<br>
+                            Le montant total des crédits vous sera déduit après la validation du trajet.<br>
+                        </div>
+                        <form method="POST" action="confirmationReservation.php">
+                            <input type="hidden" name="trajet_id" value="' . $trajet_id . '">
+                            <input type="hidden" name="nb_personnes" value="' . $nb_personnes . '">
+                            <input type="hidden" name="total_cost" value="' . $total_cost . '">
+                            <input type="hidden" name="csrf_token" value="' . htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') . '">';
 
                 // Ajouter des champs cachés pour chaque passager
                 foreach ($noms as $index => $passenger) {
-                    $nom = isset($passenger['nom']) ? $passenger['nom'] : '';
-                    $prenom = isset($passenger['prenom']) ? $passenger['prenom'] : '';
+                    $nom = isset($passenger['nom']) ? htmlspecialchars($passenger['nom'], ENT_QUOTES, 'UTF-8') : '';
+                    $prenom = isset($passenger['prenom']) ? htmlspecialchars($passenger['prenom'], ENT_QUOTES, 'UTF-8') : '';
                     echo '<input type="hidden" name="nom_passager' . $index . '" value="' . $nom . '">';
                     echo '<input type="hidden" name="prenom_passager' . $index . '" value="' . $prenom . '">';
                 }
 
-                echo '<button type="submit" name="confirm" value="1">Oui, réserver maintenant</button>
-                      </form>';
-                echo '<a href="mesTrajets.php">Retour à mes trajets</a>';
+                echo '<button type="submit" name="confirm" value="1" class="btn btn-success">Oui, réserver maintenant</button>
+                      </form>
+                      <a href="index.php" class="btn btn-secondary">Retour à la page principale</a>
+                    </div>';
             } else {
-                echo "Il n'y a pas assez de places disponibles pour cette réservation.";
+                echo '<div class="container mt-5">
+                        <div class="alert alert-danger">
+                            Il n\'y a pas assez de places disponibles pour cette réservation.
+                        </div>
+                        <a href="mesTrajets.php" class="btn btn-secondary">Retour à mes trajets</a>
+                      </div>';
             }
         } else {
-            echo "Données manquantes pour effectuer la réservation.";
+            echo '<div class="container mt-5">
+                    <div class="alert alert-warning">
+                        Données manquantes pour effectuer la réservation.
+                    </div>
+                    <a href="mesTrajets.php" class="btn btn-secondary">Retour à mes trajets</a>
+                  </div>';
         }
     } else {
-        echo "Vous devez être connecté pour réserver un trajet.";
+        echo '<div class="container mt-5">
+                <div class="alert alert-warning">
+                    Vous devez être connecté pour réserver un trajet.
+                </div>
+                <a href="connexion.php" class="btn btn-primary">Se connecter</a>
+              </div>';
     }
 }
 

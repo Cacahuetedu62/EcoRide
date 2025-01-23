@@ -4,12 +4,25 @@ require_once('lib/pdo.php');
 require_once('lib/config.php');
 
 // Vérification de la session utilisateur
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     $utilisateur_id = htmlspecialchars($_SESSION['utilisateur']['id'], ENT_QUOTES, 'UTF-8');
     echo "<div class='container'><div class='alert alert-info'>L'utilisateur connecté a l'ID : " . $utilisateur_id . "</div></div>";
+
+    // Récupérer les crédits de l'utilisateur connecté
+    $sql_credits = "SELECT credits FROM utilisateurs WHERE id = :id";
+    $stmt_credits = $pdo->prepare($sql_credits);
+    $stmt_credits->bindValue(':id', $utilisateur_id, PDO::PARAM_INT);
+    $stmt_credits->execute();
+    $credits_user = $stmt_credits->fetch(PDO::FETCH_ASSOC);
+    $credits = $credits_user ? htmlspecialchars($credits_user['credits'], ENT_QUOTES, 'UTF-8') : 0;
 } else {
     // L'utilisateur n'est pas connecté
     echo "<div class='container'><div class='alert alert-warning'>Utilisateur non connecté.</div></div>";
+    $credits = 0; // Définir les crédits à 0 si l'utilisateur n'est pas connecté
 }
 ?>
 
@@ -37,7 +50,6 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $trajet = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($trajet) {
-        $credits = htmlspecialchars($trajet['credits'], ENT_QUOTES, 'UTF-8');
         $nb_places_dispo = htmlspecialchars($trajet['nb_places'], ENT_QUOTES, 'UTF-8');
         $prix_personne = htmlspecialchars($trajet['prix_personnes'], ENT_QUOTES, 'UTF-8');
         $nb_personnes = isset($_POST['nb_personnes']) ? intval($_POST['nb_personnes']) : 1;
@@ -56,7 +68,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                         Détails du trajet n° <?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>
                     </h2>
                 </div>
-                
+
                 <div class="card-body">
                     <!-- Départ et Arrivée -->
                     <div class="row mb-4">
@@ -81,7 +93,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <div class="card h-100">
                                 <div class="card-header bg-info text-white">
@@ -114,15 +126,15 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                 </div>
                                 <div class="card-body">
                                     <p class="mb-2">
-                                        <strong>Durée du trajet :</strong> 
+                                        <strong>Durée du trajet :</strong>
                                         <?= floor($trajet['duree_minutes'] / 60) . ' h ' . ($trajet['duree_minutes'] % 60) . ' min' ?>
                                     </p>
                                     <p class="mb-2">
-                                        <strong>Votre solde :</strong> 
+                                        <strong>Votre solde :</strong>
                                         <?= htmlspecialchars($credits, ENT_QUOTES, 'UTF-8') ?> crédits
                                     </p>
                                     <p class="mb-2">
-                                        <strong>Prix du trajet :</strong> 
+                                        <strong>Prix du trajet :</strong>
                                         <?= htmlspecialchars($trajet['prix_personnes'], ENT_QUOTES, 'UTF-8') ?> € par personne
                                     </p>
                                     <p class="text-muted fst-italic">
@@ -138,13 +150,13 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                     <h4 class="mb-0">Informations du Chauffeur</h4>
                                 </div>
                                 <div class="card-body text-center">
-                                    <img src="<?= htmlspecialchars($trajet['photo'], ENT_QUOTES, 'UTF-8') ?>" 
-                                         alt="Photo du chauffeur" 
-                                         class="rounded-circle mb-3" 
+                                    <img src="<?= htmlspecialchars($trajet['photo'], ENT_QUOTES, 'UTF-8') ?>"
+                                         alt="Photo du chauffeur"
+                                         class="rounded-circle mb-3"
                                          style="width: 100px; height: 100px; object-fit: cover;">
-                                    
+
                                     <h5 class="card-title"><?= htmlspecialchars($trajet['pseudo'], ENT_QUOTES, 'UTF-8') ?></h5>
-                                    
+
                                     <div class="mb-2">
                                         <strong>Note :</strong>
                                         <?php
@@ -156,7 +168,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                     </div>
 
                                     <div class="mb-2">
-                                        <a href="commentaires.php?id=<?= htmlspecialchars($trajet['utilisateur_id'], ENT_QUOTES, 'UTF-8') ?>" 
+                                        <a href="commentaires.php?id=<?= htmlspecialchars($trajet['utilisateur_id'], ENT_QUOTES, 'UTF-8') ?>"
                                            class="btn btn-sm btn-outline-primary">
                                             Voir tous les commentaires
                                         </a>
@@ -175,39 +187,40 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                             <div class="row">
                                 <div class="col-md-6">
                                     <p class="mb-2">
-                                        <strong>Nombre de places restantes :</strong> 
+                                        <strong>Nombre de places restantes :</strong>
                                         <?= htmlspecialchars($trajet['nb_places'], ENT_QUOTES, 'UTF-8') ?>
                                     </p>
                                     <p class="mb-2">
                                         <?php
                                         $ecologique = ($trajet['energie'] === 'électrique' || $trajet['energie'] === 'hybride') ? 'Oui' : 'Non';
                                         ?>
-                                        <strong>Trajet écologique :</strong> 
+                                        <strong>Trajet écologique* :</strong>
                                         <?= $ecologique ? '🌱 Oui' : '⛽ Non' ?>
                                     </p>
+                                    <P>*Un trajet est dit "écologique" s'il est réalisé avec une voiture hybrique ou éléctrique</P>
                                 </div>
                                 <div class="col-md-6">
                                     <p class="mb-2">
-                                        <strong>Fumeur accepté :</strong> 
+                                        <strong>Fumeur accepté :</strong>
                                         <?= htmlspecialchars($trajet['fumeur'], ENT_QUOTES, 'UTF-8') ? 'Oui' : 'Non' ?>
                                     </p>
                                     <p class="mb-2">
-                                        <strong>Animaux acceptés :</strong> 
+                                        <strong>Animaux acceptés :</strong>
                                         <?= htmlspecialchars($trajet['animaux'], ENT_QUOTES, 'UTF-8') ? 'Oui' : 'Non' ?>
                                     </p>
                                 </div>
                             </div>
                             <div class="mt-3">
-                                <strong>Préférences :</strong> 
-                                <?php 
+                                <strong>Préférences :</strong>
+                                <?php
                                 $preferences = htmlspecialchars($trajet['preferences'], ENT_QUOTES, 'UTF-8');
-                                echo !empty($preferences) ? $preferences : '<em class="text-muted">Aucune préférence spécifiée</em>'; 
+                                echo !empty($preferences) ? $preferences : '<em class="text-muted">Aucune préférence spécifiée</em>';
                                 ?>
                             </div>
                             <div class="mt-2">
-                                <strong>Véhicule :</strong> 
-                                <?= htmlspecialchars($trajet['modele'], ENT_QUOTES, 'UTF-8') ?> 
-                                de la marque 
+                                <strong>Véhicule :</strong>
+                                <?= htmlspecialchars($trajet['modele'], ENT_QUOTES, 'UTF-8') ?>
+                                de la marque
                                 <?= htmlspecialchars($trajet['marque'], ENT_QUOTES, 'UTF-8') ?>
                             </div>
                         </div>
@@ -216,7 +229,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                     <!-- Formulaire de réservation -->
                     <form action="reserverTrajet.php" method="POST" id="reservationForm">
                         <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet_id, ENT_QUOTES, 'UTF-8') ?>">
-                        
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                         <div class="card mb-4">
                             <div class="card-header bg-warning text-white">
                                 <h4 class="mb-0">Réservation</h4>
@@ -225,7 +238,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="nb_personnes" class="form-label">Nombre de personnes :</label>
-                                        <input type="number" id="nb_personnes" name="nb_personnes" 
+                                        <input type="number" id="nb_personnes" name="nb_personnes"
                                                class="form-control" min="1" max="<?= $nb_places_dispo ?>" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
@@ -279,8 +292,8 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                 <?php endif; ?>
 
                                 <div class="text-center">
-                                    <button type="submit" id="submitButton" 
-                                            class="btn btn-success" 
+                                    <button type="submit" id="submitButton"
+                                            class="btn btn-success"
                                             <?= (!$isUserLoggedIn || !$places_suffisantes || !$credits_suffisants) ? 'disabled' : '' ?>>
                                         Réserver
                                     </button>
@@ -315,7 +328,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             if (nbPersonnes > 1) {
                 additionalPassengers.style.display = 'block';
                 passengerFields.innerHTML = '';
-                
+
                 for (let i = 2; i <= nbPersonnes; i++) {
                     const passengerDiv = document.createElement('div');
                     passengerDiv.className = 'row mb-3';
@@ -340,7 +353,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         function validateConditions() {
             const conditionsAccepted = conditionsVenteCheckbox.checked && politiqueConfidentialiteCheckbox.checked;
             submitButton.disabled = !conditionsAccepted;
-            
+
             if (conditionsAccepted) {
                 errorMessage.style.display = 'none';
             } else {
