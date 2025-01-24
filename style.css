@@ -997,8 +997,10 @@ input, select, textarea {
 }
 
 .btn-primary {
-    background: #06481D;
-    color: white;
+    background: #007bff;
+    border-color: #0056b3;
+    color: #fff;
+    font-weight: 500;
 }
 
 .btn-secondary {
@@ -1010,6 +1012,309 @@ textarea {
     resize: vertical;
     min-height: 60px;
 }
+/* Amélioration des cartes des trajets */
+.trajet-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 0 auto 20px;
+    padding: 20px;
+    max-width: 700px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #ddd;
+}
+
+.trajet-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Header de la carte */
+.trajet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.trajet-header h5 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.trajet-header .badge {
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+/* Styles des badges */
+.badge-en_attente { background: #f1c40f; color: #fff; }
+.badge-en_cours { background: #27ae60; color: #fff; }
+.badge-termine { background: #7f8c8d; color: #fff; }
+.badge-annule { background: #e74c3c; color: #fff; }
+
+/* Corps de la carte */
+.trajet-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+/* Destinations */
+.trajet-destinations {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2980b9;
+    margin: 10px 0;
+}
+
+.trajet-destinations span {
+    font-size: 1.5rem;
+    color: #3498db;
+}
+
+/* Actions */
+.trajet-actions {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.trajet-actions .btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    border: none;
+    transition: background 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+}
+
+.trajet-actions .btn-primary {
+    background: #3498db;
+    color: #fff;
+}
+
+.trajet-actions .btn-primary:hover {
+    background: #2980b9;
+}
+
+.trajet-actions .btn-danger {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.trajet-actions .btn-danger:hover {
+    background: #c0392b;
+}
+
+.trajet-actions .btn-success {
+    background: #2ecc71;
+    color: #fff;
+}
+
+.trajet-actions .btn-success:hover {
+    background: #27ae60;
+}
+
+/* Messages vides */
+.no-trajet {
+    text-align: center;
+    padding: 20px;
+    background: #f9f9f9;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    color: #666;
+    font-style: italic;
+    max-width: 700px;
+}
+
+/* Animation pour les cartes */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.trajet-card {
+    animation: fadeIn 0.3s ease-out;
+}
+/* Amélioration des cartes des trajets */
+.trajet-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 0 auto 20px;
+    padding: 20px;
+    max-width: 700px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #ddd;
+}
+
+.trajet-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Header de la carte */
+.trajet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.trajet-header h5 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.trajet-header .badge {
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+/* Styles des badges */
+.badge-en_attente { background: #f1c40f; color: #fff; }
+.badge-en_cours { background: #27ae60; color: #fff; }
+.badge-termine { background: #7f8c8d; color: #fff; }
+.badge-annule { background: #e74c3c; color: #fff; }
+
+/* Corps de la carte */
+.trajet-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+/* Destinations */
+.trajet-destinations {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2980b9;
+    margin: 10px 0;
+}
+
+.trajet-destinations span {
+    font-size: 1.5rem;
+    color: #3498db;
+}
+
+/* Actions */
+.trajet-actions {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.trajet-actions .btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    border: none;
+    transition: background 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+}
+
+.trajet-actions .btn-primary {
+    background: #3498db;
+    color: #fff;
+}
+
+.trajet-actions .btn-primary:hover {
+    background: #2980b9;
+}
+
+.trajet-actions .btn-danger {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.trajet-actions .btn-danger:hover {
+    background: #c0392b;
+}
+
+.trajet-actions .btn-success {
+    background: #2ecc71;
+    color: #fff;
+}
+
+.trajet-actions .btn-success:hover {
+    background: #27ae60;
+}
+
+/* Messages vides */
+.no-trajet {
+    text-align: center;
+    padding: 20px;
+    background: #f9f9f9;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Animation pour les cartes */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.trajet-card {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Styles pour les titres principaux */
+.section-title {
+    font-size: 1.8rem; /* Taille personnalisée */
+    font-weight: bold;
+    color: #2c3e50; /* Couleur principale */
+    text-align: center; /* Centrer le titre */
+    margin-bottom: 20px; /* Espacement sous le titre */
+    border-bottom: 2px solid #3498db; /* Ligne décorative */
+    padding-bottom: 10px;
+}
+
+/* Styles pour les sous-titres */
+.trajet-title {
+    font-size: 1.4rem; /* Taille légèrement plus petite */
+    font-weight: 600;
+    color: #34495e;
+    background: #ecf0f1; /* Fond clair */
+    padding: 10px 15px;
+    border-left: 5px solid #3498db; /* Barre colorée à gauche */
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+
+
 
 /* Rappel : 
 p-1 : applique un padding de 0.25rem.
