@@ -455,3 +455,8 @@ ALTER TABLE utilisateurs ADD COLUMN suspendu TINYINT DEFAULT 0;
 
 ALTER TABLE avis ADD COLUMN date_validation DATETIME DEFAULT NULL;
 
+SELECT * 
+FROM trajet_utilisateur 
+WHERE trajet_id = 113 
+AND utilisateur_id = 35;
+
