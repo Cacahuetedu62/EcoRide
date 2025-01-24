@@ -2,12 +2,11 @@
 require_once('templates/header.php');
 require_once('lib/pdo.php');
 require_once('lib/config.php');
-require_once 'vendor/autoload.php'; // Charger l'autoload de Composer pour PHPMailer
+require_once 'vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Vérifier si l'utilisateur est connecté
 if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     $utilisateur_id = $_SESSION['utilisateur']['id'];
 } else {
@@ -18,25 +17,45 @@ if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
     $trajet_id = (int)$_POST['trajet_id'];
 
-    // Mettre à jour le statut de la réservation à "terminé"
-    $sqlUpdate = "UPDATE reservations SET statut = 'terminé' WHERE trajet_id = :trajet_id AND utilisateur_id = :utilisateur_id";
+    // Activation du mode erreur PDO
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Vérifiez si l'utilisateur est le chauffeur du trajet
+    $sqlCheckChauffeur = "SELECT 1
+                          FROM trajet_utilisateur
+                          WHERE trajet_id = :trajet_id
+                          AND utilisateur_id = :utilisateur_id";
+    $stmtCheckChauffeur = $pdo->prepare($sqlCheckChauffeur);
+    $stmtCheckChauffeur->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+    $stmtCheckChauffeur->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
+    $stmtCheckChauffeur->execute();
+
+    if (!$stmtCheckChauffeur->fetchColumn()) {
+        echo "Vous n'êtes pas le chauffeur de ce trajet.";
+        exit;
+    }
+
+    // Requête mise à jour avec condition sur le statut
+    $sqlUpdate = "UPDATE reservations
+                  SET statut = 'termine'
+                  WHERE trajet_id = :trajet_id
+                  AND statut = 'en_cours'";
     $stmtUpdate = $pdo->prepare($sqlUpdate);
     $stmtUpdate->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
-    $stmtUpdate->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
 
-    // Mettre à jour la table historique avec la date de fin réelle
     $sqlHistorique = "UPDATE historique SET date_fin_reel = NOW() WHERE trajet_id = :trajet_id";
     $stmtHistorique = $pdo->prepare($sqlHistorique);
     $stmtHistorique->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
 
     try {
-        // Démarre la transaction
         $pdo->beginTransaction();
+
+        // Exécution avec vérification
         $stmtUpdate->execute();
         $stmtHistorique->execute();
+
         $pdo->commit();
 
-        // Envoi de l'email avec PHPMailer
         $subject = "Votre trajet est terminé";
         $message = "
             <html>
@@ -53,32 +72,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
             </html>
         ";
 
-        // Crée une instance de PHPMailer
         $mail = new PHPMailer(true);
         try {
-            // Configuration SMTP
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'testing.projets.siteweb@gmail.com'; // Adresse email d'expéditeur
-            $mail->Password = 'sljw jlop qtyy mqae'; // Mot de passe d'application Gmail
+            $mail->Username = 'testing.projets.siteweb@gmail.com';
+            $mail->Password = 'sljw jlop qtyy mqae';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
-            // Destinataire
             $mail->setFrom('rogez.aurore01@gmail.com', 'EcoRide');
-            $mail->addAddress('rogez.aurore01@gmail.com'); // Envoi à ton adresse email pour les tests
+            $mail->addAddress('rogez.aurore01@gmail.com');
 
-            // Contenu de l'email
             $mail->isHTML(true);
             $mail->Subject = $subject;
             $mail->Body = $message;
 
-            // Envoie de l'email
             $mail->send();
-            echo "Message envoyé avec succès !"; // Message de débogage
+
+            // Affichage du message de confirmation
+            echo "<div class='container'>";
+            echo "<h2>Trajet Terminé</h2>";
+            echo "<p>Votre trajet a été terminé avec succès.</p>";
+            echo "<p>Un email a été envoyé au passager pour connaître son avis et lui donner une note. Une fois cet avis validé par nos équipes, vous serez crédité sur votre compte du montant du trajet (moins 2 crédits pour la plateforme).</p>";
+            echo "<p>Merci pour votre participation!</p>";
+            echo "<a href='accueil.php' class='btn btn-primary'>Retour à l'accueil</a>";
+            echo "</div>";
+
         } catch (Exception $e) {
-            echo "L'email n'a pas pu être envoyé : {$mail->ErrorInfo}"; // Message d'erreur si l'email échoue
+            echo "L'email n'a pas pu être envoyé : {$mail->ErrorInfo}";
         }
     } catch (Exception $e) {
         $pdo->rollBack();
