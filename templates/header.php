@@ -73,9 +73,11 @@ if (isset($_SESSION['utilisateur'])) {
                             if ($type_acces !== 'administrateur') {
                                 echo " - Crédits : " . $credits;
                             }
-                            echo ' <a href="logout.php" class="text-decoration-none">Se déconnecter</a>';
-                        } else {
-                            echo '<a href="connexion.php" class="text-decoration-none">Se connecter</a>';
+                            echo '<a href="logout.php" class="btn btn-danger btn-sm p-2 m-2">
+                            Se déconnecter
+                          </a>';
+                                            } else {
+                            echo '<a href="connexion.php" class="btn btn-success btn-sm">Se connecter</a>';
                         }
                         ?>
                     </span>
