@@ -8,7 +8,6 @@ $_SESSION['csrf_token'] = $_SESSION['csrf_token'] ?? bin2hex(random_bytes(32));
 // Vérifie si l'utilisateur est connecté
 if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     $utilisateur_id = $_SESSION['utilisateur']['id'];
-    echo "<div class='alert alert-info'>L'utilisateur connecté a l'ID : " . htmlspecialchars($utilisateur_id, ENT_QUOTES, 'UTF-8') . "</div>";
 } else {
     echo "Utilisateur non connecté.";
     exit;
@@ -104,6 +103,14 @@ try {
         <div class="alert alert-warning">Impossible de lancer le trajet sans réservation</div>
     <?php endif; ?>
 
+    <?php if ($trajet['statut'] === 'en_attente'): ?>
+                                <form method="POST" action="annulerTrajet.php" onsubmit="return confirmAnnulation(event)">
+                                    <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                    <input type="hidden" name="role" value="conducteur">
+                                    <button type="submit" class="btn btn-danger">Annuler la réservation</button>
+                                </form>
+                            <?php endif; ?>
+
                             <?php elseif ($trajet['statut'] === 'en_cours'): ?>
                                 <form method="POST" action="terminerTrajet.php">
                                     <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
@@ -150,9 +157,10 @@ try {
                             <?php endif; ?>
                         </div>
                         <div class="trajet-actions">
-                            <?php if ($trajet['statut'] === 'en_attente'): ?>
-                                <form method="POST" action="annulerReservation.php">
+                                <?php if ($trajet['statut'] === 'en_attente'): ?>
+                                <form method="POST" action="annulerTrajet.php" onsubmit="return confirmAnnulation(event)">
                                     <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                    <input type="hidden" name="role" value="passager">
                                     <button type="submit" class="btn btn-danger">Annuler la réservation</button>
                                 </form>
                             <?php endif; ?>
@@ -178,6 +186,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 });
+
+function confirmAnnulation(event) {
+    event.preventDefault(); // Empêche la soumission du formulaire par défaut
+    if (confirm("Êtes-vous sûr de vouloir annuler ce trajet ?")) {
+        event.target.submit(); // Soumet le formulaire si l'utilisateur confirme
+    }
+}
 </script>
 
 <?php
