@@ -7,7 +7,6 @@ require_once('lib/config.php');
 if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     $utilisateur_id = $_SESSION['utilisateur']['id'];
 } else {
-    // L'utilisateur n'est pas connecté
     echo "Utilisateur non connecté.";
     exit;
 }
@@ -33,7 +32,7 @@ if (isset($_GET['trajet_id'])) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Traiter la soumission du formulaire
             if (isset($_POST['avis']) && isset($_POST['note'])) {
-                $commentaires = $_POST['avis'];
+                $commentaires = htmlspecialchars($_POST['avis'], ENT_QUOTES, 'UTF-8');
                 $note = (int)$_POST['note'];
                 $statut = 'en attente'; // Définir le statut par défaut à "en attente"
 
@@ -48,77 +47,75 @@ if (isset($_GET['trajet_id'])) {
 
                 try {
                     $stmtInsert->execute();
-                    echo "Votre avis a été soumis avec succès et est en attente de validation.";
+                    echo "<div class='avis-success'>Votre avis a été soumis avec succès et est en attente de validation.</div>";
                 } catch (PDOException $e) {
-                    echo "Erreur lors de la soumission de l'avis : " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+                    echo "<div class='avis-error'>Erreur lors de la soumission de l'avis : " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . "</div>";
                 }
             } else {
-                echo "Données de formulaire invalides.";
+                echo "<div class='avis-error'>Données de formulaire invalides.</div>";
             }
         } else {
             // Afficher le formulaire pour soumettre un avis
             ?>
-            <form method="POST" action="avis.php?trajet_id=<?php echo $trajet_id; ?>">
-                <label for="avis">Votre avis :</label>
-                <textarea name="avis" id="avis" required></textarea>
-                <label for="note">Votre note :</label>
-                <select name="note" id="note" required>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-                <button type="submit">Soumettre</button>
-            </form>
+            <div class="avis-form-container">
+                <form method="POST" action="avis.php?trajet_id=<?php echo htmlspecialchars($trajet_id, ENT_QUOTES, 'UTF-8'); ?>" id="form-avis">
+                    <label for="avis">Votre avis :</label>
+                    <textarea name="avis" id="avis" required></textarea>
+                    <div id="error-avis" class="avis-error-message"></div>
+
+                    <label for="note">Votre note :</label>
+                    <select name="note" id="note" required>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                    <div id="error-note" class="avis-error-message"></div>
+
+                    <button type="submit">Soumettre</button>
+                </form>
+            </div>
             <?php
         }
     } else {
-        echo "Le trajet spécifié n'existe pas ou ne vous appartient pas.";
-        // Ajoutez des messages de débogage
-        echo "<br>Trajet ID : " . htmlspecialchars($trajet_id, ENT_QUOTES, 'UTF-8');
-        echo "<br>Utilisateur ID : " . htmlspecialchars($utilisateur_id, ENT_QUOTES, 'UTF-8');
-
-        // Vérifiez si le trajet existe dans la table trajets
-        $sqlCheckTrajet = "SELECT * FROM trajets WHERE id = :trajet_id";
-        $stmtCheckTrajet = $pdo->prepare($sqlCheckTrajet);
-        $stmtCheckTrajet->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
-        $stmtCheckTrajet->execute();
-
-        if ($stmtCheckTrajet->rowCount() > 0) {
-            echo "<br>Le trajet existe dans la table trajets.";
-        } else {
-            echo "<br>Le trajet n'existe pas dans la table trajets.";
-        }
-
-        // Vérifiez si l'utilisateur existe dans la table utilisateurs
-        $sqlCheckUtilisateur = "SELECT * FROM utilisateurs WHERE id = :utilisateur_id";
-        $stmtCheckUtilisateur = $pdo->prepare($sqlCheckUtilisateur);
-        $stmtCheckUtilisateur->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
-        $stmtCheckUtilisateur->execute();
-
-        if ($stmtCheckUtilisateur->rowCount() > 0) {
-            echo "<br>L'utilisateur existe dans la table utilisateurs.";
-        } else {
-            echo "<br>L'utilisateur n'existe pas dans la table utilisateurs.";
-        }
-
-        // Vérifiez si l'entrée existe dans la table reservations
-        $sqlCheckReservation = "SELECT * FROM reservations WHERE trajet_id = :trajet_id AND utilisateur_id = :utilisateur_id";
-        $stmtCheckReservation = $pdo->prepare($sqlCheckReservation);
-        $stmtCheckReservation->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
-        $stmtCheckReservation->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
-        $stmtCheckReservation->execute();
-
-        if ($stmtCheckReservation->rowCount() > 0) {
-            echo "<br>L'entrée existe dans la table reservations.";
-        } else {
-            echo "<br>L'entrée n'existe pas dans la table reservations.";
-        }
+        echo "<div class='avis-error'>Le trajet spécifié n'existe pas ou ne vous appartient pas.</div>";
     }
 } else {
-    echo "Aucun trajet valide spécifié.";
+    echo "<div class='avis-error'>Aucun trajet valide spécifié.</div>";
 }
 
 require_once('templates/footer.php');
 ?>
+
+<script>
+    // Fonction de validation côté client
+    document.getElementById('form-avis').addEventListener('submit', function(event) {
+        let valid = true;
+        let avis = document.getElementById('avis').value;
+        let note = document.getElementById('note').value;
+        let errorAvis = document.getElementById('error-avis');
+        let errorNote = document.getElementById('error-note');
+
+        // Réinitialiser les messages d'erreur
+        errorAvis.textContent = '';
+        errorNote.textContent = '';
+
+        // Validation de l'avis
+        if (avis.trim().length < 10) {
+            errorAvis.textContent = 'L\'avis doit contenir au moins 10 caractères.';
+            valid = false;
+        }
+
+        // Validation de la note
+        if (!note) {
+            errorNote.textContent = 'Veuillez sélectionner une note.';
+            valid = false;
+        }
+
+        // Si une erreur a été détectée, empêcher la soumission du formulaire
+        if (!valid) {
+            event.preventDefault();
+        }
+    });
+</script>

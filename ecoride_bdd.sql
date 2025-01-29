@@ -459,4 +459,3 @@ SELECT *
 FROM trajet_utilisateur 
 WHERE trajet_id = 113 
 AND utilisateur_id = 35;
-
