@@ -1,7 +1,6 @@
 <?php
 require_once('templates/header.php');
-require_once('lib/pdo.php');
-require_once('lib/config.php');
+
 
 if (!isset($_SESSION['utilisateur']) || !isset($_SESSION['utilisateur']['id'])) {
 }

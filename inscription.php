@@ -1,7 +1,5 @@
 <?php
 require_once('templates/header.php');
-require_once('lib/pdo.php');
-require_once('lib/config.php');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Vérification du token CSRF

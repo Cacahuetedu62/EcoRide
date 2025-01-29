@@ -1,8 +1,6 @@
 <?php
-session_start(); // Assurez-vous que la session est démarrée
 require_once('templates/header.php');
-require_once('lib/pdo.php');
-require_once('lib/config.php');
+
 
 // Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['utilisateur']['id'])) {

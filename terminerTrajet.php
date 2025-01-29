@@ -1,7 +1,5 @@
 <?php
 require_once('templates/header.php');
-require_once('lib/pdo.php');
-require_once('lib/config.php');
 require_once 'vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;

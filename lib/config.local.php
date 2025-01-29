@@ -4,7 +4,13 @@ return [
         'host' => 'localhost',
         'name' => 'ecoride',
         'user' => 'root',
-        'pass' => 'MattLi2024!!'
+        'pass' => 'MattLi2024!!',
+        'charset' => 'utf8mb4'
+    ],
+    'mongodb' => [
+        'host' => 'localhost',
+        'port' => '27017',
+        'db' => 'creditsPlateforme'
     ],
     'smtp' => [
         'host' => 'smtp.gmail.com',

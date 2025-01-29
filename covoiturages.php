@@ -1,7 +1,5 @@
 <?php
 require_once('templates/header.php');
-require_once('lib/pdo.php');
-require_once('lib/config.php');
 ?>
 
 <section class="d-flex m-3 justify-content-center">

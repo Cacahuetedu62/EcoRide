@@ -1871,6 +1871,159 @@ textarea {
     border: 1px solid #dee2e6;
 }
 
+.stats-page {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.stats-page h1 {
+    color: #2C3E50;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-top: 30px;
+}
+
+.stats-page h2 {
+    color: #16A085; /* Teinte de vert */
+    font-size: 1.5rem;
+    margin: 20px 0;
+    font-weight: normal;
+}
+
+.stats-page h3 {
+    color: #E74C3C; /* Teinte de rouge */
+    font-size: 1.25rem;
+    font-weight: normal;
+}
+
+.stats-page .stats-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    padding: 20px;
+    text-align: center;
+    width: 90%;
+    max-width: 1200px;
+    flex-grow: 1;
+    box-sizing: border-box;
+}
+
+.stats-page .stats-container p,
+.stats-page .stats-container h3 {
+    font-size: 1.2rem;
+    margin: 10px 0;
+}
+
+.stats-page .total-credits,
+.stats-page #trajets-summary {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #2980B9; /* Teinte bleue pour les informations importantes */
+}
+
+.stats-page canvas {
+    margin-top: 20px;
+    width: 100%;
+    max-height: 400px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.stats-page section {
+    margin: 20px 0;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Conteneurs d'information avec une mise en page moderne */
+.stats-info-container {
+    background-color: #dceeb4;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.stats-info-container:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stats-info-text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2C3E50;
+}
+
+.stats-info-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2980B9; /* Couleur bleue pour uniformiser */
+}
+
+/* Adaptation des titres */
+.stats-page h3 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #2C3E50;
+    margin: 20px 0;
+}
+
+/* Pour les petits écrans */
+@media (max-width: 768px) {
+    .stats-info-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stats-info-number {
+        font-size: 1.25rem;
+    }
+
+    .stats-info-text {
+        font-size: 1.1rem;
+    }
+}
+
+
+.btn-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.btn-retour {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333; /* Texte foncé pour contraste */
+    background: #DCEEB4;
+    border-radius: 8px;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-retour:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+
+
 /* Rappel : 
 p-1 : applique un padding de 0.25rem.
 p-2 : applique un padding de 0.5rem.

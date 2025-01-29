@@ -1,9 +1,11 @@
 <?php
+require_once('lib/config.php');
+require_once('lib/pdo.php');
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require_once('lib/pdo.php');
-require_once('lib/config.php');
+
 
 
 function getUserInfo($pdo, $utilisateur_id) {

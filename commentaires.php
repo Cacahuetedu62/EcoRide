@@ -1,7 +1,5 @@
 <?php
 require_once('templates/header.php');
-require_once('lib/pdo.php');
-require_once('lib/config.php');
 
 // Vérifier si un ID d'utilisateur est passé via l'URL
 if (isset($_GET['id'])) {

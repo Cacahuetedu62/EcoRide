@@ -1,7 +1,5 @@
 <?php
 require_once('templates/header.php');
-require_once('lib/pdo.php');
-require_once('lib/config.php');
 
 // Vérification de la session utilisateur
 if (session_status() === PHP_SESSION_NONE) {

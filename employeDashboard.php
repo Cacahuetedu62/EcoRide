@@ -1,16 +1,16 @@
 <?php
 require_once('templates/header.php');
-require_once('lib/pdo.php');
-require_once('lib/config.php');
 require_once __DIR__ . '/vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use MongoDB\Client;
 
-// Vérification de la session employé
+// Vérification de session sécurisée
 if (!isset($_SESSION['utilisateur']) || !isset($_SESSION['utilisateur']['type_acces']) 
     || ($_SESSION['utilisateur']['type_acces'] != 'employe' && $_SESSION['utilisateur']['type_acces'] != 'administrateur')) {
+    header('Location: login.php');
+    exit();
 }
 
 // Initialize MongoDB connection
@@ -31,11 +31,16 @@ function tronquer_texte($texte, $limite = 50) {
 }
 
 function validateComment($comment) {
-    // Enlève les balises HTML potentiellement dangereuses
+    if (empty($comment)) {
+        return '';
+    }
+    
+    // Sanitize first
+    $comment = trim($comment);
     $comment = strip_tags($comment);
     
-    // Vérifie si le commentaire contient des motifs SQL suspects
-    $sqlPatterns = array(
+    // Liste étendue de motifs malveillants
+    $maliciousPatterns = array(
         '/SELECT\s+.*\s+FROM/i',
         '/INSERT\s+INTO/i',
         '/UPDATE\s+.*\s+SET/i',
@@ -47,12 +52,18 @@ function validateComment($comment) {
         '/EXEC\s+/i',
         '/--/',
         '/;/',
-        '/\/\*.*\*\//'  // Commentaires SQL
+        '/\/\*.*\*\//',
+        '/<script/i',
+        '/javascript:/i',
+        '/onclick/i',
+        '/onerror/i',
+        '/onload/i',
+        '/eval\s*\(/i'
     );
 
-    foreach ($sqlPatterns as $pattern) {
+    foreach ($maliciousPatterns as $pattern) {
         if (preg_match($pattern, $comment)) {
-            error_log("Tentative d'injection SQL détectée: " . $comment);
+            error_log("Contenu malveillant détecté: " . htmlspecialchars($comment));
             return false;
         }
     }
@@ -432,8 +443,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <td><?php echo htmlspecialchars($row["statut"]); ?></td>
                     <td class="actions">
                     <form method="post" action="" class="action-buttons" onsubmit="return handleSubmit(this);">
-                        <input type="hidden" name="avis_id" value="<?php echo $row["avis_id"]; ?>">
-        <button type="submit" name="action" value="valider" class="btn btn-validate">Valider</button>
+    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+    <input type="hidden" name="avis_id" value="<?php echo $row["avis_id"]; ?>">
+            <button type="submit" name="action" value="valider" class="btn btn-validate">Valider</button>
         <button type="submit" name="action" value="rejeter" class="btn btn-reject">Rejeter</button>
     </form>
 </td>
@@ -475,20 +487,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const warningMessage = document.getElementById('warningMessage');
     const closeBtn = document.querySelector('.close');
     
-    // Fonction de détection de contenu suspect
     function detectSuspiciousContent(text) {
-        const suspiciousPatterns = [
-            /<script/i,
-            /javascript:/i,
-            /onclick/i,
-            /onerror/i,
-            /onload/i,
-            /SELECT.*FROM/i,
-            /UNION.*SELECT/i
-        ];
-        
-        return suspiciousPatterns.some(pattern => pattern.test(text));
-    }
+    // Encoder le texte avant de l'afficher
+    text = text.replace(/&/g, '&amp;')
+               .replace(/</g, '&lt;')
+               .replace(/>/g, '&gt;')
+               .replace(/"/g, '&quot;')
+               .replace(/'/g, '&#039;');
+               
+    const suspiciousPatterns = [
+        /<script/i,
+        /javascript:/i,
+        /onclick/i,
+        /onerror/i,
+        /onload/i,
+        /SELECT.*FROM/i,
+        /UNION.*SELECT/i,
+        /data:/i,
+        /base64/i
+    ];
+    
+    return suspiciousPatterns.some(pattern => pattern.test(text));
+}
 
     // Gestionnaire pour les boutons de contenu suspect
     document.querySelectorAll('.btn-voir-contenu-suspect').forEach(button => {

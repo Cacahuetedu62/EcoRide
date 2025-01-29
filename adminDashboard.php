@@ -2,6 +2,7 @@
 require_once('templates/header.php');
 ?>
 
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-12 text-center mb-5">
@@ -16,7 +17,7 @@ require_once('templates/header.php');
             <div class="card dashboard-option shadow-lg border-0 h-100">
                 <div class="card-body text-center p-5">
                     <div class="mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-graph-up text-primary" viewBox="0 0 16 16" aria-label="Graphiques">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#DCEEB4" class="bi bi-graph-up text-primary" viewBox="0 0 16 16" aria-label="Graphiques">
                             <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .706-.07z"/>
                         </svg>
                     </div>
@@ -24,7 +25,7 @@ require_once('templates/header.php');
                     <p class="card-text mb-4">
                         Visualisez les données et statistiques de la plateforme EcoRide en un coup d'œil.
                     </p>
-                    <a href="graphiques.php" class="btn btn-primary btn-lg px-4 w-100" aria-label="Accéder aux Graphiques">
+                    <a href="graphiques.php" class="btn-retour" aria-label="Accéder aux Graphiques">
                         Accéder aux Graphiques
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-right ms-2" viewBox="0 0 16 16" aria-hidden="true">
                             <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
