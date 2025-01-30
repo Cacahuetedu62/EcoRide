@@ -227,50 +227,7 @@ try {
 }
 ?>
 
-<style>
-.status-message {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 25px;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    display: none;
-    z-index: 1000;
-    font-size: 16px;
-    font-weight: 500;
-    min-width: 300px;
-    text-align: center;
-}
 
-.status-message.success {
-    background-color: #4CAF50;
-    color: white;
-    border-left: 5px solid #2E7D32;
-}
-
-.status-message.error {
-    background-color: #f44336;
-    color: white;
-    border-left: 5px solid #c62828;
-}
-
-.status-message.show {
-    display: block;
-    animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateY(-100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-</style>
 
 <?php if (!empty($message)): ?>
     <div id="status-message" class="status-message <?php echo strpos(strtolower($message), 'erreur') !== false ? 'error' : 'success'; ?> show">
@@ -288,6 +245,10 @@ try {
     });
     </script>
 <?php endif; ?>
+
+<div class="btn-container">
+   <a href="adminDashboard.php" class="btn-retour">⬅ Retour au tableau de bord</a>
+</div>
 
 <h1 class="admin-dashboard-title">Gestion des Utilisateurs et Employés</h1>
 

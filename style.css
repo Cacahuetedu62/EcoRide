@@ -2138,6 +2138,184 @@ textarea {
     }
 }
 
+        .navbar-ecoride {
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-ecoride .nav-link {
+            color: #333 !important;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .navbar-ecoride .nav-link svg {
+            margin-bottom: 5px;
+            width: 32px;
+            height: 32px;
+            transition: transform 0.5s ease;
+        }
+
+        .navbar-ecoride .nav-link:hover svg {
+            transform: rotate(15deg) translateY(-5px);
+        }
+
+        .navbar-menu-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .navbar-menu-container ul {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .navbar-logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-connect,
+        .btn-disconnect {
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 20px 30px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            font-weight: 400;
+            font-size: large;
+        }
+
+        .btn-connect {
+            background-color: #28a745; /* Vert */
+        }
+
+        .btn-connect:hover {
+            background-color: #218838;
+        }
+
+        .btn-disconnect {
+            background-color: #dc3545; /* Rouge */
+        }
+
+        .btn-disconnect:hover {
+            background-color: #c82333;
+        }
+
+        .user-info-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .pseudo-display {
+            color: black;
+        }
+
+        .navbar-ecoride .dropdown-menu {
+            max-height: 0;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .navbar-ecoride .dropdown-toggle[aria-expanded="true"] + .dropdown-menu {
+            max-height: 500px;
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media (max-width: 992px) {
+            .navbar-menu-container ul {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+.pseudo-display{
+font-weight: 400;
+font-size: large;
+font-size: 25px;
+}
+
+.status-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 1000;
+    font-size: 16px;
+    font-weight: 500;
+    min-width: 300px;
+    text-align: center;
+}
+
+.status-message.success {
+    background-color: #4CAF50;
+    color: white;
+    border-left: 5px solid #2E7D32;
+}
+
+.status-message.error {
+    background-color: #f44336;
+    color: white;
+    border-left: 5px solid #c62828;
+}
+
+.status-message.show {
+    display: block;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.admin-management-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Réduisez cette valeur pour diminuer l'espacement */
+}
+
+.admin-form-label {
+    margin-bottom: 2px; /* Réduisez la marge entre le label et l'input */
+}
+
+.admin-form-input {
+    margin-bottom: 5px; /* Ajoutez une petite marge en bas de chaque input */
+}
+
+.admin-action-btn {
+    margin-top: 10px; /* Gardez un peu d'espace avant le bouton */
+}
 
 /* Rappel : 
 p-1 : applique un padding de 0.25rem.
