@@ -2,11 +2,14 @@
 require_once('lib/config.php');
 require_once('lib/pdo.php');
 
+// if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
+//     header("Location: https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+//     exit();
+// }
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-
 
 function getUserInfo($pdo, $utilisateur_id) {
     $query = "SELECT pseudo, credits, type_acces FROM utilisateurs WHERE id = :id";

@@ -459,3 +459,14 @@ SELECT *
 FROM trajet_utilisateur 
 WHERE trajet_id = 113 
 AND utilisateur_id = 35;
+
+
+CREATE TABLE admin_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    user_id INT NOT NULL,
+    details TEXT,
+    ip_address VARCHAR(45),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
