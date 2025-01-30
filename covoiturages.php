@@ -5,43 +5,44 @@ require_once('templates/header.php');
 <section class="d-flex m-3 justify-content-center">
     <div class="colonne-formulaire">
         <form method="POST" action="">
-            <div><h4>Chercher un trajet</h4>
-            <label for="ville_depart" class="form-label">Ville de départ</label>
-            <input type="text" class="form-control" id="ville_depart" name="ville_depart" placeholder="Ville de départ" required value="<?php echo isset($_POST['ville_depart']) ? htmlspecialchars($_POST['ville_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-            <div class="invalid-feedback">
-                Veuillez saisir une ville de départ
+            <div>
+                <h4>Chercher un trajet</h4>
+                <label for="ville_depart" class="form-label">Ville de départ</label>
+                <input type="text" class="form-control" id="ville_depart" name="ville_depart" placeholder="Ville de départ" required value="<?php echo isset($_POST['ville_depart']) ? htmlspecialchars($_POST['ville_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                <div class="invalid-feedback">
+                    Veuillez saisir une ville de départ
+                </div>
             </div>
-        </div>
 
-        <div>
-            <label for="ville_arrive" class="form-label">Ville d'arrivé</label>
-            <input type="text" class="form-control" id="ville_arrive" name="ville_arrive" placeholder="Ville d'arrivé" required value="<?php echo isset($_POST['ville_arrive']) ? htmlspecialchars($_POST['ville_arrive'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-            <div class="invalid-feedback">
-                Veuillez saisir une ville d'arrivé
+            <div>
+                <label for="ville_arrive" class="form-label">Ville d'arrivée</label>
+                <input type="text" class="form-control" id="ville_arrive" name="ville_arrive" placeholder="Ville d'arrivée" required value="<?php echo isset($_POST['ville_arrive']) ? htmlspecialchars($_POST['ville_arrive'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                <div class="invalid-feedback">
+                    Veuillez saisir une ville d'arrivée
+                </div>
             </div>
-        </div>
 
-        <div>
-            <label for="date_depart" class="form-label">Date de départ</label>
-            <input type="date" class="form-control" id="date_depart" name="date_depart" required
-                value="<?php echo isset($_POST['date_depart']) ? htmlspecialchars($_POST['date_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>"
-                min="<?php echo date('Y-m-d'); ?>" >
-            <div class="invalid-feedback">
-                Veuillez saisir une date de départ valide (pas avant aujourd'hui).
+            <div>
+                <label for="date_depart" class="form-label">Date de départ</label>
+                <input type="date" class="form-control" id="date_depart" name="date_depart" required
+                    value="<?php echo isset($_POST['date_depart']) ? htmlspecialchars($_POST['date_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>"
+                    min="<?php echo date('Y-m-d'); ?>">
+                <div class="invalid-feedback">
+                    Veuillez saisir une date de départ valide (pas avant aujourd'hui).
+                </div>
             </div>
-        </div>
 
-        <div>
-            <label for="nb_passagers" class="form-label">Nombre de passagers</label>
-            <input type="number" class="form-control" id="nb_passagers" name="nb_passagers" placeholder="Nombre de passagers" required value="<?php echo isset($_POST['nb_passagers']) ? htmlspecialchars($_POST['nb_passagers'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-            <div class="invalid-feedback">
-                Veuillez saisir le nombre de passagers
+            <div>
+                <label for="nb_passagers" class="form-label">Nombre de passagers</label>
+                <input type="number" class="form-control" id="nb_passagers" name="nb_passagers" placeholder="Nombre de passagers" required value="<?php echo isset($_POST['nb_passagers']) ? htmlspecialchars($_POST['nb_passagers'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                <div class="invalid-feedback">
+                    Veuillez saisir le nombre de passagers
+                </div>
             </div>
-        </div>
 
-        <div>
-            <button class="buttonVert m-3" type="submit" name="chercher">Chercher</button>
-        </div>
+            <div>
+                <button class="btn btn-success m-3" type="submit" name="chercher">Chercher</button>
+            </div>
         </form>
     </div>
 
@@ -50,7 +51,8 @@ require_once('templates/header.php');
         // Deuxième partie du formulaire qui affine la recherche
         if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
             echo '
-                <div><h4>Vous pouvez affiner vos recherches</h4>
+                <div>
+                    <h4>Vous pouvez affiner vos recherches</h4>
                     <div>Souhaitez-vous un trajet effectué avec une voiture électrique/hybride ? Il sera alors considéré comme "écologique".</div>
                     <div><input type="checkbox" id="ecologique" name="ecologique" value="1" ' . (isset($_POST['ecologique']) && $_POST['ecologique'] == '1' ? 'checked' : '') . '> Oui</div>
 
@@ -74,7 +76,7 @@ require_once('templates/header.php');
                     </div>
 
                     <div>
-                        <button class="buttonVert m-3" type="submit" name="filtrer">Appliquer les filtres</button>
+                        <button class="btn btn-success m-3" type="submit" name="filtrer">Appliquer les filtres</button>
                     </div>
                 </div>
             ';
@@ -100,7 +102,7 @@ if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
         die("Ville de départ invalide. Seules les lettres et les espaces sont autorisés.");
     }
     if (!preg_match("/^[a-zA-Z\s]+$/", $ville_arrive)) {
-        die("Ville d'arrivé invalide. Seules les lettres et les espaces sont autorisés.");
+        die("Ville d'arrivée invalide. Seules les lettres et les espaces sont autorisés.");
     }
 
     if ($duree && !is_numeric($duree)) {
@@ -191,13 +193,13 @@ if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
 
     <div class="trajetComplet p-3">
         <h3>Arrivée</h3>
-        <label for="#" class="form-label">Ville d'arrivé</label>
+        <label for="#" class="form-label">Ville d'arrivée</label>
         <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_arrive']) ?>" disabled>
 
-        <label for="#" class="form-label">Date d'arrivé</label>
+        <label for="#" class="form-label">Date d'arrivée</label>
         <input type="date" class="form-control" value="<?= $trajet['date_arrive'] ?>" disabled>
 
-        <label for="#" class="form-label">Heure d'arrivé</label>
+        <label for="#" class="form-label">Heure d'arrivée</label>
         <input type="text" class="form-control" value="<?= $trajet['heure_arrive'] ?>" disabled>
     </div>
 
@@ -228,9 +230,9 @@ if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
             }
             ?>
         </p>
-        <p style="font-size: 15px;">*Un trajet est dit "écologique" s'il est effectué avec une voiture éléctrique/hybride</p>
+        <p style="font-size: 15px;">*Un trajet est dit "écologique" s'il est effectué avec une voiture électrique/hybride</p>
         <div>
-            <button class="buttonVert mt-2" name="détails"><a href="reservations.php?id=<?php echo htmlspecialchars($trajet['id']); ?>">+ détails</a></button>
+            <button class="btn btn-success mt-2" name="détails"><a href="reservations.php?id=<?php echo htmlspecialchars($trajet['id']); ?>">+ détails</a></button>
         </div>
     </div>
 </section>

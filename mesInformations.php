@@ -241,37 +241,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                            value="<?= htmlspecialchars($utilisateur['email']) ?>" disabled>
                                 </div>
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="telephone">Téléphone</label>
-                                        <input type="tel" class="form-control" id="telephone" name="telephone"
-                                               value="<?= htmlspecialchars($utilisateur['telephone']) ?>" disabled>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="date_naissance">Date de naissance</label>
-                                        <input type="date" class="form-control" id="date_naissance" name="date_naissance"
-                                               value="<?= htmlspecialchars($utilisateur['date_naissance']) ?>" disabled>
-                                    </div>
-                                </div>
-
                                 <div class="mb-3">
-                                    <label for="adresse">Adresse</label>
-                                    <input type="text" class="form-control" id="adresse" name="adresse"
-                                           value="<?= htmlspecialchars($utilisateur['adresse']) ?>" disabled>
-                                </div>
+    <label for="telephone">Téléphone</label>
+    <input type="tel" class="form-control" id="telephone" name="telephone"
+           value="<?= !empty($utilisateur['telephone']) ? htmlspecialchars($utilisateur['telephone']) : 'Non renseigné' ?>" disabled>
+</div>
 
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <label for="code_postal">Code Postal</label>
-                                        <input type="text" class="form-control" id="code_postal" name="code_postal"
-                                               value="<?= htmlspecialchars($utilisateur['code_postal']) ?>" disabled>
-                                    </div>
-                                    <div class="col-md-8 mb-3">
-                                        <label for="ville">Ville</label>
-                                        <input type="text" class="form-control" id="ville" name="ville"
-                                               value="<?= htmlspecialchars($utilisateur['ville']) ?>" disabled>
-                                    </div>
-                                </div>
+<div class="col-md-6 mb-3">
+    <label for="date_naissance">Date de naissance</label>
+    <input type="date" class="form-control" id="date_naissance" name="date_naissance"
+           value="<?= !empty($utilisateur['date_naissance']) ? htmlspecialchars($utilisateur['date_naissance']) : '' ?>" disabled>
+</div>
+
+<div class="mb-3">
+    <label for="adresse">Adresse</label>
+    <input type="text" class="form-control" id="adresse" name="adresse"
+           value="<?= !empty($utilisateur['adresse']) ? htmlspecialchars($utilisateur['adresse']) : 'Non renseignée' ?>" disabled>
+</div>
+
+<div class="col-md-4 mb-3">
+    <label for="code_postal">Code Postal</label>
+    <input type="text" class="form-control" id="code_postal" name="code_postal"
+           value="<?= !empty($utilisateur['code_postal']) ? htmlspecialchars($utilisateur['code_postal']) : 'Non renseigné' ?>" disabled>
+</div>
+
+<div class="col-md-8 mb-3">
+    <label for="ville">Ville</label>
+    <input type="text" class="form-control" id="ville" name="ville"
+           value="<?= !empty($utilisateur['ville']) ? htmlspecialchars($utilisateur['ville']) : 'Non renseignée' ?>" disabled>
+</div>
 
                                 <div class="mb-3">
                                     <label for="role">Je suis</label>

@@ -2,7 +2,6 @@
 require_once('templates/header.php');
 ?>
 
-<main>
     <div class="row p-3 justify-content-center align-items-md-stretch containHistoire">
         <div class="col-md-8 d-flex justify-content-center" style="flex: 7;">
             <div class="h-100 p-1 rounded-3 image-backgroundHistoire">
@@ -61,7 +60,6 @@ require_once('templates/header.php');
         </div>
     </div>
 
-    <div class="container marketing">
         <div class="row carousselImageDescription">
             <div class="col-lg-4 d-flex flex-column align-items-center text-center">
                 <img src="images/poignee_de_main.jpg" class="bd-placeholder-img rounded-circle" width="200" height="150" alt="poignée de main">
@@ -76,8 +74,7 @@ require_once('templates/header.php');
                 <p class="p-3">L'application et le site web "EcoRide" sont conçus pour offrir une expérience utilisateur simple et rapide. Trouver un trajet éco-responsable n'a jamais été aussi facile grâce à une interface claire et intuitive.</p>
             </div>
         </div>
-    </div>
-</main>
+
 
 <?php
 require_once('templates/footer.php');

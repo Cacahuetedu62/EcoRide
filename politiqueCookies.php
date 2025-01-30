@@ -6,6 +6,11 @@ require_once('templates/header.php');
         <div class="cookie-policy bg-white rounded shadow p-4">
             <h1 class="text-center mb-4">Politique de Cookies</h1>
             
+
+
+           <p class="btn-disconnect">AJOUTER LA GéOLOCALISATION !</p>
+
+
             <div class="cookie-intro mb-5">
                 <p class="lead text-center">
                     Nous utilisons des cookies pour améliorer votre expérience sur notre site. 
