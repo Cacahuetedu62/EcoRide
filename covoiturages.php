@@ -5,22 +5,27 @@ require_once('templates/header.php');
 <section class="d-flex m-3 justify-content-center">
     <div class="colonne-formulaire">
         <form method="POST" action="">
-            <div>
-                <h4>Chercher un trajet</h4>
-                <label for="ville_depart" class="form-label">Ville de départ</label>
-                <input type="text" class="form-control" id="ville_depart" name="ville_depart" placeholder="Ville de départ" required value="<?php echo isset($_POST['ville_depart']) ? htmlspecialchars($_POST['ville_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-                <div class="invalid-feedback">
-                    Veuillez saisir une ville de départ
-                </div>
-            </div>
+        <div>
+    <label for="ville_depart" class="form-label">Ville de départ</label>
+    <input type="text" class="form-control" id="ville_depart" name="ville_depart" 
+           placeholder="Entrez une ville de départ" required 
+           list="ville_depart-list" 
+           value="<?php echo isset($_POST['ville_depart']) ? htmlspecialchars($_POST['ville_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+    <div class="invalid-feedback">
+        Veuillez saisir une ville de départ
+    </div>
+</div>
 
-            <div>
-                <label for="ville_arrive" class="form-label">Ville d'arrivée</label>
-                <input type="text" class="form-control" id="ville_arrive" name="ville_arrive" placeholder="Ville d'arrivée" required value="<?php echo isset($_POST['ville_arrive']) ? htmlspecialchars($_POST['ville_arrive'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-                <div class="invalid-feedback">
-                    Veuillez saisir une ville d'arrivée
-                </div>
-            </div>
+<div>
+    <label for="ville_arrive" class="form-label">Ville d'arrivée</label>
+    <input type="text" class="form-control" id="ville_arrive" name="ville_arrive" 
+           placeholder="Entrez une ville d'arrivée" required 
+           list="ville_arrive-list" 
+           value="<?php echo isset($_POST['ville_arrive']) ? htmlspecialchars($_POST['ville_arrive'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+    <div class="invalid-feedback">
+        Veuillez saisir une ville d'arrivée
+    </div>
+</div>
 
             <div>
                 <label for="date_depart" class="form-label">Date de départ</label>
@@ -97,12 +102,11 @@ if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
     $duree = isset($_POST['duree']) ? $_POST['duree'] : null;
     $note_min = isset($_POST['note_min']) ? $_POST['note_min'] : null;
 
-    // Validation des villes (uniquement lettres et espaces autorisés)
-    if (!preg_match("/^[a-zA-Z\s]+$/", $ville_depart)) {
-        die("Ville de départ invalide. Seules les lettres et les espaces sont autorisés.");
+    if (empty($ville_depart) || strlen($ville_depart) < 2) {
+        die("La ville de départ est trop courte ou vide");
     }
-    if (!preg_match("/^[a-zA-Z\s]+$/", $ville_arrive)) {
-        die("Ville d'arrivée invalide. Seules les lettres et les espaces sont autorisés.");
+    if (empty($ville_arrive) || strlen($ville_arrive) < 2) {
+        die("La ville d'arrivée est trop courte ou vide");
     }
 
     if ($duree && !is_numeric($duree)) {
@@ -259,6 +263,52 @@ if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
 </div>
 
 <script>
+
+// Fonction d'autocomplétion
+function setupAutocomplete(inputId) {
+    const input = document.getElementById(inputId);
+    let timeout = null;
+
+    input.addEventListener('input', function() {
+        clearTimeout(timeout);
+        const query = this.value;
+
+        if (query.length < 3) return; // Attendre au moins 3 caractères
+
+        timeout = setTimeout(() => {
+            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}, France&format=json&limit=5`)
+                .then(response => response.json())
+                .then(data => {
+                    const datalist = document.getElementById(inputId + '-list');
+                    if (!datalist) {
+                        const newDatalist = document.createElement('datalist');
+                        newDatalist.id = inputId + '-list';
+                        input.parentNode.appendChild(newDatalist);
+                        input.setAttribute('list', inputId + '-list');
+                    }
+
+                    document.getElementById(inputId + '-list').innerHTML = data
+                        .map(item => `<option value="${item.display_name}">`)
+                        .join('');
+                });
+        }, 300);
+    });
+}
+
+// Initialisation au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter les datalists pour l'autocomplétion
+    setupAutocomplete('ville_depart');
+    setupAutocomplete('ville_arrive');
+});
+
+// Toast Bootstrap
+var toastElement = document.querySelector('.toast');
+if (toastElement) {
+    var toast = new bootstrap.Toast(toastElement);
+    toast.show();
+}
+
  // Vérifie si le toast existe sur la page et l'affiche
  var toastElement = document.querySelector('.toast');
  if (toastElement) {
