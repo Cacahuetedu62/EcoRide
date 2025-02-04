@@ -1,0 +1,17 @@
+# Interdire l'accès au dossier .git
+<Files ".git">
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# Interdire l'accès au fichier composer.json
+<Files "composer.json">
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# Interdire l'accès au fichier composer.lock
+<Files "composer.lock">
+    Order Deny,Allow
+    Deny from all
+</Files>

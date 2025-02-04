@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
             echo "<p>Votre trajet a été terminé avec succès.</p>";
             echo "<p>Un email a été envoyé au passager pour connaître son avis et lui donner une note. Une fois cet avis validé par nos équipes, vous serez crédité sur votre compte du montant du trajet (moins 2 crédits pour la plateforme).</p>";
             echo "<p>Merci pour votre participation!</p>";
-            echo "<a href='accueil.php' class='btn btn-primary'>Retour à l'accueil</a>";
+            echo "<a href='index.php' class='btn btn-primary'>Retour à l'accueil</a>";
             echo "</div>";
 
         } catch (Exception $e) {

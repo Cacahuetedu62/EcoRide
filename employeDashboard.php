@@ -32,34 +32,22 @@ function tronquer_texte($texte, $limite = 50) {
 
 function validateComment($comment) {
     if (empty($comment)) {
-        return '';
+        return $comment;
     }
-    
-    // Sanitize first
+
     $comment = trim($comment);
     $comment = strip_tags($comment);
     
-    // Liste étendue de motifs malveillants
-    $maliciousPatterns = array(
-        '/SELECT\s+.*\s+FROM/i',
-        '/INSERT\s+INTO/i',
-        '/UPDATE\s+.*\s+SET/i',
-        '/DELETE\s+FROM/i',
-        '/UNION\s+SELECT/i',
-        '/DROP\s+TABLE/i',
-        '/ALTER\s+TABLE/i',
-        '/EXECUTE\s+/i',
-        '/EXEC\s+/i',
-        '/--/',
-        '/;/',
-        '/\/\*.*\*\//',
+    // Autoriser les apostrophes françaises
+    $comment = str_replace(['&#039;', '&#39;', '&apos;'], "'", $comment);
+
+    $maliciousPatterns = [
         '/<script/i',
         '/javascript:/i',
-        '/onclick/i',
-        '/onerror/i',
-        '/onload/i',
-        '/eval\s*\(/i'
-    );
+        '/document\./i',
+        '/eval\(/i',
+        '/exec\(/i'
+    ];
 
     foreach ($maliciousPatterns as $pattern) {
         if (preg_match($pattern, $comment)) {
@@ -70,7 +58,6 @@ function validateComment($comment) {
     
     return $comment;
 }
-
 
 function gererCredits($pdo, $creditsCollection, $avis_utilisateur_id, $trajet_id) {
     try {
@@ -387,6 +374,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 <div class="dashboard-container">
     <h1 class="dashboard-title">Gestion des Avis Clients</h1>
+    <?php 
+    // Générer un nouveau token CSRF si nécessaire
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    ?>
     <table class="dashboard-table">
         <thead>
             <tr>

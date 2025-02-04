@@ -263,14 +263,14 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                 <div class="form-check mb-2">
                                     <input type="checkbox" class="form-check-input" id="conditionsVente">
                                     <label class="form-check-label" for="conditionsVente">
-                                        J'accepte les conditions de vente
+                                        J'accepte les conditions de vente <a href="CGDV.php"> [ Je clic ici pour consulter les conditions générales de ventes ]</a>
                                     </label>
                                 </div>
 
                                 <div class="form-check mb-3">
                                     <input type="checkbox" class="form-check-input" id="politiqueConfidentialite">
                                     <label class="form-check-label" for="politiqueConfidentialite">
-                                        J'accepte la politique de confidentialité
+                                        J'accepte la politique de confidentialité <a href="mentionsLegales.php"> [ Je clic ici pour consulter les mentions légales ]</a>
                                     </label>
                                 </div>
 

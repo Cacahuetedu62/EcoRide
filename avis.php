@@ -1,5 +1,9 @@
 <?php
 require_once('templates/header.php');
+require_once('lib/pdo.php');
+require_once('lib/config.php');
+
+// var_dump($_SESSION);
 
 // Vérifier si l'utilisateur est connecté
 if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {

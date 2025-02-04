@@ -1,4 +1,7 @@
 <?php
+define('NO_DB_REQUIRED', true);
+error_reporting(0);
+ini_set('display_errors', 0);
 require_once('templates/header.php');
 ?>
 

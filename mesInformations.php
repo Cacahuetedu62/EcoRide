@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $photo = null;
 
     // Validation des champs obligatoires
-    $required_fields = ['pseudo', 'nom', 'prenom', 'email', 'telephone', 'date_naissance', 'adresse', 'code_postal', 'ville', 'role'];
+    $required_fields = ['pseudo', 'nom', 'prenom', 'email', 'telephone', 'date_naissance', 'adresse', 'code_postal', 'ville'];
     foreach ($required_fields as $field) {
         if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
             $errors[] = "Le champ $field est obligatoire.";
@@ -102,54 +102,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($errors)) {
         try {
             // Préparer la requête SQL
-            $sql = "UPDATE utilisateurs SET
-                    pseudo = :pseudo,
-                    nom = :nom,
-                    prenom = :prenom,
-                    email = :email,
-                    telephone = :telephone,
-                    date_naissance = :date_naissance,
-                    adresse = :adresse,
-                    code_postal = :code_postal,
-                    ville = :ville,
-                    role = :role";
+// Préparer la requête SQL
+$sql = "UPDATE utilisateurs SET
+    pseudo = :pseudo,
+    nom = :nom,
+    prenom = :prenom,
+    email = :email,
+    telephone = :telephone,
+    date_naissance = :date_naissance,
+    adresse = :adresse,
+    code_postal = :code_postal,
+    ville = :ville";
 
-            // Ajouter la photo à la requête si elle a été mise à jour
-            if ($photo) {
-                $sql .= ", photo = :photo";
-            }
+// Ajouter la photo à la requête si elle a été mise à jour
+if ($photo) {
+    $sql .= ", photo = :photo";
+}
 
-            $sql .= " WHERE id = :id";
+$sql .= " WHERE id = :id";
 
-            // Préparer les paramètres
-            $params = [
-                'pseudo' => htmlspecialchars($_POST['pseudo']),
-                'nom' => htmlspecialchars($_POST['nom']),
-                'prenom' => htmlspecialchars($_POST['prenom']),
-                'email' => filter_var($_POST['email'], FILTER_SANITIZE_EMAIL),
-                'telephone' => htmlspecialchars($_POST['telephone']),
-                'date_naissance' => $_POST['date_naissance'],
-                'adresse' => htmlspecialchars($_POST['adresse']),
-                'code_postal' => htmlspecialchars($_POST['code_postal']),
-                'ville' => htmlspecialchars($_POST['ville']),
-                'role' => htmlspecialchars($_POST['role']),
-                'photo' => $photo ?? $utilisateur['photo'], // Utiliser la photo existante si aucune nouvelle photo n'est téléchargée
-                'id' => $utilisateur_id
-            ];
+// Préparer les paramètres
+$params = [
+    'pseudo' => htmlspecialchars($_POST['pseudo']),
+    'nom' => htmlspecialchars($_POST['nom']),
+    'prenom' => htmlspecialchars($_POST['prenom']),
+    'email' => filter_var($_POST['email'], FILTER_SANITIZE_EMAIL),
+    'telephone' => htmlspecialchars($_POST['telephone']),
+    'date_naissance' => $_POST['date_naissance'],
+    'adresse' => htmlspecialchars($_POST['adresse']),
+    'code_postal' => htmlspecialchars($_POST['code_postal']),
+    'ville' => htmlspecialchars($_POST['ville']),
+    'id' => $utilisateur_id
+];
 
-            // Ajouter la photo aux paramètres si elle existe
-            if ($photo) {
-                $params['photo'] = $photo;
-            }
+// Ajouter la photo aux paramètres seulement si elle existe
+if ($photo) {
+    $params['photo'] = $photo;
+}
 
-            // Debug des paramètres
-            foreach ($params as $key => $value) {
-                error_log("Paramètre $key : " . var_export($value, true));
-            }
+// Debug des paramètres
+foreach ($params as $key => $value) {
+    error_log("Paramètre $key : " . var_export($value, true));
+}
 
-            // Exécuter la requête
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
+// Exécuter la requête
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+
 
             $success_message = "Vos informations ont été mises à jour avec succès.";
             
@@ -271,14 +270,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
            value="<?= !empty($utilisateur['ville']) ? htmlspecialchars($utilisateur['ville']) : 'Non renseignée' ?>" disabled>
 </div>
 
-                                <div class="mb-3">
-                                    <label for="role">Je suis</label>
-                                    <select class="form-control" id="role" name="role" disabled>
-                                        <option value="passager" <?= $utilisateur['role'] == 'passager' ? 'selected' : '' ?>>Passager</option>
-                                        <option value="chauffeur" <?= $utilisateur['role'] == 'chauffeur' ? 'selected' : '' ?>>Chauffeur</option>
-                                        <option value="passager_chauffeur" <?= $utilisateur['role'] == 'passager_chauffeur' ? 'selected' : '' ?>>Passager/Chauffeur</option>
-                                    </select>
-                                </div>
 
                                 <div class="text-center mt-4">
                                     <button type="button" class="btn btn-primary" id="edit-btn" onclick="editForm()">

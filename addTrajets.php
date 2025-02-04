@@ -258,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <label for="preferences">Préférences supplémentaires</label>
                             <textarea id="preferences" name="preferences" rows="3"></textarea>
 
+                            <p>Si vous cochez la case vous accpetez les fumeurs / animaux</p>
                             <div class="trajet-checkbox">
                                 <input type="checkbox" id="fumeur" name="fumeur">
                                 <label for="fumeur">Fumeur</label>
