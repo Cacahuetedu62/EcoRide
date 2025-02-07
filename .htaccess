@@ -1,8 +1,7 @@
-# Autoriser l'accès à index.php
 <FilesMatch "^index\.php$">
-    Order Allow,Deny
-    Allow from all
+    Require all granted
 </FilesMatch>
+
 
 # Configuration de base
 <IfModule mod_rewrite.c>
@@ -10,7 +9,7 @@
     RewriteBase /
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
+    RewriteRule ^ /index.php [QSA,L]
 </IfModule>
 
 # Protection des fichiers sensibles
