@@ -6,5 +6,10 @@
         "ext-mongodb": "*",
         "ext-pdo": "*",
         "ext-pdo_mysql": "*"
+    },
+    "config": {
+        "platform": {
+            "php": "8.2.0"
+        }
     }
 }
