@@ -1,6 +1,4 @@
 <?php
-error_reporting(0);
-ini_set('display_errors', 0);
 require_once('lib/config.php');
 require_once('lib/pdo.php');
 
@@ -76,11 +74,9 @@ if (isset($_SESSION['utilisateur'])) {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder@2.1.1/dist/Control.Geocoder.js"></script>
-
 </head>
 
 
-</head>
 <body>
     <header>
         <div class="container-fluid navbar-ecoride px-3 py-2">
@@ -164,6 +160,8 @@ if (isset($_SESSION['utilisateur'])) {
             </div>
         </div>
     </header>
+
+    
 <script>
     function loadContent(page) {
         fetch(page)

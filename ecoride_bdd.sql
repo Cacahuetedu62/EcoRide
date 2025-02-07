@@ -470,3 +470,4 @@ CREATE TABLE admin_logs (
     ip_address VARCHAR(45),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+DESCRIBE avis;

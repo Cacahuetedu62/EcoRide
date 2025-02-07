@@ -1,4 +1,98 @@
 </main>
+<div class="cookie-consent" id="cookieConsent">
+    <div class="container">
+        <h3>Nous utilisons des cookies</h3>
+        <p>Nous utilisons des cookies pour améliorer votre expérience sur notre site. En continuant à naviguer, vous acceptez notre utilisation des cookies.</p>
+        <div class="text-center">
+            <button class="btn btn-primary" id="acceptCookies">J'accepte</button>
+            <button class="btn btn-secondary" id="declineCookies">Refuser</button>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cookieConsent = document.getElementById('cookieConsent');
+    const acceptCookies = document.getElementById('acceptCookies');
+    const declineCookies = document.getElementById('declineCookies');
+
+    // Vérifie si le consentement a déjà été donné
+    const consent = getCookie('cookieConsent');
+    if (consent !== 'accepted') {
+        cookieConsent.style.display = 'block';
+    }
+
+    acceptCookies.addEventListener('click', function() {
+        setCookie('cookieConsent', 'accepted', 365); // Cookie persistant pendant 1 an
+        enableNonEssentialCookies(); // Activer les cookies non essentiels
+        cookieConsent.style.display = 'none';
+    });
+
+    declineCookies.addEventListener('click', function() {
+        setCookie('cookieConsent', 'declined', null); // Cookie de session
+        disableNonEssentialCookies(); // Désactiver les cookies non essentiels
+        cookieConsent.style.display = 'none';
+    });
+
+    // Fonction pour activer ou désactiver les cookies non essentiels
+    function manageCookies() {
+        const consent = getCookie('cookieConsent');
+        if (consent === 'accepted') {
+            enableNonEssentialCookies(); // Activer les cookies non essentiels
+        } else if (consent === 'declined') {
+            disableNonEssentialCookies(); // Désactiver les cookies non essentiels
+        }
+    }
+
+    // Appeler la fonction pour gérer les cookies au chargement de la page
+    manageCookies();
+
+    // Fonction pour définir un cookie
+    function setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
+
+    // Fonction pour obtenir un cookie
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    // Fonction pour activer les cookies non essentiels
+    function enableNonEssentialCookies() {
+        // Ajoutez ici le code pour activer les cookies non essentiels
+        console.log('Cookies non essentiels activés');
+        // Exemple : activer Google Analytics
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'YOUR_GOOGLE_ANALYTICS_ID');
+    }
+
+    // Fonction pour désactiver les cookies non essentiels
+    function disableNonEssentialCookies() {
+        // Ajoutez ici le code pour désactiver les cookies non essentiels
+        console.log('Cookies non essentiels désactivés');
+        // Exemple : désactiver Google Analytics
+        window['ga-disable-YOUR_GOOGLE_ANALYTICS_ID'] = true;
+    }
+});
+</script>
+
+
+
+
 <footer>
     <div class="footer-container">
         <div class="footer-content">
@@ -51,9 +145,17 @@
                             <span>Cookies</span>
                         </a>
                     </li>
+                    <li class="footer-item">
+                        <a href="contact.php" class="footer-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="footer-icon"><path d="m480-80-10-120h-10q-142 0-241-99t-99-241q0-142 99-241t241-99q71 0 132.5 26.5t108 73q46.5 46.5 73 108T800-540q0 75-24.5 144t-67 128q-42.5 59-101 107T480-80Zm80-146q71-60 115.5-140.5T720-540q0-109-75.5-184.5T460-800q-109 0-184.5 75.5T200-540q0 109 75.5 184.5T460-280h100v54Zm-101-95q17 0 29-12t12-29q0-17-12-29t-29-12q-17 0-29 12t-12 29q0 17 12 29t29 12Zm-29-127h60q0-30 6-42t38-44q18-18 30-39t12-45q0-51-34.5-76.5T460-720q-44 0-74 24.5T344-636l56 22q5-17 19-33.5t41-16.5q27 0 40.5 15t13.5 33q0 17-10 30.5T480-558q-35 30-42.5 47.5T430-448Zm30-65Z"/></svg>                            
+                        <span>Contact</span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
             <p class="footer-copyright">© 2024/2025 Rogez Aurore - ECF EcoRide</p>
         </div>
     </div>
 </footer>
+</body>
+</html>

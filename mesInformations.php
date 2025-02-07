@@ -272,7 +272,7 @@ $stmt->execute($params);
 
 
                                 <div class="text-center mt-4">
-                                    <button type="button" class="btn btn-primary" id="edit-btn" onclick="editForm()">
+                                    <button type="button" class="buttonVert" id="edit-btn" onclick="editForm()">
                                         Modifier mes informations
                                     </button>
                                     <button type="submit" class="btn btn-success" id="submit-btn" style="display:none;">

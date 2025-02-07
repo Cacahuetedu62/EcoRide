@@ -46,7 +46,7 @@ require_once('templates/header.php');
             </div>
 
             <div>
-                <button class="btn btn-success m-3" type="submit" name="chercher">Chercher</button>
+                <button class="buttonVert" type="submit" name="chercher">Chercher</button>
             </div>
         </form>
     </div>

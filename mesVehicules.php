@@ -127,7 +127,7 @@ $voitures = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php endforeach; ?>
     </div>
 
-    <button id="ajouterVehiculeBtn" class="btn btn-primary mb-4">+ Ajouter un véhicule</button>
+    <button id="ajouterVehiculeBtn" class="buttonVert">+ Ajouter un véhicule</button>
 
     <!-- Formulaire d'ajout de véhicule -->
     <div id="ajouterForm" style="display:none;" class="card p-4 mb-4">

@@ -1,7 +1,6 @@
 <?php
 require_once('templates/header.php');
 
-
 $_SESSION['csrf_token'] = $_SESSION['csrf_token'] ?? bin2hex(random_bytes(32));
 
 // Vérifie si l'utilisateur est connecté
@@ -22,28 +21,37 @@ if (isset($_SESSION['message'])) {
 
 // Requête SQL pour récupérer les trajets
 $sql = "SELECT DISTINCT
-           t.id,
-           t.date_depart,
-           t.heure_depart,
-           t.lieu_arrive,
-           t.lieu_depart,
-           COALESCE(r.statut, 'en_attente') AS statut,
-           GROUP_CONCAT(DISTINCT CONCAT(u_passager.prenom, ' ', u_passager.nom) SEPARATOR ' | ') AS participants,
-           GROUP_CONCAT(DISTINCT CONCAT(p.nom_passager, ' ', p.prenom_passager) SEPARATOR ' | ') AS invites,
-           r.id AS id_reservation,
-           CASE
-               WHEN tu.utilisateur_id = :utilisateur_id THEN 'chauffeur'
-               ELSE 'passager'
-           END AS role
-       FROM trajets t
-       JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
-       LEFT JOIN reservations r ON t.id = r.trajet_id
-       LEFT JOIN utilisateurs u_passager ON r.utilisateur_id = u_passager.id
-       LEFT JOIN passagers p ON r.id = p.reservation_id
-       WHERE (tu.utilisateur_id = :utilisateur_id OR r.utilisateur_id = :utilisateur_id)
-         AND (r.statut != 'termine' OR r.statut IS NULL)
-       GROUP BY t.id, r.id, tu.utilisateur_id
-       ORDER BY t.date_depart";
+    t.id,
+    t.date_depart,
+    t.heure_depart,
+    t.lieu_arrive,
+    t.lieu_depart,
+    COALESCE(r.statut, 'en_attente') AS statut,
+    r.date_reservation,
+    (
+        SELECT GROUP_CONCAT(DISTINCT CONCAT(u.prenom, ' ', u.nom) SEPARATOR ' | ')
+        FROM reservations r2
+        JOIN utilisateurs u ON r2.utilisateur_id = u.id
+        WHERE r2.trajet_id = t.id
+    ) AS participants,
+    (
+        SELECT GROUP_CONCAT(DISTINCT CONCAT(p.prenom_passager, ' ', p.nom_passager) SEPARATOR ' | ')
+        FROM passagers p
+        JOIN reservations r3 ON p.reservation_id = r3.id
+        WHERE r3.trajet_id = t.id
+    ) AS invites,
+    r.id AS id_reservation,
+    CASE
+        WHEN tu.utilisateur_id = :utilisateur_id THEN 'chauffeur'
+        ELSE 'passager'
+    END AS role
+FROM trajets t
+JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
+LEFT JOIN reservations r ON t.id = r.trajet_id
+WHERE (tu.utilisateur_id = :utilisateur_id OR r.utilisateur_id = :utilisateur_id)
+  AND (r.statut != 'termine' OR r.statut IS NULL)
+GROUP BY t.id, r.id, tu.utilisateur_id
+ORDER BY r.date_reservation DESC";
 
 $statement = $pdo->prepare($sql);
 $statement->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
@@ -51,22 +59,25 @@ $statement->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
 try {
     $statement->execute();
     $trajets = $statement->fetchAll(PDO::FETCH_ASSOC);
+    error_log("Trajets récupérés : " . print_r($trajets, true));
 } catch (PDOException $e) {
+    error_log("Erreur lors de la récupération des trajets : " . $e->getMessage());
     echo "Erreur lors de la récupération des trajets : " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
     exit;
 }
+
 ?>
 
-<h2 class="section-title">Mes trajets à venir</h2>
+<h2 class="section-title p-4">Mes trajets à venir</h2>
 <div class="trajets-container">
     <!-- Section Chauffeur -->
-    <div class="trajets-column">
+    <div class="trajets-column m-3">
         <h3 class="trajet-title">Trajets en tant que chauffeur</h3>
         <?php
         $trajets_chauffeur = array_filter($trajets, fn($trajet) => $trajet['role'] === 'chauffeur');
         if (!empty($trajets_chauffeur)): ?>
             <?php foreach ($trajets_chauffeur as $trajet): ?>
-                <div class="trajet-card" id="trajet-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                <div class="trajet-card m-3" id="trajet-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
                     <div class="trajet-header">
                         <h5>Trajet n° <?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?></h5>
                         <span class="badge badge-<?= $trajet['statut'] ?>">
@@ -83,7 +94,7 @@ try {
                             <p><i class="fas fa-calendar"></i> <?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?></p>
                             <p><i class="fas fa-clock"></i> <?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?></p>
                             <?php if (!empty($trajet['participants'])): ?>
-                                <p><i class="fas fa-users"></i>Reservé par : <?= htmlspecialchars($trajet['participants'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <p><i class="fas fa-users"></i> Réservé par : <?= htmlspecialchars($trajet['participants'], ENT_QUOTES, 'UTF-8') ?></p>
                             <?php endif; ?>
                             <?php if (!empty($trajet['invites'])): ?>
                                 <p><i class="fas fa-user-friends"></i> Ses invités : <?= htmlspecialchars($trajet['invites'], ENT_QUOTES, 'UTF-8') ?></p>
@@ -99,14 +110,16 @@ try {
             <button type="submit" class="btn btn-success">Lancer le trajet</button>
         </form>
     <?php else: ?>
-        <div class="alert alert-warning">Impossible de lancer le trajet sans réservation</div>
+        <div class="alert alert-warning d-flex">Impossible de lancer le trajet sans réservation</div>
     <?php endif; ?>
 
     <?php if ($trajet['statut'] === 'en_attente'): ?>
+
+                        <div class="annulation-details d-flex">
                                 <form method="POST" action="annulerTrajet.php" onsubmit="return confirmAnnulation(event)">
                                     <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="role" value="conducteur">
-                                    <button type="submit" class="btn btn-danger">Annuler la réservation</button>
+                                    <button type="submit" class="btn btn-danger m-2">Annuler la réservation</button>
                                 </form>
                             <?php endif; ?>
 
@@ -116,8 +129,9 @@ try {
                                     <button type="submit" class="btn btn-danger">Terminer le trajet</button>
                                 </form>
                             <?php endif; ?>
-                            <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary">Détails</a>
+                            <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary m-2">Détails</a>
                         </div>
+                    </div>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -129,7 +143,7 @@ try {
     </div>
 
     <!-- Section Passager -->
-    <div class="trajets-column">
+    <div class="trajets-column m-3">
         <h3 class="trajet-title">Trajets en tant que passager</h3>
         <?php
         $trajets_passager = array_filter($trajets, fn($trajet) => $trajet['role'] === 'passager');

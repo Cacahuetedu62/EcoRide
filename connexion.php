@@ -47,8 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Maintenant seulement, on inclut le header et le contenu HTML
 require_once('templates/header.php');
 ?>
-
-<main>
+<a href="index.php">Retour à l'acceuil</a>
 <section class="loginRegister d-flex justify-content-center mt-5">
     <div class="loginRegister-container p-2">
         <h2 class="text-center">Se connecter</h2>
@@ -59,13 +58,13 @@ require_once('templates/header.php');
             <label for="password">Mot de passe :</label>
             <input type="password" name="password" id="password" required>
 
-            <button class="btnInscription p-3" type="submit">Se connecter</button>
+            <button class="buttonVert m-3" type="submit">Se connecter</button>
         </form>
         <div class="text-center">
             <p>Pas de compte ? <a href="inscription.php">Créer un compte</a></p>
         </div>
     </div>
-</main>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

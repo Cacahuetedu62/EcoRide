@@ -59,6 +59,8 @@ require_once('templates/header.php');
         </div>
     </div>
 
+
+
         <div class="row carousselImageDescription">
             <div class="col-lg-4 d-flex flex-column align-items-center text-center">
                 <img src="images/poignee_de_main.jpg" class="bd-placeholder-img rounded-circle" width="200" height="150" alt="poignée de main">

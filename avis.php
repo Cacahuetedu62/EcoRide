@@ -17,17 +17,32 @@ if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
 if (isset($_GET['trajet_id'])) {
     $trajet_id = (int)$_GET['trajet_id'];
 
-    // Vérifier si le trajet existe dans la base de données en utilisant la table reservations
     $sqlCheck = "
-        SELECT t.*
-        FROM trajets t
-        JOIN reservations r ON t.id = r.trajet_id
-        WHERE t.id = :trajet_id AND r.utilisateur_id = :utilisateur_id
-    ";
-    $stmtCheck = $pdo->prepare($sqlCheck);
-    $stmtCheck->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
-    $stmtCheck->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
-    $stmtCheck->execute();
+    SELECT t.*, tu.utilisateur_id as conducteur_id
+    FROM trajets t
+    JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
+    JOIN reservations r ON t.id = r.trajet_id
+    WHERE t.id = :trajet_id 
+    AND r.utilisateur_id = :utilisateur_id
+    AND tu.role = 'conducteur'
+";
+$stmtCheck = $pdo->prepare($sqlCheck);
+$stmtCheck->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+$stmtCheck->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
+$stmtCheck->execute();
+$trajet = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+if ($trajet) {
+    // Utiliser l'ID du conducteur lors de l'insertion de l'avis
+    $sqlInsert = "INSERT INTO avis (commentaires, note, statut, utilisateur_id, trajet_id) 
+                  VALUES (:commentaires, :note, :statut, :conducteur_id, :trajet_id)";
+    $stmtInsert = $pdo->prepare($sqlInsert);
+    $stmtInsert->bindParam(':commentaires', $commentaires, PDO::PARAM_STR);
+    $stmtInsert->bindParam(':note', $note, PDO::PARAM_INT);
+    $stmtInsert->bindParam(':statut', $statut, PDO::PARAM_STR);
+    $stmtInsert->bindParam(':conducteur_id', $trajet['conducteur_id'], PDO::PARAM_INT);
+    $stmtInsert->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+}
 
     if ($stmtCheck->rowCount() > 0) {
         // Le trajet existe et appartient à l'utilisateur connecté

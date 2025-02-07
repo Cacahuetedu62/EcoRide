@@ -70,9 +70,8 @@ $credits_suffisants = $trajet['credits'] >= ($trajet['prix_personnes'] * $nb_per
 ?>
 
 <div class="container">
-    <a href="javascript:history.back()" class="btn btn-secondary mt-3">
-        <i class="fas fa-arrow-left"></i> Retour
-    </a>
+<a href="javascript:history.back()" class="btn btn-secondary p-2">Retour</a>
+
 
     <div class="container">
         <!-- Titre principal -->
@@ -120,11 +119,12 @@ $credits_suffisants = $trajet['credits'] >= ($trajet['prix_personnes'] * $nb_per
                 <p>Prix par personne : <?= $trajet['prix_personnes'] ?> €</p>
 
                 <?php
-                // Récupérer les passagers invités à partir de la table passagers
-                $invites = explode(' | ', $trajet['invites']); // les invités sont séparés par ' | '
-                $total_passagers = count($invites) + 1; // Inclure l'utilisateur principal
-                $prix_total = $trajet['prix_personnes'] * $total_passagers;
-                ?>
+// Récupérer les passagers invités à partir de la table passagers
+$invites = isset($trajet['invites']) && !is_null($trajet['invites']) ? explode(' | ', $trajet['invites']) : [];
+$total_passagers = count($invites) + 1; // Inclure l'utilisateur principal
+$prix_total = $trajet['prix_personnes'] * $total_passagers;
+?>
+
 
                 <p><strong>Invités :</strong><br>
                 <?php
@@ -149,16 +149,9 @@ $credits_suffisants = $trajet['credits'] >= ($trajet['prix_personnes'] * $nb_per
             <div class="col-md-6 departArrive">
                 <h4>Informations sur le chauffeur</h4>
                 <p class="profilPhotoPseudo">
-                    <!-- Photo du chauffeur -->
-                    <img
-                        src="<?= htmlspecialchars($trajet['photo'] ?? 'images/default-avatar.png') ?>"
-                        alt="Photo du chauffeur"
-                        class="rounded-circle"
-                        width="75"
-                        height="75"
-                    >
-                    <?= htmlspecialchars($trajet['pseudo']) ?>
-                </p>
+            <img src="<?= htmlspecialchars($trajet['photo']) ?>" alt="Photo du chauffeur" class="bd-placeholder-img rounded-circle" width="75" height="75">
+            <?= htmlspecialchars($trajet['pseudo']) ?>
+        </p>
 
                 <!-- Note du chauffeur -->
                 <p>Note :
@@ -171,7 +164,7 @@ $credits_suffisants = $trajet['credits'] >= ($trajet['prix_personnes'] * $nb_per
 
                 <!-- Lien vers les commentaires -->
                 <p>
-                    <a href="commentaires.php?id=<?= htmlspecialchars($trajet['utilisateur_id']) ?>" class="btn btn-primary btn-sm">Voir les commentaires</a>
+                    <a href="commentaires.php?id=<?= htmlspecialchars($trajet['utilisateur_id']) ?>" class="buttonVert">Voir les commentaires</a>
                 </p>
             </div>
 

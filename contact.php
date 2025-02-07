@@ -1,11 +1,7 @@
 <?php
-define('NO_DB_REQUIRED', true);
-error_reporting(0);
-ini_set('display_errors', 0);
 require_once('templates/header.php');
 ?>
 
-<main>
     <div class="p-4 p-md-5 mb-4 rounded text-body-emphasis imageSAV">
         <div class="col-lg-6 px-0">
             <h3 class="display-4">Nous sommes à votre écoute</h3>
@@ -99,7 +95,7 @@ require_once('templates/header.php');
             </div>
         </div>
     </div>
-</main>
+
 
 <?php
 require_once('templates/footer.php');

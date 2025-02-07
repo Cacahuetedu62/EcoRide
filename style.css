@@ -2,8 +2,6 @@
 	margin: 0;
 	padding: 0;
     font-family: "Roboto", sans-serif;
-    font-weight: 120;
-    font-style: normal;
 	text-decoration: none;
     font-size: 18px;
 }
@@ -14,7 +12,6 @@ p{
 
 html, body {
     height: 100%; 
-    margin: 0;
     display: flex;
     flex-direction: column;
 }
@@ -29,22 +26,14 @@ a, a:link, a:visited, a:hover, a:active {
     cursor: pointer;
 }
 
-a:hover {
-    color: inherit;
-    text-decoration: none;
-}
-
-
 footer {
     background-color:#F4B749 ;
     margin-top: auto;    
-    border-top: 1px solid #dee2e6;
-    padding: 1rem 0;
+    padding: 1% 0;
     width: 100%;
 }
 
 .footer-container {
-    max-width: 1200px;
     margin: 0 auto;
     padding: 0 1rem;
 }
@@ -63,22 +52,14 @@ footer {
     gap: 2rem;
 }
 
-.footer-item {
-    margin: 0;
-}
-
 .footer-link {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-decoration: none;
     color: #212529;
-    font-size: 0.875rem;
+    font-size: 1rem;
     gap: 0.5rem;
-}
-
-.footer-link:hover {
-    color: #0d6efd;
 }
 
 .footer-icon {
@@ -117,13 +98,13 @@ footer {
 
 .descriptionHistoire{
     text-align: center;
-    margin: 1vh;
+    margin: 10vh;
+    font-size: 2vh;
     color: antiquewhite;
 }
 
 .carousselImageDescription{
-    margin: 6vh 6vh 2vh 6vh;
-    padding: 3vh;
+    margin: 3vh 10vh 3vh 10vh;
     display: flex;
     justify-content: space-around;
     flex-wrap: wrap;
@@ -134,16 +115,15 @@ footer {
 }
 
 .containHistoire{
-    --bs-gutter-x: 0;
-    margin: 2vh;
+    margin: 4vh;
 }
 
 .buttonVert {
-    background-color: #06481D; 
+    background-color: #295e3c; 
     color: white; 
     font-weight: bold; 
-    padding: 10px 20px; 
-    font-size: 18px; 
+    padding: 2% 3%; 
+    font-size: 1.25rem; 
     border: none; 
     border-radius: 8px; 
     transition: all 0.3s ease; 
@@ -151,18 +131,9 @@ footer {
     text-decoration: none;
 }
 
-
-.buttonVert a {
-    text-decoration: none;
-    color: white;
-    font-weight: bold; 
-    padding: 10px 20px; 
-    font-size: 18px; 
-}
-
 .buttonVert:hover {
-    background-color: #05521C; /* Change la couleur au survol */
-    transform: translateY(-4px); /* Légère surélévation du bouton au survol */
+    background-color: #519168; /* Change la couleur au survol */
+    transform: translateY(-4px); /* Surélévation du bouton au survol */
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Ombre plus marquée au survol */
 }
 
@@ -183,12 +154,9 @@ footer {
     margin: 2vh;
 }
 
-
-/* Mise en forme générale */
 .loginRegister {
     align-items: center;
-    min-height: 100vh;  /* Permet de centrer la section verticalement */
-    padding: 20px;    
+    min-height: 100vh;
     align-items: flex-start;
 }
 
@@ -197,7 +165,6 @@ footer {
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 400px;  /* Limite la largeur de la boîte de connexion */
 }
 
 .form-group {
@@ -218,34 +185,6 @@ input[type="text"], input[type="password"] {
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 16px;
-}
-
-.btnInscription {
-    width: 100%;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    transition: background-color 0.3s;
-    margin: 10px;
-}
-
-button:hover {
-    background-color: #45a049;
-}
-
-.text-center p {
-    font-size: 14px;
-}
-
-.text-center a {
-    color: #007bff;
-    text-decoration: none;
-}
-
-.text-center a:hover {
-    text-decoration: underline;
 }
 
 .departArrive {
@@ -276,29 +215,13 @@ button:hover {
     padding: 10px;
     border-radius: 8px;
  }
- 
- .buttonVert {
-    background: #27ae60;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 6px;
-    border: none;
-    font-weight: 500;
-    transition: background 0.3s;
- }
- 
- .buttonVert:hover {
-    background: #219a52;
- }
- 
+
  #errorMessage {
-    color: #e74c3c;
+    color: red;
     padding: 10px;
     margin: 10px 0;
     border-radius: 4px;
  }
-
-
 
 .profilPhotoPseudo img{
     margin:1vh;
@@ -328,56 +251,6 @@ width: 400px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-#errorMessage{
-    color: red;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.form-page .custom-section2 {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* La section prend au moins toute la hauteur de la fenêtre */
-    background-image: url('images/route_cote_2.jpg'); /* Remplace par ton image */
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-}
-
-
-
-/* Espacement des éléments du formulaire (label, input, etc.) dans la page spécifique */
-.form-page form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.form-group, .form-group input, .form-group label{
-    width: 400px;
-}
-
-.form-page form label, .form-page form input, .form-page form select, .form-page form textarea, .form-page form button {
-    width: 100%; /* Les éléments occupent toute la largeur disponible */
-    margin-bottom: 5px; /* Réduit l'espacement entre les éléments */
-    width: 70%;
-}
-
-/* Taille des champs du formulaire dans la page spécifique */
-.form-page input, .form-page select, .form-page textarea {
-    padding: 4px;
-    font-size: 0.9rem; /* Réduit la taille du texte des champs */
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-
-/* Ajuster la taille de la textarea dans la page spécifique */
-.form-page textarea {
-    height: 120px; /* Réduit la hauteur de la textarea */
-}
-
 .loginRegister-container {
     background-color: #f9f9f9;
     padding: 30px;
@@ -387,162 +260,11 @@ width: 400px;
     max-width: 500px;
 }
 
-.form-page p {
-    font-size: 12px;
-}
-
-.vehicule{
-    box-shadow: 0 12px 50px rgba(0, 0, 0, 0.4);  /* Ombre très visible avec une opacité plus élevée */
-    padding: 15px;
-}
-
-.autresParticipants{
-    background-color: pink;
-    border: solid black 2px;
-    margin: 1vh;
-    padding: 1vh;
-}
-
 .commentaires{
     border: solid black 2px;
     padding: 1vh;
     margin: 10vh;
 }
-
-.colonnesConducPassagers{
-    padding: 2vh;
-}
-
-.colonnesConducPassagers h4{
-    color : whitesmoke;
-    font-size: 40px;
-    background-color: #05521C;
-    padding: 1vh;
-}
-
-.colonnesConducPassagers h5{
-    color : whitesmoke;
-    font-size: 20px;
-    background-color: #8d8b2e;
-    padding: 1vh;
-}
-
-/* Effet givré */
-.givre {
-    position: relative;
-    overflow: hidden;
-    padding: 2vh;
-    margin: 2vh;
-    width: 50vh;
-    border-radius: 8px;
-}
-
-
-.givre::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.6); /* Voile blanc semi-transparent */
-    backdrop-filter: blur(8px); /* Flou pour l'effet givré */
-    z-index: 1;
-}
-
-/* Assurez-vous que le contenu est au-dessus de l'effet givré */
-.givre > * {
-    position: relative;
-    z-index: 2;
-}
-
-/* Amélioration de l'aspect de l'effet givré pour les éléments texte ou autres */
-.givre .vehicule {
-    background-color: rgba(255, 255, 255, 0.8); /* Fond clair et givré pour chaque trajet */
-    border-radius: 8px; /* Bord arrondi (facultatif) */
-    padding: 15px;
-    margin-bottom: 15px;
-}
-
-.titleTrajets span{
-    font-size: 25px;          /* Taille du texte */
-    font-weight: bold;        /* Texte en gras */
-    text-align: center;       /* Centrer le texte */
-}
-
-.titleTrajets p{
-    font-size: 25px;          /* Taille du texte */
-    font-weight: bold;        /* Texte en gras */
-}
-
-
-.point-en-cours {
-    width: 10px;
-    height: 10px;
-    background-color: orange;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 10px;
-}
-
-.point-termine {
-    width: 10px;
-    height: 10px;
-    background-color: green;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 10px;
-}
-
-.admin-container {
-    max-width: 500px;
-    margin: 50px 0px 50px 0px;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
-
-h1, h2, h3 {
-    color: #333;
-}
-
-.employee-form-container {
-    margin-bottom: 40px;
-    width: 500px;
-}
-
-.employee-form-container form {
-    display: flex;
-    flex-direction: column;
-}
-
-.employee-form-container label {
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-.employee-form-container input {
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.employee-form-container button {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.employee-form-container button:hover {
-    background-color: #0056b3;
-}
-
 .message {
     background-color: #f8d7da;
     color: #721c24;
@@ -557,17 +279,6 @@ h1, h2, h3 {
     margin: 50px 350px 50px 350px;
 }
 
-.total-credits {
-    background-color: #e9ecef;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
-.total-credits h3 {
-    margin: 0;
-}
-
 #creditsChart {
     max-width: 100%;
     height: 400px;
@@ -580,48 +291,52 @@ h1, h2, h3 {
     transform: translateY(-10px);
     box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
 }
-
 .cookie-consent {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background: rgba(33, 37, 41, 0.95);
     color: white;
     z-index: 9999;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    padding: 2rem;
+    border-radius: 10px;
     display: none;
+    width: 80%;
+    max-width: 600px;
 }
 
 .cookie-consent h3 {
     color: white;
     margin-bottom: 1rem;
+    font-size: 1.5rem;
 }
 
 .cookie-consent p {
-    margin-bottom: 0;
-    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.cookie-consent .text-center {
+    text-align: center;
+}
+
+.cookie-consent .btn {
+    margin: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
 }
 
 @media (max-width: 768px) {
-    .cookie-consent .text-end {
-        text-align: center !important;
-        margin-top: 1rem;
+    .cookie-consent {
+        width: 90%;
     }
-    
+
     .cookie-consent .btn {
         width: 100%;
         margin: 0.5rem 0;
     }
-}
-
-.cookie-animation {
-    position: relative;
-    margin: 2rem auto;
-    width: 120px;
-    height: 120px;
-    background: url('https://cdn-icons-png.flaticon.com/512/3038/3038970.png') no-repeat center/cover;
-    animation: biteCookie 4s infinite;
 }
 
 .cookie-policy {
@@ -788,47 +503,10 @@ h1, h2, h3 {
     left: 0;
 }
 
-.address-card {
-    background: #fff;
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-top: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
 
-/* Style spécial pour la section cookies */
 .cookies-section {
     background: #f8f9fa;
     border: 2px solid #4CAF50;
-}
-
-.cookie-highlight {
-    padding: 2rem;
-    text-align: center;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.cookie-highlight p {
-    font-size: 1.1rem;
-    color: #2c3e50;
-    margin-bottom: 1.5rem;
-}
-
-.cookie-highlight .btn-primary {
-    background-color: #4CAF50;
-    border-color: #4CAF50;
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-}
-
-.cookie-highlight .btn-primary:hover {
-    background-color: #388E3C;
-    border-color: #388E3C;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 /* Responsive design */
@@ -851,7 +529,7 @@ h1, h2, h3 {
     }
 }
 
-/* Styles pour les CGV */
+
 .cgv-policy {
     max-width: 1200px;
     margin: 0 auto;
@@ -869,11 +547,6 @@ h1, h2, h3 {
     padding: 2rem;
     border-radius: 10px;
     margin-bottom: 3rem;
-}
-
-.lead {
-    font-size: 1.2rem;
-    color: #666;
 }
 
 .toc-card {
@@ -923,7 +596,6 @@ h1, h2, h3 {
 }
 
 .definition-card h4 {
-    color: #4CAF50;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid #e9ecef;
@@ -954,19 +626,6 @@ h1, h2, h3 {
     padding: 2rem;
     background: #f8f9fa;
     border-radius: 8px;
-}
-
-.cookie-highlight .btn-primary {
-    background-color: #4CAF50;
-    border-color: #4CAF50;
-    padding: 1rem 2rem;
-    transition: all 0.3s ease;
-}
-
-.cookie-highlight .btn-primary:hover {
-    background-color: #388E3C;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 @media (max-width: 768px) {
@@ -1012,8 +671,6 @@ h1, h2, h3 {
     border-color: #4CAF50;
 }
 
-/* addTrajets.php  */
-
 .form-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -1031,16 +688,6 @@ h1, h2, h3 {
     flex: 1;
 }
 
-h3 {
-    margin: 15px 0 10px 0;
-    color: #06481D;
-    font-size: 1.1em;
-}
-
-.form-group {
-    margin-bottom: 12px;
-}
-
 .form-group label {
     display: block;
     margin-bottom: 4px;
@@ -1055,31 +702,6 @@ input, select, textarea {
     font-size: 0.9em;
 }
 
-.radio-groups {
-    margin: 15px 0;
-}
-
-.radio-group {
-    margin-bottom: 10px;
-}
-
-.radio-options {
-    display: flex;
-    gap: 15px;
-    margin-top: 5px;
-}
-
-.radio-options input[type="radio"] {
-    width: auto;
-    margin-right: 5px;
-}
-
-.form-actions {
-    text-align: center;
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
-}
 
 .btn-primary, .btn-secondary {
     padding: 8px 20px;
@@ -1089,39 +711,9 @@ input, select, textarea {
     margin: 0 10px;
 }
 
-.btn-primary {
-    background: #007bff;
-    border-color: #0056b3;
-    color: #fff;
-    font-weight: 500;
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
-
 textarea {
     resize: vertical;
-    min-height: 60px;
-}
-/* Amélioration des cartes des trajets */
-.trajet-card {
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin: 0 auto 20px;
-    padding: 20px;
-    max-width: 700px;
-}
-
-
-/* Header de la carte */
-.trajet-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
+    min-height: 8rem;
 }
 
 .trajet-header h5 {
@@ -1138,13 +730,13 @@ textarea {
     text-transform: capitalize;
 }
 
-/* Styles des badges */
+
 .badge-en_attente { background: #f1c40f; color: #fff; }
 .badge-en_cours { background: #27ae60; color: #fff; }
 .badge-termine { background: #7f8c8d; color: #fff; }
 .badge-annule { background: #e74c3c; color: #fff; }
 
-/* Corps de la carte */
+
 .trajet-body {
     display: flex;
     flex-direction: column;
@@ -1153,41 +745,25 @@ textarea {
     color: #555;
 }
 
-/* Destinations */
-.trajet-destinations {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #2980b9;
-    margin: 10px 0;
-}
-
 .trajet-destinations span {
     font-size: 1.5rem;
     color: #3498db;
 }
 
-/* Actions */
 .trajet-actions {
     display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
     gap: 10px;
-    margin-top: 15px;
+    margin-top: 2rem;
 }
 
-.trajet-actions .btn {
-    flex: 1;
-    min-width: 120px;
-    padding: 10px 15px;
-    font-size: 0.9rem;
-    border-radius: 8px;
-    border: none;
-    transition: background 0.3s ease, transform 0.2s ease;
-    cursor: pointer;
+.annulation-details{
+    background: #f8f9fa;
+    border-radius: 10px;
+    flex-direction: column;
+}
+
+.btn-mesTrajets{
+    background-color: yellow;
 }
 
 .trajet-actions .btn-primary {
@@ -1229,7 +805,7 @@ textarea {
     max-width: 700px;
 }
 
-/* Container principal */
+
 .form-page {
     padding: 20px;
     max-width: 1400px;
@@ -1243,13 +819,12 @@ textarea {
     padding: 20px;
 }
 
-/* Titres */
+
 .section-title {
     font-size: 2rem;
     font-weight: bold;
     color: #2c3e50;
     text-align: center;
-    margin-bottom: 30px;
     position: relative;
     padding-bottom: 15px;
 }
@@ -1276,42 +851,26 @@ textarea {
     margin-bottom: 25px;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    text-align: center;
 }
 
-/* Cartes de trajets */
-.trajet-card {
-    background: #ffffff;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    margin-bottom: 25px;
-    padding: 25px;
-}
-
-/* En-tête de la carte */
-.trajet-header {
+ .trajet-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 15px;
     border-bottom: 1px solid #eee;
-}
+} 
 
-/* Badges */
+
 .badge {
-    padding: 8px 16px;
     border-radius: 20px;
     font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: capitalize;
+    border-radius: 4px;
+    margin-left: 5px;
 }
 
-.badge-en_attente { background: #f1c40f; color: #fff; }
-.badge-en_cours { background: #27ae60; color: #fff; }
-.badge-termine { background: #7f8c8d; color: #fff; }
-.badge-annule { background: #e74c3c; color: #fff; }
-
-/* Destinations */
 .trajet-destinations {
     display: flex;
     align-items: center;
@@ -1329,7 +888,7 @@ textarea {
     font-weight: bold;
 }
 
-/* Détails du trajet */
+
 .trajet-details {
     display: grid;
     gap: 12px;
@@ -1349,12 +908,6 @@ textarea {
     width: 20px;
 }
 
-/* Boutons d'action */
-.trajet-actions {
-    display: flex;
-    gap: 15px;
-    margin-top: 20px;
-}
 
 .btn {
     padding: 10px 20px;
@@ -1387,7 +940,6 @@ textarea {
     filter: brightness(110%);
 }
 
-/* Message d'absence de trajet */
 .no-trajet {
     text-align: center;
     padding: 30px;
@@ -1436,7 +988,6 @@ textarea {
     }
 }
 
-/* Styles pour la pagination */
 .pagination {
     display: flex;
     justify-content: center;
@@ -1471,73 +1022,44 @@ textarea {
     border-color: #007bff;
 }
 
-/* styles.css */
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
-
-.section-title {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-/* À ajouter dans votre fichier style.css */
-.vehicle-card {
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 15px;
+.comment-card {
     background-color: #f8f9fa;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.vehicle-form-wrapper {
-    max-width: 600px;
-    margin: 20px auto;
-}
-
-.vehicle-input-group {
-    margin-bottom: 15px;
-}
-
-.vehicle-action-button--delete {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-}
-
-.vehicle-action-button--add {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-}
-
-.vehicle-notification {
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 4px;
-    font-weight: 500;
-}
-
-.vehicle-notification--error {
-    background-color: #fff3f3;
-    color: #dc3545;
-    border: 1px solid #dc3545;
-}
-
-.vehicle-notification--success {
-    background-color: #f0fff0;
-    color: #28a745;
-    border: 1px solid #28a745;
-}
+    border-radius: 10px;
+ }
+ 
+ .rating-stars {
+    color: #ffc107;
+    font-size: 1.2em;
+ }
+ 
+ .comment-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+ }
+ 
+ .comment-author {
+    font-weight: bold;
+    color: #495057;
+ }
+ 
+ .comment-date {
+    color: #6c757d;
+    font-size: 0.8em;
+ }
+ 
+ .rating-note {
+    font-weight: bold;
+    color: #F4B749 ;
+ }
 
 .avis-form-container {
     background-color: #fff;
@@ -1600,7 +1122,7 @@ textarea {
     margin-bottom: 20px;
 }
 
-/* Styles généraux */
+
 .dashboard-container {
     background-color: #fff;
     padding: 20px;
@@ -1608,7 +1130,7 @@ textarea {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 90%;
     margin: 20px auto;
-    max-width: 1600px; /* Augmenter la largeur maximale pour le mode paysage */
+    max-width: 1600px; 
 }
 
 .dashboard-title {
@@ -1654,13 +1176,6 @@ textarea {
     margin-bottom: 5px;
 }
 
-.badge {
-    display: inline-block;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 12px;
-    margin-left: 5px;
-}
 
 .badge-conducteur {
     background-color: #28a745;
@@ -1733,7 +1248,6 @@ textarea {
     color: #721c24;
 }
 
-/* Modal styles */
 .modal {
     display: none;
     position: fixed;
@@ -1782,13 +1296,13 @@ textarea {
     color: #856404;
 }
 
-/* Amélioration de l'accessibilité */
+
 .modal:focus-within {
     outline: 2px solid #007bff;
     outline-offset: -2px;
 }
 
-/* Style pour le contenu du commentaire */
+
 .comment-content {
     white-space: pre-wrap;
     word-break: break-word;
@@ -1799,7 +1313,6 @@ textarea {
     border-radius: 4px;
 }
 
-/* Style pour les commentaires dangereux */
 .commentaire-dangereux {
     background-color: #ffebee;
     border: 2px solid #ff1744;
@@ -1860,14 +1373,14 @@ textarea {
     background-color: #d50000;
 }
 
-/* Style pour les commentaires normaux */
+
 .commentaire-normal {
     padding: 5px;
     background-color: #f5f5f5;
     border-radius: 4px;
 }
 
-/* Style amélioré pour le message d'avertissement dans la modal */
+
 .warning-message {
     margin-top: 15px;
     padding: 15px;
@@ -1900,7 +1413,7 @@ textarea {
     margin: 5px 0;
 }
 
-/* Style pour la modal */
+
 .modal-content {
     max-width: 600px;
     width: 90%;
@@ -1992,7 +1505,7 @@ textarea {
     justify-content: center;
 }
 
-/* Conteneurs d'information avec une mise en page moderne */
+
 .stats-info-container {
     background-color: #dceeb4;
     padding: 20px;
@@ -2018,10 +1531,10 @@ textarea {
 .stats-info-number {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #2980B9; /* Couleur bleue pour uniformiser */
+    color: #2980B9; 
 }
 
-/* Adaptation des titres */
+
 .stats-page h3 {
     font-size: 1.2rem;
     font-weight: 500;
@@ -2029,7 +1542,7 @@ textarea {
     margin: 20px 0;
 }
 
-/* Pour les petits écrans */
+
 @media (max-width: 768px) {
     .stats-info-container {
         flex-direction: column;
@@ -2056,7 +1569,7 @@ textarea {
     padding: 12px 24px;
     font-size: 16px;
     font-weight: bold;
-    color: #333; /* Texte foncé pour contraste */
+    color: #295e3c; 
     background: #DCEEB4;
     border-radius: 8px;
     text-decoration: none;
@@ -2094,7 +1607,7 @@ textarea {
     justify-content: space-between;
 }
 
-/* Conteneurs des formulaires */
+
 .admin-employee-container,
 .admin-user-container {
     background-color: white;
@@ -2105,7 +1618,7 @@ textarea {
     min-width: 300px;
 }
 
-/* Style des formulaires */
+
 .admin-management-form {
     display: flex;
     flex-direction: column;
@@ -2132,7 +1645,7 @@ textarea {
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
-/* Boutons */
+
 .admin-action-btn {
     background-color: #3498db;
     color: white;
@@ -2164,7 +1677,7 @@ textarea {
     background-color: #219a52;
 }
 
-/* Message de confirmation/erreur */
+
 .admin-status-message {
     padding: 1rem;
     margin-bottom: 1rem;
@@ -2173,7 +1686,7 @@ textarea {
     border-left: 4px solid #3498db;
 }
 
-/* Responsive design */
+
 @media (max-width: 768px) {
     .admin-content-section {
         flex-direction: column;
@@ -2252,7 +1765,7 @@ textarea {
         }
 
         .btn-connect {
-            background-color: #28a745; /* Vert */
+            background-color: #28a745; 
         }
 
         .btn-connect:hover {
@@ -2260,7 +1773,7 @@ textarea {
         }
 
         .btn-disconnect {
-            background-color: #dc3545; /* Rouge */
+            background-color: #dc3545; 
         }
 
         .btn-disconnect:hover {
@@ -2372,19 +1885,13 @@ font-size: 25px;
 .trajet-form-wrapper {
     max-width: 800px;
     margin: auto;
-    background: rgb(166, 163, 163);
+    background: rgb(244, 242, 242);
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.trajet-title {
-    text-align: center;
-    color: #007bff;
-    margin-bottom: 20px;
-}
 
-/* Alertes */
 .trajet-alert {
     padding: 15px;
     border-radius: 8px;
@@ -2401,7 +1908,7 @@ font-size: 25px;
     color: #155724;
 }
 
-/* Cartes */
+
 .trajet-card {
     background: white;
     border-radius: 10px;
@@ -2411,7 +1918,6 @@ font-size: 25px;
 }
 
 
-/* Formulaires */
 .trajet-form-row {
     display: flex;
     gap: 20px;
@@ -2439,7 +1945,7 @@ input, select, textarea {
     border-radius: 6px;
 }
 
-/* Boutons */
+
 .trajet-form-actions {
     text-align: center;
 }
@@ -2465,12 +1971,12 @@ input, select, textarea {
 .trajet-choice {
     display: flex;
     align-items: center;
-    gap: 10px; /* Espacement entre les boutons */
+    gap: 10px; 
 }
 
 .trajet-choice input[type="radio"] {
     margin: 0;
-    width: 16px; /* Taille fixe */
+    width: 16px; 
     height: 16px;
     vertical-align: middle;
 }
@@ -2480,9 +1986,6 @@ input, select, textarea {
     vertical-align: middle;
     cursor: pointer;
 }
-
-
-
 
 /* Rappel : 
 p-1 : applique un padding de 0.25rem.

@@ -2,7 +2,6 @@
 require_once('templates/header.php');
 ?>
 
-<main>
     <div class="container py-5">
         <div class="cgv-policy bg-white rounded shadow p-4">
             <h1 class="text-center mb-4">Conditions Générales de Vente</h1>
@@ -103,15 +102,13 @@ require_once('templates/header.php');
                     <p>EcoRide s'engage à protéger les données personnelles des utilisateurs conformément au Règlement Général sur la Protection des Données (RGPD). Pour plus d'informations sur la manière dont nous collectons, utilisons et protégeons vos données personnelles, veuillez consulter notre <a href="politiqueConfidentialite.php">politique de confidentialité</a>.</p>
                 </div>
 
-                <div class="cgv-section cookies-section" id="section10">
+                <div class="cgv-section" id="section10">
                     <h2>10. Cookies</h2>
-                    <div class="cookie-highlight">
                         <p>Le site utilise des cookies pour améliorer l'expérience utilisateur. Pour en savoir plus sur la façon dont nous utilisons les cookies :</p>
                         <div class="text-center mt-4">
                             <a href="politiqueCookies.php" class="btn btn-primary btn-lg">
                                 Consulter notre politique de cookies
                             </a>
-                        </div>
                     </div>
                 </div>
 
@@ -127,7 +124,6 @@ require_once('templates/header.php');
             </div>
         </div>
     </div>
-</main>
 
 <?php
 require_once('templates/footer.php');
