@@ -1,11 +1,13 @@
+# Indiquer le fichier index par défaut
+DirectoryIndex index.php index.html
+
+# Autoriser l'accès à index.php
 <FilesMatch "^index\.php$">
     Order Allow,Deny
     Allow from all
 </FilesMatch>
 
-
-
-# Configuration de base
+# Configuration de base de réécriture d'URL
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
