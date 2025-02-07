@@ -1,22 +1,23 @@
 FROM php:8.2-apache
 
 RUN apt-get update && apt-get install -y \
-    libzip-dev zip pkg-config libssl-dev \
-    libcurl4-openssl-dev git unzip
+   libzip-dev zip pkg-config libssl-dev \
+   libcurl4-openssl-dev git unzip
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN pecl install mongodb \
-    && echo "extension=mongodb.so" > $PHP_INI_DIR/conf.d/mongodb.ini \
-    && docker-php-ext-enable mongodb \
-    && docker-php-ext-install zip pdo pdo_mysql curl
+   && echo "extension=mongodb.so" > $PHP_INI_DIR/conf.d/mongodb.ini \
+   && docker-php-ext-enable mongodb \
+   && docker-php-ext-install zip pdo pdo_mysql curl
 
 RUN echo "ServerTokens Prod" >> /etc/apache2/apache2.conf \
-    && echo "ServerSignature Off" >> /etc/apache2/apache2.conf \
-    && echo "expose_php = Off" >> $PHP_INI_DIR/conf.d/security.ini \
-    && a2enmod headers rewrite \
-    && a2dismod mpm_event \
-    && a2enmod mpm_prefork
+   && echo "ServerSignature Off" >> /etc/apache2/apache2.conf \
+   && echo "expose_php = Off" >> $PHP_INI_DIR/conf.d/security.ini \
+   && a2enmod headers rewrite \
+   && a2dismod mpm_event mpm_worker \
+   && a2enmod mpm_prefork \
+   && service apache2 restart
 
 WORKDIR /var/www/html
 
