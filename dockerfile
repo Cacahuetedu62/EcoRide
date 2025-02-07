@@ -1,23 +1,22 @@
 FROM php:8.2-apache
 
+# Mettre à jour les paquets et installer Ruby, Bundler et autres dépendances
 RUN apt-get update && apt-get install -y \
     libzip-dev zip pkg-config libssl-dev \
-    libcurl4-openssl-dev git unzip
+    libcurl4-openssl-dev git unzip ruby-full \
+    && gem install bundler
 
+# Copier Composer depuis l'image officielle
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Installer MongoDB (si nécessaire) et autres extensions PHP
 RUN pecl install mongodb \
     && echo "extension=mongodb.so" > $PHP_INI_DIR/conf.d/mongodb.ini \
     && docker-php-ext-enable mongodb \
     && docker-php-ext-install zip pdo pdo_mysql curl
 
-RUN a2dismod mpm_event mpm_worker && \
-    a2enmod mpm_prefork && \
-    echo "ServerName localhost" >> /etc/apache2/apache2.conf
+# Désactiver les modules MPM en conflit (si nécessaire)
+RUN a2dismod mpm_event mpm_worker mpm_prefork
 
-WORKDIR /var/www/html
-COPY . .
-RUN composer install --no-dev --optimize-autoloader
-
-EXPOSE 80
-CMD ["apache2-foreground"]
+# Recharger Apache
+RUN service apache2 restart
