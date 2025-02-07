@@ -1,5 +1,6 @@
 # Indiquer le fichier index par défaut
-DirectoryIndex index.php index.html
+DirectoryIndex index.php
+
 
 # Autoriser l'accès à index.php
 <FilesMatch "^index\.php$">
