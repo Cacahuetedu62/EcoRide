@@ -1,4 +1,6 @@
 FROM php:8.2-apache
+
+# Installation des dépendances et extensions
 RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
@@ -9,9 +11,6 @@ RUN apt-get update && apt-get install -y \
     && echo "extension=mongodb.so" > $PHP_INI_DIR/conf.d/mongodb.ini \
     && docker-php-ext-enable mongodb \
     && docker-php-ext-install zip pdo pdo_mysql curl
-
-# Installation des extensions PHP
-RUN docker-php-ext-install pdo pdo_mysql
 
 # Configuration sécurité
 RUN echo "ServerTokens Prod" >> /etc/apache2/apache2.conf \
