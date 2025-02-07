@@ -1,6 +1,8 @@
 <FilesMatch "^index\.php$">
-    Require all granted
+    Order Allow,Deny
+    Allow from all
 </FilesMatch>
+
 
 
 # Configuration de base
