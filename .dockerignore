@@ -2,7 +2,5 @@
 .git
 .gitignore
 .dockerignore
-composer.json
-composer.lock
 vendor/
 node_modules/
