@@ -1,10 +1,13 @@
 FROM php:8.2-apache
 
+FROM php:8.2-apache
 RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
-    && docker-php-ext-install zip
-
+    && pecl install mongodb \
+    && docker-php-ext-enable mongodb \
+    && docker-php-ext-install zip pdo pdo_mysql
+    
 # Installation des extensions PHP
 RUN docker-php-ext-install pdo pdo_mysql
 
