@@ -11,13 +11,13 @@ RUN pecl install mongodb \
     && docker-php-ext-enable mongodb \
     && docker-php-ext-install zip pdo pdo_mysql curl
 
-RUN rm -f /etc/apache2/mods-enabled/mpm_*
-RUN a2enmod mpm_prefork
+RUN a2dismod mpm_event mpm_worker && \
+    a2enmod mpm_prefork && \
+    echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 WORKDIR /var/www/html
-COPY ./composer.json ./composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
 COPY . .
+RUN composer install --no-dev --optimize-autoloader
 
 EXPOSE 80
 CMD ["apache2-foreground"]
