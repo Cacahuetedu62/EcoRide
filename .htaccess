@@ -1,33 +1,8 @@
-# Indiquer le fichier index par défaut
-DirectoryIndex index.php
+RewriteEngine On
+RewriteBase /
 
-
-# Autoriser l'accès à index.php
-<FilesMatch "^index\.php$">
-    Order Allow,Deny
-    Allow from all
-</FilesMatch>
-
-# Configuration de base de réécriture d'URL
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(.*)$ /index.php [QSA,L]
-</IfModule>
-
-# Protection des fichiers sensibles
-<Files ~ "^(composer\.(json|lock)|\.git)">
-    Order Deny,Allow
-    Deny from all
-</Files>
-
-# Cache pour ressources statiques
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType image/* "access plus 1 year"
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType font/* "access plus 1 year"
-</IfModule>
+# Si le fichier ou dossier n'existe pas
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+# Redirige vers index.php
+RewriteRule ^ index.php [L]

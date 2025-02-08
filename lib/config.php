@@ -16,6 +16,7 @@ define('DB_HOST', $config['db']['host']);
 define('DB_NAME', $config['db']['name']);
 define('DB_USER', $config['db']['user']);
 define('DB_PASS', $config['db']['pass']);
+define('DB_PORT', '3306');
 
 // Configuration MongoDB simple
 define('MONGODB_HOST', $config['mongodb']['host']);
