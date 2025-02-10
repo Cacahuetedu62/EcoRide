@@ -20,8 +20,6 @@ if (!file_exists($photos_path)) {
 
 // Vérification de la session
 if (!isset($_SESSION['utilisateur']) || !isset($_SESSION['utilisateur']['id'])) {
-    header('Location: connexion.php');
-    exit;
 }
 
 function validateImage($file) {

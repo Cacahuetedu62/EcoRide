@@ -1,7 +1,7 @@
 <?php
 require_once('templates/header.php');
 
-// Vérification de la session
+// Vérification de la session utilisateur
 if (!isset($_SESSION['utilisateur']) || !isset($_SESSION['utilisateur']['id'])) {
     $_SESSION['error_message'] = "Vous devez être connecté pour accéder à cette page.";
 }
@@ -10,14 +10,14 @@ $utilisateur_id = $_SESSION['utilisateur']['id'];
 $error_messages = [];
 $success_message = '';
 
-// Fonction de nettoyage des entrées
+// Fonction de nettoyage des entrées pour éviter les injections
 function cleanInput($data) {
     return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
 }
 
-// Traitement du formulaire
+// Traitement du formulaire lorsqu'il est soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Nettoyage et récupération des données
+    // Nettoyage et récupération des données du formulaire
     $lieu_depart = cleanInput($_POST['lieu_depart'] ?? '');
     $date_depart = cleanInput($_POST['date_depart'] ?? '');
     $heure_depart = cleanInput($_POST['heure_depart'] ?? '');
@@ -52,12 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error_messages[] = "Le prix doit être supérieur à 0.";
     }
 
-    // Si pas d'erreurs, on procède à l'insertion
+    // Si pas d'erreurs, on procède à l'insertion dans la base de données
     if (empty($error_messages)) {
         try {
             $pdo->beginTransaction();
 
-            // Mise à jour du rôle si nécessaire
+            // Mise à jour du rôle de l'utilisateur si nécessaire
             $stmt_role = $pdo->prepare("UPDATE utilisateurs SET role = CASE
                 WHEN role = 'passager' THEN 'passager-chauffeur'
                 WHEN role IS NULL THEN 'chauffeur'
@@ -152,129 +152,106 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <section class="trajet-form-page">
+    <div class="trajet-form-wrapper">
+        <h2 class="trajet-title">Proposer un Nouveau Trajet</h2>
 
-        <div class="trajet-form-wrapper">
-            <h2 class="trajet-title">Proposer un Nouveau Trajet</h2>
+        <?php if (!empty($error_messages)): ?>
+            <div class="trajet-alert trajet-alert-danger">
+                <?php foreach ($error_messages as $message): ?>
+                    <p><?= $message ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
 
-            <?php if (!empty($error_messages)): ?>
-                <div class="trajet-alert trajet-alert-danger">
-                    <?php foreach ($error_messages as $message): ?>
-                        <p><?= $message ?></p>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+        <?php if ($success_message): ?>
+            <div class="trajet-alert trajet-alert-success">
+                <?= $success_message ?>
+            </div>
+        <?php endif; ?>
 
-            <?php if ($success_message): ?>
-                <div class="trajet-alert trajet-alert-success">
-                    <?= $success_message ?>
-                </div>
-            <?php endif; ?>
+        <form method="POST" action="" id="trajetForm" class="trajet-form">
+            <!-- Départ -->
+            <div class="trajet-card m-2">
+                <h3 class="trajet-card-title">Départ</h3>
+                <div class="trajet-card-body">
+                    <label for="lieu_depart">Lieu de départ</label>
+                    <input type="text" id="lieu_depart" name="lieu_depart" required placeholder="Entrez une ville ou une adresse">
 
-            <form method="POST" action="" id="trajetForm" class="trajet-form">
-            <div class="trajet-form-row">
-                    <!-- Colonne Départ -->
-                    <div class="trajet-card">
-                        <h3 class="trajet-card-title m-1">Départ</h3>
-                        <div class="trajet-card-body">
-                            <label for="lieu_depart">Lieu de départ</label>
-                            <input type="text" id="lieu_depart" name="lieu_depart" required
-                                   placeholder="Entrez une ville ou une adresse">
-
-                            <div class="trajet-input-group">
-                                <div>
-                                    <label for="date_depart">Date</label>
-                                    <input type="date" id="date_depart" name="date_depart" min="<?= date('Y-m-d') ?>" required>
-                                </div>
-                                <div>
-                                    <label for="heure_depart">Heure</label>
-                                    <input type="time" id="heure_depart" name="heure_depart" required>
-                                </div>
-                            </div>
-
-                            <div id="trajet-info" class="trajet-info"></div>
-                        </div>
-                    </div>
-
-                    <!-- Colonne Arrivée -->
-                    <div class="trajet-card">
-                        <h3 class="trajet-card-title m-1">Arrivée</h3>
-                        <div class="trajet-card-body">
-                            <label for="lieu_arrive">Lieu d'arrivée</label>
-                            <input type="text" id="lieu_arrive" name="lieu_arrive" required
-                                   placeholder="Entrez une ville ou une adresse">
-
-                            <div class="trajet-input-group">
-                                <div>
-                                    <label for="date_arrive">Date</label>
-                                    <input type="date" id="date_arrive" name="date_arrive" readonly>
-                                </div>
-                                <div>
-                                    <label for="heure_arrive">Heure</label>
-                                    <input type="time" id="heure_arrive" name="heure_arrive" readonly>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="trajet-input-group">
+                        <label for="date_depart">Date</label>
+                        <input type="date" id="date_depart" name="date_depart" min="<?= date('Y-m-d') ?>" required>
+                    </div><div>
+                        <label for="heure_depart">Heure</label>
+                        <input type="time" id="heure_depart" name="heure_depart" required>
                     </div>
                 </div>
-                <div class="trajet-form-row">
-    <div class="trajet-card">
-        <h3 class="trajet-card-title m-1">Places et Tarif</h3>
-        <div class="trajet-card-body">
-            <div class="trajet-input-group">
-                <div>
+            </div>
+
+            <!-- Arrivée -->
+            <div class="trajet-card m-2">
+                <h3 class="trajet-card-title">Arrivée</h3>
+                <div class="trajet-card-body">
+                    <label for="lieu_arrive">Lieu d'arrivée</label>
+                    <input type="text" id="lieu_arrive" name="lieu_arrive" required placeholder="Entrez une ville ou une adresse">
+
+                    <div class="trajet-input-group">
+                        <label for="date_arrive">Date</label>
+                        <input type="date" id="date_arrive" name="date_arrive" readonly>
+                    </div><div>
+                        <label for="heure_arrive">Heure</label>
+                        <input type="time" id="heure_arrive" name="heure_arrive" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Places et Tarif -->
+            <div class="trajet-card m-2">
+                <h3 class="trajet-card-title">Places et Tarif</h3>
+                <div class="trajet-card-body">
                     <label for="nb_places">Places disponibles</label>
                     <input type="number" id="nb_places" name="nb_places" min="1" max="8" value="1" required>
-                </div>
-                <div>
+
                     <label for="prix_personnes">Prix par personne (€)</label>
                     <input type="number" step="0.1" min="0" id="prix_personnes" name="prix_personnes" required>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-                
-                <!-- Section véhicule et préférences -->
-                <div class="trajet-form-row">
-                    <div class="trajet-card">
-                        <h3 class="trajet-card-title m-1">Véhicule</h3>
-                        <div class="trajet-card-body">
-                            <label for="voiture">Sélectionnez votre véhicule</label>
-                            <select id="voiture" name="voiture" required>
-                                <option value="">Choisir un véhicule</option>
-                                <?php foreach ($voitures as $voiture): ?>
-                                    <option value="<?= htmlspecialchars($voiture['id']) ?>">
-                                        <?= htmlspecialchars($voiture['marque'] . ' ' . $voiture['modele']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
 
-                    <div class="trajet-card">
-                        <h3 class="trajet-card-title m-1">Préférences</h3>
-
-
-                            <label for="preferences">Préférences supplémentaires</label>
-                            <textarea id="preferences" name="preferences" rows="3"></textarea>
-
-                            <p>Si vous cochez la case vous accpetez les fumeurs / animaux</p>
-                            <div class="trajet-checkbox">
-                                <input type="checkbox" id="fumeur" name="fumeur">
-                                <label for="fumeur">Fumeur</label>
-                            </div>
-                            <div class="trajet-checkbox">
-                                <input type="checkbox" id="animaux" name="animaux">
-                                <label for="animaux">Animaux acceptés</label>
-                            </div>
-                        </div>
-                    </div>                
-                    <button class="buttonVert" type="submit" name="chercher">Publier le trajet</button>
+            <!-- Véhicule -->
+            <div class="trajet-card m-2">
+                <h3 class="trajet-card-title">Véhicule</h3>
+                <div class="trajet-card-body">
+                    <label for="voiture">Sélectionnez votre véhicule</label>
+                    <select id="voiture" name="voiture" required>
+                        <option value="">Choisir un véhicule</option>
+                        <?php foreach ($voitures as $voiture): ?>
+                            <option value="<?= htmlspecialchars($voiture['id']) ?>">
+                                <?= htmlspecialchars($voiture['marque'] . ' ' . $voiture['modele']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
+            </div>
 
+            <!-- Préférences -->
+            <div class="trajet-card m-2">
+                <h3 class="trajet-card-title">Préférences</h3>
+                <div class="trajet-card-body">
+                    <label for="preferences">Préférences supplémentaires</label>
+                    <textarea id="preferences" name="preferences" rows="3"></textarea>
 
-            </form>
-        </div>
+                    <div class="trajet-checkbox">
+                        <input type="checkbox" id="fumeur" name="fumeur">
+                        <label for="fumeur">Fumeur</label>
+                    </div>
+                    <div class="trajet-checkbox">
+                        <input type="checkbox" id="animaux" name="animaux">
+                        <label for="animaux">Animaux acceptés</label>
+                    </div>
+                </div>
+            </div>
+
+            <button class="buttonVert" type="submit" name="chercher">Publier le trajet</button>
+        </form>
     </div>
 </section>
 
@@ -375,3 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('heure_depart').addEventListener('change', calculateRoute);
 });
 </script>
+
+<?php
+require_once('templates/footer.php');
+?>

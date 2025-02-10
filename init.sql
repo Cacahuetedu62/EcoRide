@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS EcoRide;
+CREATE DATABASE EcoRide;
 USE EcoRide;
 
 CREATE TABLE utilisateurs (

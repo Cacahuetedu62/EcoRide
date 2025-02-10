@@ -6,11 +6,11 @@ return [
         'user' => 'ecoride_user',
         'pass' => 'secure_password',
         'charset' => 'utf8mb4',
-        'port' => '3306'  // Port interne reste 3306
+        'port' => '3306'
     ],
     'mongodb' => [
         'host' => 'mongodb',
-        'port' => '27017',  // Port interne reste 27017
+        'port' => '27017',
         'db' => 'creditsPlateforme'
     ],
     'smtp' => [

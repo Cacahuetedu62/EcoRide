@@ -1,14 +1,9 @@
 <?php
-// Configuration des paramètres de session (AVANT session_start())
-ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_samesite', 'Strict');
-ini_set('session.gc_maxlifetime', 3600);
-
-// Vérification de l'existence du fichier de configuration
 if (!file_exists(__DIR__ . '/config.local.php')) {
-    die('Configuration file not found');
+    die('Le fichier de configuration est manquant');
 }
 
+// Retirer les paramètres de session d'ici car ils doivent être définis avant session_start()
 $config = require_once 'config.local.php';
 
 // Configuration DB
@@ -18,7 +13,7 @@ define('DB_USER', $config['db']['user']);
 define('DB_PASS', $config['db']['pass']);
 define('DB_PORT', '3306');
 
-// Configuration MongoDB simple
+// Configuration MongoDB
 define('MONGODB_HOST', $config['mongodb']['host']);
 define('MONGODB_PORT', $config['mongodb']['port']);
 define('MONGODB_DB', $config['mongodb']['db']);

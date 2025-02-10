@@ -5,39 +5,39 @@ require_once('templates/header.php');
 <section class="d-flex m-3 justify-content-center">
     <div class="colonne-formulaire">
         <form method="POST" action="">
-        <div>
-    <label for="ville_depart" class="form-label">Ville de départ</label>
-    <input type="text" class="form-control" id="ville_depart" name="ville_depart" 
-           placeholder="Entrez une ville de départ" required 
-           list="ville_depart-list" 
-           value="<?php echo isset($_POST['ville_depart']) ? htmlspecialchars($_POST['ville_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-    <div class="invalid-feedback">
-        Veuillez saisir une ville de départ
-    </div>
-</div>
+            <div class="form-group">
+                <label for="ville_depart" class="form-label">Ville de départ</label>
+                <input type="text" class="form-control" id="ville_depart" name="ville_depart"
+                       placeholder="Entrez une ville de départ" required
+                       list="ville_depart-list"
+                       value="<?php echo isset($_POST['ville_depart']) ? htmlspecialchars($_POST['ville_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                <div class="invalid-feedback">
+                    Veuillez saisir une ville de départ
+                </div>
+            </div>
 
-<div>
-    <label for="ville_arrive" class="form-label">Ville d'arrivée</label>
-    <input type="text" class="form-control" id="ville_arrive" name="ville_arrive" 
-           placeholder="Entrez une ville d'arrivée" required 
-           list="ville_arrive-list" 
-           value="<?php echo isset($_POST['ville_arrive']) ? htmlspecialchars($_POST['ville_arrive'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-    <div class="invalid-feedback">
-        Veuillez saisir une ville d'arrivée
-    </div>
-</div>
+            <div class="form-group">
+                <label for="ville_arrive" class="form-label">Ville d'arrivée</label>
+                <input type="text" class="form-control" id="ville_arrive" name="ville_arrive"
+                       placeholder="Entrez une ville d'arrivée" required
+                       list="ville_arrive-list"
+                       value="<?php echo isset($_POST['ville_arrive']) ? htmlspecialchars($_POST['ville_arrive'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                <div class="invalid-feedback">
+                    Veuillez saisir une ville d'arrivée
+                </div>
+            </div>
 
-            <div>
+            <div class="form-group">
                 <label for="date_depart" class="form-label">Date de départ</label>
                 <input type="date" class="form-control" id="date_depart" name="date_depart" required
-                    value="<?php echo isset($_POST['date_depart']) ? htmlspecialchars($_POST['date_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>"
-                    min="<?php echo date('Y-m-d'); ?>">
+                       value="<?php echo isset($_POST['date_depart']) ? htmlspecialchars($_POST['date_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>"
+                       min="<?php echo date('Y-m-d'); ?>">
                 <div class="invalid-feedback">
                     Veuillez saisir une date de départ valide (pas avant aujourd'hui).
                 </div>
             </div>
 
-            <div>
+            <div class="form-group">
                 <label for="nb_passagers" class="form-label">Nombre de passagers</label>
                 <input type="number" class="form-control" id="nb_passagers" name="nb_passagers" placeholder="Nombre de passagers" required value="<?php echo isset($_POST['nb_passagers']) ? htmlspecialchars($_POST['nb_passagers'], ENT_QUOTES, 'UTF-8') : ''; ?>">
                 <div class="invalid-feedback">
@@ -45,7 +45,7 @@ require_once('templates/header.php');
                 </div>
             </div>
 
-            <div>
+            <div class="form-group">
                 <button class="buttonVert" type="submit" name="chercher">Chercher</button>
             </div>
         </form>
@@ -61,26 +61,26 @@ require_once('templates/header.php');
                     <div>Souhaitez-vous un trajet effectué avec une voiture électrique/hybride ? Il sera alors considéré comme "écologique".</div>
                     <div><input type="checkbox" id="ecologique" name="ecologique" value="1" ' . (isset($_POST['ecologique']) && $_POST['ecologique'] == '1' ? 'checked' : '') . '> Oui</div>
 
-                    <div>
+                    <div class="form-group">
                         <label for="prix_min" class="form-label">Prix minimum</label>
                         <input type="number" class="form-control" id="prix_min" name="prix_min" placeholder="Prix minimum en €"
                                value="' . (isset($_POST['prix_min']) ? htmlspecialchars($_POST['prix_min'], ENT_QUOTES, 'UTF-8') : '') . '">
                     </div>
 
-                    <div>
+                    <div class="form-group">
                         <label for="duree" class="form-label">Durée du trajet</label>
                         <input type="text" class="form-control" id="duree" name="duree" placeholder="Durée du trajet (en heures)"
                                value="' . (isset($_POST['duree']) ? htmlspecialchars($_POST['duree'], ENT_QUOTES, 'UTF-8') : '') . '">
                     </div>
 
-                    <div>
+                    <div class="form-group">
                         <label for="note_min" class="form-label">Note minimale pour le chauffeur</label>
                         <input type="number" class="form-control" id="note_min" name="note_min" placeholder="Note minimale (1-5)"
                                min="1" max="5"
                                value="' . (isset($_POST['note_min']) ? htmlspecialchars($_POST['note_min'], ENT_QUOTES, 'UTF-8') : '') . '">
                     </div>
 
-                    <div>
+                    <div class="form-group">
                         <button class="btn btn-success m-3" type="submit" name="filtrer">Appliquer les filtres</button>
                     </div>
                 </div>
@@ -183,87 +183,86 @@ if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
 
     <div class="m-3"><h4>Trajet n° <?= htmlspecialchars($trajet['id']) ?></h4></div>
     <section class="recapTrajet d-flex">
-    <div class="trajetComplet p-3">
-        <h3>Départ</h3>
-        <label for="#" class="form-label">Ville de départ</label>
-        <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_depart']) ?>" disabled>
+        <div class="trajetComplet p-3">
+            <h3>Départ</h3>
+            <label for="#" class="form-label">Ville de départ</label>
+            <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_depart']) ?>" disabled>
 
-        <label for="#" class="form-label">Date de départ</label>
-        <input type="date" class="form-control" value="<?= $trajet['date_depart'] ?>" disabled>
+            <label for="#" class="form-label">Date de départ</label>
+            <input type="date" class="form-control" value="<?= $trajet['date_depart'] ?>" disabled>
 
-        <label for="#" class="form-label">Heure de départ</label>
-        <input type="text" class="form-control" value="<?= $trajet['heure_depart'] ?>" disabled>
-    </div>
-
-    <div class="trajetComplet p-3">
-        <h3>Arrivée</h3>
-        <label for="#" class="form-label">Ville d'arrivée</label>
-        <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_arrive']) ?>" disabled>
-
-        <label for="#" class="form-label">Date d'arrivée</label>
-        <input type="date" class="form-control" value="<?= $trajet['date_arrive'] ?>" disabled>
-
-        <label for="#" class="form-label">Heure d'arrivée</label>
-        <input type="text" class="form-control" value="<?= $trajet['heure_arrive'] ?>" disabled>
-    </div>
-
-    <div class="trajetComplet p-3">
-        <h4>Informations sur le chauffeur</h4>
-        <p class="profilPhotoPseudo">
-            <img src="<?= htmlspecialchars($trajet['photo']) ?>" alt="Photo du chauffeur" class="bd-placeholder-img rounded-circle" width="75" height="75">
-            <?= htmlspecialchars($trajet['pseudo']) ?>
-        </p>
-
-        <p>Note :
-        <?php
-            $note_moyenne = $trajet['note_moyenne'];
-            for ($i = 0; $i < $note_moyenne; $i++) {
-                echo "🚗"; // Affichage de l'icône pour chaque point de la note
-            }
-        ?>
-        </p>
-
-        <p>Nombre de places restantes :<?= $trajet['nb_places'] ?></p>
-        <p>Prix :<?= $trajet['prix_personnes'] ?> € par personne</p>
-        <p>
-            <?php
-            if ($ecologique) {
-                echo "🌱 C'est un trajet écologique*";
-            } else {
-                echo "⛽ Ce trajet n'est pas écologique*";
-            }
-            ?>
-        </p>
-        <p style="font-size: 15px;">*Un trajet est dit "écologique" s'il est effectué avec une voiture électrique/hybride</p>
-        <div>
-            <button class="btn btn-success mt-2" name="détails"><a href="reservations.php?id=<?php echo htmlspecialchars($trajet['id']); ?>">+ détails</a></button>
+            <label for="#" class="form-label">Heure de départ</label>
+            <input type="text" class="form-control" value="<?= $trajet['heure_depart'] ?>" disabled>
         </div>
-    </div>
-</section>
+
+        <div class="trajetComplet p-3">
+            <h3>Arrivée</h3>
+            <label for="#" class="form-label">Ville d'arrivée</label>
+            <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_arrive']) ?>" disabled>
+
+            <label for="#" class="form-label">Date d'arrivée</label>
+            <input type="date" class="form-control" value="<?= $trajet['date_arrive'] ?>" disabled>
+
+            <label for="#" class="form-label">Heure d'arrivée</label>
+            <input type="text" class="form-control" value="<?= $trajet['heure_arrive'] ?>" disabled>
+        </div>
+
+        <div class="trajetComplet p-3">
+            <h4>Informations sur le chauffeur</h4>
+            <p class="profilPhotoPseudo">
+                <img src="<?= htmlspecialchars($trajet['photo']) ?>" alt="Photo du chauffeur" class="bd-placeholder-img rounded-circle" width="75" height="75">
+                <?= htmlspecialchars($trajet['pseudo']) ?>
+            </p>
+
+            <p>Note :
+            <?php
+                $note_moyenne = $trajet['note_moyenne'];
+                for ($i = 0; $i < $note_moyenne; $i++) {
+                    echo "🚗"; // Affichage de l'icône pour chaque point de la note
+                }
+            ?>
+            </p>
+
+            <p>Nombre de places restantes :<?= $trajet['nb_places'] ?></p>
+            <p>Prix :<?= $trajet['prix_personnes'] ?> € par personne</p>
+            <p>
+                <?php
+                if ($ecologique) {
+                    echo "🌱 C'est un trajet écologique*";
+                } else {
+                    echo "⛽ Ce trajet n'est pas écologique*";
+                }
+                ?>
+            </p>
+            <p style="font-size: 15px;">*Un trajet est dit "écologique" s'il est effectué avec une voiture électrique/hybride</p>
+            <div>
+                <button class="btn btn-success mt-2" name="détails"><a href="reservations.php?id=<?php echo htmlspecialchars($trajet['id']); ?>">+ détails</a></button>
+            </div>
+        </div>
+    </section>
 
     <?php
-}
-} else {
-     // Affichage du toast ici seulement quand aucun trajet n'est trouvé
-     ?>
-     <!-- Toast Bootstrap pour "Aucun trajet trouvé" -->
-     <div class="toast-container p-3 position-fixed top-50 start-50 translate-middle z-index-5">
-         <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-             <div class="toast-header">
-                 <strong class="me-auto">Résultat de la recherche</strong>
-                 <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-             </div>
-             <div class="toast-body">
-                 Aucun trajet trouvé pour les dates sélectionnées. Peut-être que des trajets sont disponibles à d'autres dates. Essayez de modifier vos dates de départ.
-             </div>
-     <?php
- }
+    }
+    } else {
+         // Affichage du toast ici seulement quand aucun trajet n'est trouvé
+         ?>
+         <!-- Toast Bootstrap pour "Aucun trajet trouvé" -->
+         <div class="toast-container p-3 position-fixed top-50 start-50 translate-middle z-index-5">
+             <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                 <div class="toast-header">
+                     <strong class="me-auto">Résultat de la recherche</strong>
+                     <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                 </div>
+                 <div class="toast-body">
+                     Aucun trajet trouvé pour les dates sélectionnées. Peut-être que des trajets sont disponibles à d'autres dates. Essayez de modifier vos dates de départ.
+                 </div>
+         <?php
+    }
 }
 ?>
 </div>
 
 <script>
-
 // Fonction d'autocomplétion
 function setupAutocomplete(inputId) {
     const input = document.getElementById(inputId);
@@ -308,13 +307,6 @@ if (toastElement) {
     var toast = new bootstrap.Toast(toastElement);
     toast.show();
 }
-
- // Vérifie si le toast existe sur la page et l'affiche
- var toastElement = document.querySelector('.toast');
- if (toastElement) {
-     var toast = new bootstrap.Toast(toastElement);
-     toast.show(); // Afficher le toast
- }
 </script>
 </main>
 <?php

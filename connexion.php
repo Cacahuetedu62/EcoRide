@@ -1,9 +1,55 @@
 <?php
-error_reporting(0);
-ini_set('display_errors', 0);
-require_once('lib/pdo.php');
-require_once('lib/config.php');
+require_once('lib/session_config.php');
+session_start();
 
+require_once('lib/config.php');
+require_once('lib/pdo.php');
+
+// Connexion à la base de données
+try {
+    $pdo = new PDO("mysql:host=db;dbname=ecoride;charset=utf8mb4", 'ecoride_user', 'secure_password');
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Tableaux à vérifier
+    $tables = [
+        'utilisateurs',
+        'voitures',
+        'trajets',
+        'trajet_utilisateur',
+        'avis'
+    ];
+
+    // Vérification du nombre d'enregistrements dans chaque table
+    foreach ($tables as $table) {
+        try {
+            $stmt = $pdo->query("SELECT COUNT(*) FROM $table");
+            $count = $stmt->fetchColumn();
+            echo "Table $table : $count enregistrements<br>";
+        } catch (PDOException $e) {
+            echo "Erreur pour la table $table : " . $e->getMessage() . "<br>";
+        }
+    }
+} catch (PDOException $e) {
+    echo "Erreur de connexion : " . $e->getMessage();
+}
+
+// Affichage des paramètres de connexion et test de la connexion
+try {
+    echo "Paramètres de connexion : \n";
+    echo "Hôte : " . DB_HOST . "\n";
+    echo "Base de données : " . DB_NAME . "\n";
+    echo "Utilisateur : " . DB_USER . "\n";
+    echo "Port : " . DB_PORT . "\n";
+
+    // Test de la connexion en récupérant un utilisateur
+    $stmt = $pdo->query("SELECT * FROM utilisateurs LIMIT 1");
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    var_dump($result);
+} catch (PDOException $e) {
+    echo "Erreur détaillée : " . $e->getMessage();
+}
+
+// Traitement du formulaire de connexion
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['pseudo']) && isset($_POST['password'])) {
         $pseudo = $_POST['pseudo'];
@@ -21,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
 
+            // Vérification du mot de passe
             if (password_verify($password, $utilisateur['password'])) {
                 session_start();
                 $_SESSION['utilisateur'] = [
@@ -30,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'type_acces' => $utilisateur['type_acces']
                 ];
 
-                // Redirige vers la page d'accueil après la connexion avec une animation de transition
+                // Redirection vers la page d'accueil après la connexion
                 header('Location: index.php');
                 exit;
             } else {
@@ -44,10 +91,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Maintenant seulement, on inclut le header et le contenu HTML
+// Inclusion du header et du contenu HTML
 require_once('templates/header.php');
 ?>
-<a href="index.php">Retour à l'acceuil</a>
+
+<a href="index.php">Retour à l'accueil</a>
+
 <section class="loginRegister d-flex justify-content-center mt-5">
     <div class="loginRegister-container p-2">
         <h2 class="text-center">Se connecter</h2>
@@ -64,7 +113,7 @@ require_once('templates/header.php');
             <p>Pas de compte ? <a href="inscription.php">Créer un compte</a></p>
         </div>
     </div>
-
+</section>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -88,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', function(event) {
             const pseudo = document.getElementById('pseudo').value.trim();
             const password = passwordInput.value;
-            
+
             if (!pseudo || !password) {
                 event.preventDefault();
                 const alert = document.createElement('div');
