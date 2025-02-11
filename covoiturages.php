@@ -308,7 +308,7 @@ if (toastElement) {
     toast.show();
 }
 </script>
-</main>
+
 <?php
 require_once('templates/footer.php');
 ?>

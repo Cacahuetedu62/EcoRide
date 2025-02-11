@@ -2,11 +2,9 @@
 require_once('templates/header.php');
 ?>
 
-<div class="container py-5">
+<div class="py-5">
     <div class="cookie-policy bg-white rounded shadow p-4">
         <h1 class="text-center mb-4">Politique de Cookies</h1>
-
-        <p class="btn-disconnect">AJOUTER LA GÉOLOCALISATION !</p>
 
         <div class="cookie-intro mb-5">
             <p class="lead text-center">
@@ -34,6 +32,14 @@ require_once('templates/header.php');
                         <li>Maintenir votre session active pendant que vous naviguez sur le site.</li>
                         <li>Assurer la sécurité de votre connexion.</li>
                         <li>Permettre le bon fonctionnement des fonctionnalités du site.</li>
+                    </ul>
+
+                    <p class="mt-4">Concernant la saisie des villes :</p>
+                    <ul>
+                        <li>Notre site utilise un système d'autocomplétion pour faciliter la saisie des villes.</li>
+                        <li>Ce système fonctionne uniquement à partir du texte que vous saisissez.</li>
+                        <li>Aucune donnée de géolocalisation n'est collectée ou utilisée.</li>
+                        <li>Les suggestions proposées sont basées exclusivement sur votre saisie textuelle.</li>
                     </ul>
                 </div>
             </div>

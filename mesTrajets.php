@@ -19,7 +19,46 @@ if (isset($_SESSION['message'])) {
     unset($_SESSION['message_type']);
 }
 
-// Requête SQL pour récupérer les trajets
+// Pagination
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$limit = 2; // Limite de 2 trajets par page
+$offset = ($page - 1) * $limit;
+
+// Requête pour les trajets en tant que chauffeur
+$sql_chauffeur = "SELECT DISTINCT t.id, COUNT(*) OVER() as total_count
+FROM trajets t
+JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
+LEFT JOIN reservations r ON t.id = r.trajet_id
+WHERE tu.utilisateur_id = :utilisateur_id
+AND (r.statut != 'termine' OR r.statut IS NULL)";
+
+// Requête pour les trajets en tant que passager
+$sql_passager = "SELECT DISTINCT t.id, COUNT(*) OVER() as total_count
+FROM trajets t
+JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
+LEFT JOIN reservations r ON t.id = r.trajet_id
+WHERE r.utilisateur_id = :utilisateur_id
+AND (r.statut != 'termine' OR r.statut IS NULL)";
+
+$stmt_chauffeur = $pdo->prepare($sql_chauffeur . " LIMIT :limit OFFSET :offset");
+$stmt_chauffeur->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
+$stmt_chauffeur->bindParam(':limit', $limit, PDO::PARAM_INT);
+$stmt_chauffeur->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+$stmt_passager = $pdo->prepare($sql_passager . " LIMIT :limit OFFSET :offset");
+$stmt_passager->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
+$stmt_passager->bindParam(':limit', $limit, PDO::PARAM_INT);
+$stmt_passager->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+$stmt_chauffeur->execute();
+$stmt_passager->execute();
+
+$total_chauffeur = $stmt_chauffeur->fetch(PDO::FETCH_ASSOC)['total_count'] ?? 0;
+$total_passager = $stmt_passager->fetch(PDO::FETCH_ASSOC)['total_count'] ?? 0;
+
+$total_pages = ceil(max($total_chauffeur, $total_passager) / $limit);
+
+// Requête SQL pour récupérer les trajets avec pagination
 $sql = "SELECT DISTINCT
     t.id,
     t.date_depart,
@@ -51,10 +90,13 @@ LEFT JOIN reservations r ON t.id = r.trajet_id
 WHERE (tu.utilisateur_id = :utilisateur_id OR r.utilisateur_id = :utilisateur_id)
   AND (r.statut != 'termine' OR r.statut IS NULL)
 GROUP BY t.id, r.id, tu.utilisateur_id
-ORDER BY r.date_reservation DESC";
+ORDER BY r.date_reservation DESC
+LIMIT :limit OFFSET :offset";
 
 $statement = $pdo->prepare($sql);
 $statement->bindParam(':utilisateur_id', $utilisateur_id, PDO::PARAM_INT);
+$statement->bindParam(':limit', $limit, PDO::PARAM_INT);
+$statement->bindParam(':offset', $offset, PDO::PARAM_INT);
 
 try {
     $statement->execute();
@@ -65,128 +107,177 @@ try {
     echo "Erreur lors de la récupération des trajets : " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
     exit;
 }
-
 ?>
 
-<h2 class="section-title p-4">Mes trajets à venir</h2>
-<div class="trajets-container">
-    <!-- Section Chauffeur -->
-    <div class="trajets-column m-3">
-        <h3 class="trajet-title">Trajets en tant que chauffeur</h3>
-        <?php
-        $trajets_chauffeur = array_filter($trajets, fn($trajet) => $trajet['role'] === 'chauffeur');
-        if (!empty($trajets_chauffeur)): ?>
-            <?php foreach ($trajets_chauffeur as $trajet): ?>
-                <div class="trajet-card m-3" id="trajet-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
-                    <div class="trajet-header">
-                        <h5>Trajet n° <?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?></h5>
-                        <span class="badge badge-<?= $trajet['statut'] ?>">
-                            <?= ucfirst($trajet['statut']) ?>
-                        </span>
-                    </div>
-                    <div class="trajet-body">
-                        <div class="trajet-destinations">
-                            <span class="destination-depart"><?= htmlspecialchars($trajet['lieu_depart'], ENT_QUOTES, 'UTF-8') ?></span>
-                            <span class="destination-arrow">→</span>
-                            <span class="destination-arrivee"><?= htmlspecialchars($trajet['lieu_arrive'], ENT_QUOTES, 'UTF-8') ?></span>
-                        </div>
-                        <div class="trajet-details">
-                            <p><i class="fas fa-calendar"></i> <?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p><i class="fas fa-clock"></i> <?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <?php if (!empty($trajet['participants'])): ?>
-                                <p><i class="fas fa-users"></i> Réservé par : <?= htmlspecialchars($trajet['participants'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <?php endif; ?>
-                            <?php if (!empty($trajet['invites'])): ?>
-                                <p><i class="fas fa-user-friends"></i> Ses invités : <?= htmlspecialchars($trajet['invites'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <?php endif; ?>
-                        </div>
-                        <div class="trajet-actions">
-                        <?php if ($trajet['statut'] === 'en_attente'): ?>
-    <?php if (!empty($trajet['participants'])): ?>
-        <form method="POST" action="lancerTrajet.php">
-            <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
-            <input type="hidden" name="utilisateur_id" value="<?= htmlspecialchars($_SESSION['utilisateur']['id'], ENT_QUOTES, 'UTF-8') ?>">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
-            <button type="submit" class="btn btn-success">Lancer le trajet</button>
-        </form>
-    <?php else: ?>
-        <div class="alert alert-warning d-flex">Impossible de lancer le trajet sans réservation</div>
-    <?php endif; ?>
-
-    <?php if ($trajet['statut'] === 'en_attente'): ?>
-
-                        <div class="annulation-details d-flex">
-                                <form method="POST" action="annulerTrajet.php" onsubmit="return confirmAnnulation(event)">
-                                    <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
-                                    <input type="hidden" name="role" value="conducteur">
-                                    <button type="submit" class="btn btn-danger m-2">Annuler la réservation</button>
-                                </form>
-                            <?php endif; ?>
-
-                            <?php elseif ($trajet['statut'] === 'en_cours'): ?>
-                                <form method="POST" action="terminerTrajet.php">
-                                    <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
-                                    <button type="submit" class="btn btn-danger">Terminer le trajet</button>
-                                </form>
-                            <?php endif; ?>
-                            <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary m-2">Détails</a>
-                        </div>
-                    </div>
-                    </div>
+<div class="container-fluid py-4">
+    <h2 class="text-center mb-4 border-bottom pb-2">Mes trajets à venir</h2>
+    
+    <div class="row g-4">
+        <!-- Section Chauffeur -->
+        <div class="col-md-6">
+            <div class="border rounded-3 p-3 h-100 bg-white">
+                <h3 class="text-center py-2 mb-4 border-bottom">Trajets en tant que chauffeur</h3>
+                <div class="card-body">
+                    <?php
+                    $trajets_chauffeur = array_slice(
+    array_filter($trajets, fn($trajet) => $trajet['role'] === 'chauffeur'),
+    0,
+    2
+);
+                    if (!empty($trajets_chauffeur)): ?>
+                        <?php foreach ($trajets_chauffeur as $trajet): ?>
+                            <div class="card mb-3" id="trajet-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Trajet n° <?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?></h5>
+                                    <span class="badge bg-<?= $trajet['statut'] === 'en_attente' ? 'warning' : ($trajet['statut'] === 'en_cours' ? 'info' : 'success') ?>">
+                                        <?= ucfirst($trajet['statut']) ?>
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="fw-bold"><?= htmlspecialchars($trajet['lieu_depart'], ENT_QUOTES, 'UTF-8') ?></span>
+                                            <i class="fas fa-arrow-right mx-2"></i>
+                                            <span class="fw-bold"><?= htmlspecialchars($trajet['lieu_arrive'], ENT_QUOTES, 'UTF-8') ?></span>
+                                        </div>
+                                        <div class="small text-muted">
+                                            <p class="mb-1"><i class="fas fa-calendar me-2"></i><?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?></p>
+                                            <p class="mb-1"><i class="fas fa-clock me-2"></i><?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?></p>
+                                            <?php if (!empty($trajet['participants'])): ?>
+                                                <p class="mb-1"><i class="fas fa-users me-2"></i>Réservé par : <?= htmlspecialchars($trajet['participants'], ENT_QUOTES, 'UTF-8') ?></p>
+                                            <?php endif; ?>
+                                            <?php if (!empty($trajet['invites'])): ?>
+                                                <p class="mb-1"><i class="fas fa-user-friends me-2"></i>Ses invités : <?= htmlspecialchars($trajet['invites'], ENT_QUOTES, 'UTF-8') ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <?php if ($trajet['statut'] === 'en_attente'): ?>
+                                            <?php if (!empty($trajet['participants'])): ?>
+                                                <form method="POST" action="lancerTrajet.php" class="me-2">
+                                                    <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                                    <input type="hidden" name="utilisateur_id" value="<?= htmlspecialchars($_SESSION['utilisateur']['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                                    <button type="submit" class="btn btn-success btn-sm">Lancer le trajet</button>
+                                                </form>
+                                                <form method="POST" action="annulerTrajet.php" onsubmit="return confirmAnnulation(event)" class="me-2">
+                                                    <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                                    <input type="hidden" name="role" value="conducteur">
+                                                    <button type="submit" class="btn btn-danger btn-sm">Annuler la réservation</button>
+                                                </form>
+                                            <?php else: ?>
+                                                <div class="alert alert-warning">Impossible de lancer le trajet sans réservation</div>
+                                            <?php endif; ?>
+                                        <?php elseif ($trajet['statut'] === 'en_cours'): ?>
+                                            <form method="POST" action="terminerTrajet.php" class="me-2">
+                                                <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                                <button type="submit" class="btn btn-danger btn-sm">Terminer le trajet</button>
+                                            </form>
+                                        <?php endif; ?>
+                                        <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary btn-sm">Détails</a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="alert alert-info">Aucun trajet prévu en tant que chauffeur.</div>
+                    <?php endif; ?>
                 </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <div class="no-trajet">
-                <p>Aucun trajet prévu en tant que chauffeur.</p>
             </div>
-        <?php endif; ?>
+        </div>
+
+        <!-- Section Passager -->
+        <div class="col-md-6">
+            <div class="border rounded-3 p-3 h-100 bg-white">
+                <h3 class="text-center py-2 mb-4 border-bottom">Trajets en tant que passager</h3>
+                <div class="card-body">
+                    <?php
+                    $trajets_passager = array_slice(
+    array_filter($trajets, fn($trajet) => $trajet['role'] === 'passager'),
+    0,
+    2
+);
+                    if (!empty($trajets_passager)): ?>
+                        <?php foreach ($trajets_passager as $trajet): ?>
+                            <div class="card mb-3" id="trajet-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Trajet n° <?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?></h5>
+                                    <span class="badge bg-<?= $trajet['statut'] === 'en_attente' ? 'warning' : ($trajet['statut'] === 'en_cours' ? 'info' : 'success') ?>">
+                                        <?= ucfirst($trajet['statut']) ?>
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="fw-bold"><?= htmlspecialchars($trajet['lieu_depart'], ENT_QUOTES, 'UTF-8') ?></span>
+                                            <i class="fas fa-arrow-right mx-2"></i>
+                                            <span class="fw-bold"><?= htmlspecialchars($trajet['lieu_arrive'], ENT_QUOTES, 'UTF-8') ?></span>
+                                        </div>
+                                        <div class="small text-muted">
+                                            <p class="mb-1"><i class="fas fa-calendar me-2"></i><?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?></p>
+                                            <p class="mb-1"><i class="fas fa-clock me-2"></i><?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?></p>
+                                            <?php if (!empty($trajet['invites'])): ?>
+                                                <p class="mb-1"><i class="fas fa-user-friends me-2"></i>Vos invités : <?= htmlspecialchars($trajet['invites'], ENT_QUOTES, 'UTF-8') ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <?php if ($trajet['statut'] === 'en_attente'): ?>
+                                            <form method="POST" action="annulerTrajet.php" onsubmit="return confirmAnnulation(event)" class="me-2">
+                                                <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                                <input type="hidden" name="role" value="passager">
+                                                <button type="submit" class="btn btn-danger btn-sm">Annuler la réservation</button>
+                                            </form>
+                                        <?php endif; ?>
+                                        <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary btn-sm">Détails</a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="alert alert-info">Aucune réservation en tant que passager.</div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <!-- Section Passager -->
-    <div class="trajets-column m-3">
-        <h3 class="trajet-title">Trajets en tant que passager</h3>
-        <?php
-        $trajets_passager = array_filter($trajets, fn($trajet) => $trajet['role'] === 'passager');
-        if (!empty($trajets_passager)): ?>
-            <?php foreach ($trajets_passager as $trajet): ?>
-                <div class="trajet-card" id="trajet-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
-                    <div class="trajet-header">
-                        <h5>Trajet n° <?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?></h5>
-                        <span class="badge badge-<?= $trajet['statut'] ?>">
-                            <?= ucfirst($trajet['statut']) ?>
-                        </span>
-                    </div>
-                    <div class="trajet-body">
-                        <div class="trajet-destinations">
-                            <span class="destination-depart"><?= htmlspecialchars($trajet['lieu_depart'], ENT_QUOTES, 'UTF-8') ?></span>
-                            <span class="destination-arrow">→</span>
-                            <span class="destination-arrivee"><?= htmlspecialchars($trajet['lieu_arrive'], ENT_QUOTES, 'UTF-8') ?></span>
-                        </div>
-                        <div class="trajet-details">
-                            <p><i class="fas fa-calendar"></i> <?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p><i class="fas fa-clock"></i> <?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <?php if (!empty($trajet['invites'])): ?>
-                                <p><i class="fas fa-user-friends"></i> Vos invités : <?= htmlspecialchars($trajet['invites'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <?php endif; ?>
-                        </div>
-                        <div class="trajet-actions">
-                                <?php if ($trajet['statut'] === 'en_attente'): ?>
-                                <form method="POST" action="annulerTrajet.php" onsubmit="return confirmAnnulation(event)">
-                                    <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
-                                    <input type="hidden" name="role" value="passager">
-                                    <button type="submit" class="btn btn-danger">Annuler la réservation</button>
-                                </form>
-                            <?php endif; ?>
-                            <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary">Détails</a>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <div class="no-trajet">
-                <p>Aucune réservation en tant que passager.</p>
-            </div>
-        <?php endif; ?>
+<!-- Pagination -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="Navigation des trajets" class="mt-4">
+                <ul class="pagination justify-content-center gap-2">
+                    <?php if($total_pages > 1): ?>
+                        <!-- Bouton précédent -->
+                        <li class="page-item">
+                            <a class="btn <?= ($page <= 1) ? 'btn-secondary disabled' : 'btn-primary' ?>" 
+                               href="?page=<?= $page - 1 ?>" 
+                               <?= ($page <= 1) ? 'tabindex="-1" aria-disabled="true"' : '' ?>>Précédent</a>
+                        </li>
+                        
+                        <!-- Numéros de page -->
+                        <?php for($i = 1; $i <= $total_pages; $i++): ?>
+                            <li class="page-item">
+                                <a class="btn <?= ($page == $i) ? 'btn-primary' : 'btn-outline-primary' ?>" 
+                                   href="?page=<?= $i ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor; ?>
+                        
+                        <!-- Bouton suivant -->
+                        <li class="page-item">
+                            <a class="btn <?= ($page >= $total_pages) ? 'btn-secondary disabled' : 'btn-primary' ?>" 
+                               href="?page=<?= $page + 1 ?>" 
+                               <?= ($page >= $total_pages) ? 'tabindex="-1" aria-disabled="true"' : '' ?>>Suivant</a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </nav>
+        </div>
     </div>
 </div>
 
@@ -201,9 +292,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function confirmAnnulation(event) {
-    event.preventDefault(); // Empêche la soumission du formulaire par défaut
+    event.preventDefault();
     if (confirm("Êtes-vous sûr de vouloir annuler ce trajet ?")) {
-        event.target.submit(); // Soumet le formulaire si l'utilisateur confirme
+        event.target.submit();
     }
 }
 </script>

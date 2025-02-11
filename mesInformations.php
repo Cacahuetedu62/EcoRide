@@ -20,8 +20,11 @@ if (!file_exists($photos_path)) {
 
 // Vérification de la session
 if (!isset($_SESSION['utilisateur']) || !isset($_SESSION['utilisateur']['id'])) {
+    // Rediriger ou afficher un message d'erreur si l'utilisateur n'est pas connecté
+    exit;
 }
 
+// Fonction pour valider une image
 function validateImage($file) {
     $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
     $max_size = 5 * 1024 * 1024; // 5MB
@@ -56,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
+    // Validation et traitement de la photo
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
         $validation = validateImage($_FILES['photo']);
         if ($validation === true) {
@@ -100,56 +104,54 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($errors)) {
         try {
             // Préparer la requête SQL
-// Préparer la requête SQL
-$sql = "UPDATE utilisateurs SET
-    pseudo = :pseudo,
-    nom = :nom,
-    prenom = :prenom,
-    email = :email,
-    telephone = :telephone,
-    date_naissance = :date_naissance,
-    adresse = :adresse,
-    code_postal = :code_postal,
-    ville = :ville";
+            $sql = "UPDATE utilisateurs SET
+                pseudo = :pseudo,
+                nom = :nom,
+                prenom = :prenom,
+                email = :email,
+                telephone = :telephone,
+                date_naissance = :date_naissance,
+                adresse = :adresse,
+                code_postal = :code_postal,
+                ville = :ville";
 
-// Ajouter la photo à la requête si elle a été mise à jour
-if ($photo) {
-    $sql .= ", photo = :photo";
-}
+            // Ajouter la photo à la requête si elle a été mise à jour
+            if ($photo) {
+                $sql .= ", photo = :photo";
+            }
 
-$sql .= " WHERE id = :id";
+            $sql .= " WHERE id = :id";
 
-// Préparer les paramètres
-$params = [
-    'pseudo' => htmlspecialchars($_POST['pseudo']),
-    'nom' => htmlspecialchars($_POST['nom']),
-    'prenom' => htmlspecialchars($_POST['prenom']),
-    'email' => filter_var($_POST['email'], FILTER_SANITIZE_EMAIL),
-    'telephone' => htmlspecialchars($_POST['telephone']),
-    'date_naissance' => $_POST['date_naissance'],
-    'adresse' => htmlspecialchars($_POST['adresse']),
-    'code_postal' => htmlspecialchars($_POST['code_postal']),
-    'ville' => htmlspecialchars($_POST['ville']),
-    'id' => $utilisateur_id
-];
+            // Préparer les paramètres
+            $params = [
+                'pseudo' => htmlspecialchars($_POST['pseudo']),
+                'nom' => htmlspecialchars($_POST['nom']),
+                'prenom' => htmlspecialchars($_POST['prenom']),
+                'email' => filter_var($_POST['email'], FILTER_SANITIZE_EMAIL),
+                'telephone' => htmlspecialchars($_POST['telephone']),
+                'date_naissance' => $_POST['date_naissance'],
+                'adresse' => htmlspecialchars($_POST['adresse']),
+                'code_postal' => htmlspecialchars($_POST['code_postal']),
+                'ville' => htmlspecialchars($_POST['ville']),
+                'id' => $utilisateur_id
+            ];
 
-// Ajouter la photo aux paramètres seulement si elle existe
-if ($photo) {
-    $params['photo'] = $photo;
-}
+            // Ajouter la photo aux paramètres seulement si elle existe
+            if ($photo) {
+                $params['photo'] = $photo;
+            }
 
-// Debug des paramètres
-foreach ($params as $key => $value) {
-    error_log("Paramètre $key : " . var_export($value, true));
-}
+            // Debug des paramètres
+            foreach ($params as $key => $value) {
+                error_log("Paramètre $key : " . var_export($value, true));
+            }
 
-// Exécuter la requête
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-
+            // Exécuter la requête
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
 
             $success_message = "Vos informations ont été mises à jour avec succès.";
-            
+
             // Rafraîchir les informations utilisateur
             $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE id = :id");
             $stmt->execute(['id' => $utilisateur_id]);
@@ -161,7 +163,7 @@ $stmt->execute($params);
             error_log("Erreur SQL: " . $e->getMessage());
             error_log("Requête SQL: " . $sql);
             error_log("Paramètres: " . print_r($params, true));
-            
+
             // Afficher les détails de l'erreur
             $errorInfo = $stmt->errorInfo();
             error_log("Détails de l'erreur : " . print_r($errorInfo, true));
@@ -170,124 +172,121 @@ $stmt->execute($params);
 }
 ?>
 
-<section class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h2 class="card-title text-center mb-4">Mon Profil</h2>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card m-4">
+            <div class="card-body p-4">
+                <h2 class="card-title text-center mb-4">Mon Profil</h2>
 
-                    <?php if (!empty($success_message)): ?>
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <?= $success_message ?>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    <?php endif; ?>
+                <?php if (!empty($success_message)): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <?= $success_message ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
 
-                    <?php if (!empty($errors)): ?>
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <ul class="mb-0">
-                                <?php foreach ($errors as $error): ?>
-                                    <li><?= $error ?></li>
-                                <?php endforeach; ?>
-                            </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    <?php endif; ?>
+                <?php if (!empty($errors)): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <ul class="mb-0">
+                            <?php foreach ($errors as $error): ?>
+                                <li><?= $error ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
 
-                    <form id="profileForm" method="POST" enctype="multipart/form-data">
-                        <div class="row mb-4">
-                            <div class="col-md-4 text-center">
-                                <div class="profile-photo-container mb-3">
+                <form id="profileForm" method="POST" enctype="multipart/form-data">
+                    <div class="row mb-4">
+                        <div class="col-md-4 text-center">
+                            <div class="profile-photo-container mb-3">
                                 <img src="<?= $utilisateur['photo'] ?? 'images/default.png.webp' ?>"
-     alt="Photo de profil"
-     class="profile-photo"
-     id="photoPreview">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="photo" class="btn btn-outline-primary">
-                                        Changer la photo
-                                    </label>
-                                    <input type="file" class="d-none" id="photo" name="photo" accept="image/*">
-                                </div>
+                                     alt="Photo de profil"
+                                     class="profile-photo"
+                                     id="photoPreview">
                             </div>
-
-                            <div class="col-md-8">
-                                <div class="form-group mb-3">
-                                    <label for="pseudo">Pseudo</label>
-                                    <input type="text" class="form-control" id="pseudo" name="pseudo"
-                                           value="<?= htmlspecialchars($utilisateur['pseudo']) ?>" disabled>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="nom">Nom</label>
-                                        <input type="text" class="form-control" id="nom" name="nom"
-                                               value="<?= htmlspecialchars($utilisateur['nom']) ?>" disabled>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="prenom">Prénom</label>
-                                        <input type="text" class="form-control" id="prenom" name="prenom"
-                                               value="<?= htmlspecialchars($utilisateur['prenom']) ?>" disabled>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="email">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email"
-                                           value="<?= htmlspecialchars($utilisateur['email']) ?>" disabled>
-                                </div>
-
-                                <div class="mb-3">
-    <label for="telephone">Téléphone</label>
-    <input type="tel" class="form-control" id="telephone" name="telephone"
-           value="<?= !empty($utilisateur['telephone']) ? htmlspecialchars($utilisateur['telephone']) : 'Non renseigné' ?>" disabled>
-</div>
-
-<div class="col-md-6 mb-3">
-    <label for="date_naissance">Date de naissance</label>
-    <input type="date" class="form-control" id="date_naissance" name="date_naissance"
-           value="<?= !empty($utilisateur['date_naissance']) ? htmlspecialchars($utilisateur['date_naissance']) : '' ?>" disabled>
-</div>
-
-<div class="mb-3">
-    <label for="adresse">Adresse</label>
-    <input type="text" class="form-control" id="adresse" name="adresse"
-           value="<?= !empty($utilisateur['adresse']) ? htmlspecialchars($utilisateur['adresse']) : 'Non renseignée' ?>" disabled>
-</div>
-
-<div class="col-md-4 mb-3">
-    <label for="code_postal">Code Postal</label>
-    <input type="text" class="form-control" id="code_postal" name="code_postal"
-           value="<?= !empty($utilisateur['code_postal']) ? htmlspecialchars($utilisateur['code_postal']) : 'Non renseigné' ?>" disabled>
-</div>
-
-<div class="col-md-8 mb-3">
-    <label for="ville">Ville</label>
-    <input type="text" class="form-control" id="ville" name="ville"
-           value="<?= !empty($utilisateur['ville']) ? htmlspecialchars($utilisateur['ville']) : 'Non renseignée' ?>" disabled>
-</div>
-
-
-                                <div class="text-center mt-4">
-                                    <button type="button" class="buttonVert" id="edit-btn" onclick="editForm()">
-                                        Modifier mes informations
-                                    </button>
-                                    <button type="submit" class="btn btn-success" id="submit-btn" style="display:none;">
-                                        Enregistrer les modifications
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" id="cancel-btn" onclick="cancelEdit()" style="display:none;">
-                                        Annuler
-                                    </button>
-                                </div>
+                            <div class="mb-3">
+                                <label for="photo" class="btn btn-outline-primary">
+                                    Changer la photo
+                                </label>
+                                <input type="file" class="d-none" id="photo" name="photo" accept="image/*">
                             </div>
                         </div>
-                    </form>
-                </div>
+
+                        <div class="col-md-8">
+                            <div class="form-group mb-3">
+                                <label for="pseudo">Pseudo</label>
+                                <input type="text" class="form-control" id="pseudo" name="pseudo"
+                                       value="<?= htmlspecialchars($utilisateur['pseudo']) ?>" disabled>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nom">Nom</label>
+                                    <input type="text" class="form-control" id="nom" name="nom"
+                                           value="<?= htmlspecialchars($utilisateur['nom']) ?>" disabled>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="prenom">Prénom</label>
+                                    <input type="text" class="form-control" id="prenom" name="prenom"
+                                           value="<?= htmlspecialchars($utilisateur['prenom']) ?>" disabled>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                       value="<?= htmlspecialchars($utilisateur['email']) ?>" disabled>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="telephone">Téléphone</label>
+                                <input type="tel" class="form-control" id="telephone" name="telephone"
+                                       value="<?= !empty($utilisateur['telephone']) ? htmlspecialchars($utilisateur['telephone']) : 'Non renseigné' ?>" disabled>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="date_naissance">Date de naissance</label>
+                                <input type="date" class="form-control" id="date_naissance" name="date_naissance"
+                                       value="<?= !empty($utilisateur['date_naissance']) ? htmlspecialchars($utilisateur['date_naissance']) : '' ?>" disabled>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="adresse">Adresse</label>
+                                <input type="text" class="form-control" id="adresse" name="adresse"
+                                       value="<?= !empty($utilisateur['adresse']) ? htmlspecialchars($utilisateur['adresse']) : 'Non renseignée' ?>" disabled>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="code_postal">Code Postal</label>
+                                <input type="text" class="form-control" id="code_postal" name="code_postal"
+                                       value="<?= !empty($utilisateur['code_postal']) ? htmlspecialchars($utilisateur['code_postal']) : 'Non renseigné' ?>" disabled>
+                            </div>
+
+                            <div class="col-md-8 mb-3">
+                                <label for="ville">Ville</label>
+                                <input type="text" class="form-control" id="ville" name="ville"
+                                       value="<?= !empty($utilisateur['ville']) ? htmlspecialchars($utilisateur['ville']) : 'Non renseignée' ?>" disabled>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <button type="button" class="buttonVert" id="edit-btn" onclick="editForm()">
+                                    Modifier mes informations
+                                </button>
+                                <button type="submit" class="btn btn-success" id="submit-btn" style="display:none;">
+                                    Enregistrer les modifications
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="cancel-btn" onclick="cancelEdit()" style="display:none;">
+                                    Annuler
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</section>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

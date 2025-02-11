@@ -2,7 +2,7 @@
 require_once('templates/header.php');
 ?>
 
-    <div class="container py-5">
+<div class="py-5">
         <div class="cgv-policy bg-white rounded shadow p-4">
             <h1 class="text-center mb-4">Conditions Générales de Vente</h1>
 

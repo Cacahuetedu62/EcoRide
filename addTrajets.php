@@ -151,107 +151,158 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<section class="trajet-form-page">
-    <div class="trajet-form-wrapper">
-        <h2 class="trajet-title">Proposer un Nouveau Trajet</h2>
+<section class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="border rounded-3 p-4 bg-white">
+                <h2 class="text-center mb-4 border-bottom pb-2">Proposer un Nouveau Trajet</h2>
 
-        <?php if (!empty($error_messages)): ?>
-            <div class="trajet-alert trajet-alert-danger">
-                <?php foreach ($error_messages as $message): ?>
-                    <p><?= $message ?></p>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($success_message): ?>
-            <div class="trajet-alert trajet-alert-success">
-                <?= $success_message ?>
-            </div>
-        <?php endif; ?>
-
-        <form method="POST" action="" id="trajetForm" class="trajet-form">
-            <!-- Départ -->
-            <div class="trajet-card m-2">
-                <h3 class="trajet-card-title">Départ</h3>
-                <div class="trajet-card-body">
-                    <label for="lieu_depart">Lieu de départ</label>
-                    <input type="text" id="lieu_depart" name="lieu_depart" required placeholder="Entrez une ville ou une adresse">
-
-                    <div class="trajet-input-group">
-                        <label for="date_depart">Date</label>
-                        <input type="date" id="date_depart" name="date_depart" min="<?= date('Y-m-d') ?>" required>
-                    </div><div>
-                        <label for="heure_depart">Heure</label>
-                        <input type="time" id="heure_depart" name="heure_depart" required>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Arrivée -->
-            <div class="trajet-card m-2">
-                <h3 class="trajet-card-title">Arrivée</h3>
-                <div class="trajet-card-body">
-                    <label for="lieu_arrive">Lieu d'arrivée</label>
-                    <input type="text" id="lieu_arrive" name="lieu_arrive" required placeholder="Entrez une ville ou une adresse">
-
-                    <div class="trajet-input-group">
-                        <label for="date_arrive">Date</label>
-                        <input type="date" id="date_arrive" name="date_arrive" readonly>
-                    </div><div>
-                        <label for="heure_arrive">Heure</label>
-                        <input type="time" id="heure_arrive" name="heure_arrive" readonly>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Places et Tarif -->
-            <div class="trajet-card m-2">
-                <h3 class="trajet-card-title">Places et Tarif</h3>
-                <div class="trajet-card-body">
-                    <label for="nb_places">Places disponibles</label>
-                    <input type="number" id="nb_places" name="nb_places" min="1" max="8" value="1" required>
-
-                    <label for="prix_personnes">Prix par personne (€)</label>
-                    <input type="number" step="0.1" min="0" id="prix_personnes" name="prix_personnes" required>
-                </div>
-            </div>
-
-            <!-- Véhicule -->
-            <div class="trajet-card m-2">
-                <h3 class="trajet-card-title">Véhicule</h3>
-                <div class="trajet-card-body">
-                    <label for="voiture">Sélectionnez votre véhicule</label>
-                    <select id="voiture" name="voiture" required>
-                        <option value="">Choisir un véhicule</option>
-                        <?php foreach ($voitures as $voiture): ?>
-                            <option value="<?= htmlspecialchars($voiture['id']) ?>">
-                                <?= htmlspecialchars($voiture['marque'] . ' ' . $voiture['modele']) ?>
-                            </option>
+                <?php if (!empty($error_messages)): ?>
+                    <div class="alert alert-danger">
+                        <?php foreach ($error_messages as $message): ?>
+                            <p class="mb-0"><?= $message ?></p>
                         <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Préférences -->
-            <div class="trajet-card m-2">
-                <h3 class="trajet-card-title">Préférences</h3>
-                <div class="trajet-card-body">
-                    <label for="preferences">Préférences supplémentaires</label>
-                    <textarea id="preferences" name="preferences" rows="3"></textarea>
-
-                    <div class="trajet-checkbox">
-                        <input type="checkbox" id="fumeur" name="fumeur">
-                        <label for="fumeur">Fumeur</label>
                     </div>
-                    <div class="trajet-checkbox">
-                        <input type="checkbox" id="animaux" name="animaux">
-                        <label for="animaux">Animaux acceptés</label>
-                    </div>
-                </div>
-            </div>
+                <?php endif; ?>
 
-            <button class="buttonVert" type="submit" name="chercher">Publier le trajet</button>
-        </form>
+                <?php if ($success_message): ?>
+                    <div class="alert alert-success">
+                        <?= $success_message ?>
+                    </div>
+                <?php endif; ?>
+
+                <form method="POST" action="" id="trajetForm">
+                    <div class="row g-4">
+                        <!-- Départ et Arrivée sur la même ligne pour grands écrans -->
+                        <div class="col-12 col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h3 class="h5 mb-0">Départ</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="lieu_depart" class="form-label">Lieu de départ</label>
+                                        <input type="text" class="form-control" id="lieu_depart" name="lieu_depart" required placeholder="Entrez une ville ou une adresse">
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="date_depart" class="form-label">Date</label>
+                                            <input type="date" class="form-control" id="date_depart" name="date_depart" min="<?= date('Y-m-d') ?>" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="heure_depart" class="form-label">Heure</label>
+                                            <input type="time" class="form-control" id="heure_depart" name="heure_depart" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h3 class="h5 mb-0">Arrivée</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="lieu_arrive" class="form-label">Lieu d'arrivée</label>
+                                        <input type="text" class="form-control" id="lieu_arrive" name="lieu_arrive" required placeholder="Entrez une ville ou une adresse">
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="date_arrive" class="form-label">Date</label>
+                                            <input type="date" class="form-control" id="date_arrive" name="date_arrive" readonly>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="heure_arrive" class="form-label">Heure</label>
+                                            <input type="time" class="form-control" id="heure_arrive" name="heure_arrive" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Places, Tarif et Véhicule -->
+                        <div class="col-12 col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h3 class="h5 mb-0">Places et Tarif</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="nb_places" class="form-label">Places disponibles</label>
+                                        <input type="number" class="form-control" id="nb_places" name="nb_places" min="1" max="8" value="1" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="prix_personnes" class="form-label">Prix par personne (€)</label>
+                                        <input type="number" class="form-control" step="0.1" min="0" id="prix_personnes" name="prix_personnes" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h3 class="h5 mb-0">Véhicule</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="voiture" class="form-label">Sélectionnez votre véhicule</label>
+                                        <select class="form-select" id="voiture" name="voiture" required>
+                                            <option value="">Choisir un véhicule</option>
+                                            <?php foreach ($voitures as $voiture): ?>
+                                                <option value="<?= htmlspecialchars($voiture['id']) ?>">
+                                                    <?= htmlspecialchars($voiture['marque'] . ' ' . $voiture['modele']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Préférences sur toute la largeur -->
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="h5 mb-0">Préférences</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="preferences" class="form-label">Préférences supplémentaires</label>
+                                        <textarea class="form-control" id="preferences" name="preferences" rows="3"></textarea>
+                                    </div>
+                                    <p class="text-muted text-center mb-3">
+                                        <i class="fas fa-info-circle"></i> Cliquez sur les options ci-dessous si vous les acceptez
+                                    </p>
+                                    <div class="d-flex justify-content-center gap-4 mt-3">
+                                        <div class="text-center">
+                                            <input type="checkbox" class="btn-check" id="fumeur" name="fumeur" autocomplete="off">
+                                            <label class="btn btn-outline-secondary p-3 rounded-3" for="fumeur">
+                                                <i class="fas fa-smoking fa-2x mb-2"></i><br>
+                                                Fumeur accepté
+                                            </label>
+                                        </div>
+                                        <div class="text-center">
+                                            <input type="checkbox" class="btn-check" id="animaux" name="animaux" autocomplete="off">
+                                            <label class="btn btn-outline-secondary p-3 rounded-3" for="animaux">
+                                                <i class="fas fa-paw fa-2x mb-2"></i><br>
+                                                Animaux acceptés
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button class="btn btn-success btn-lg" type="submit" name="chercher">Publier le trajet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </section>
 

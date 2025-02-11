@@ -1,6 +1,11 @@
 <?php
 require_once('templates/header.php');
 
+// Génération et vérification du token CSRF
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Vérification du token CSRF
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
@@ -8,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     $errors = [];
-    
+
     // Nettoyage et récupération des données
     $pseudo = htmlspecialchars(trim($_POST['pseudo']));
     $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
@@ -55,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         try {
             $pdo->beginTransaction();
 
-            $sql = "INSERT INTO utilisateurs (pseudo, email, password, nom, prenom, credits) 
+            $sql = "INSERT INTO utilisateurs (pseudo, email, password, nom, prenom, credits)
                     VALUES (:pseudo, :email, :password, :nom, :prenom, 20)";
             $stmt = $pdo->prepare($sql);
             $success = $stmt->execute([
@@ -73,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     'pseudo' => $pseudo,
                     'credits' => 20
                 ];
-                
+
                 $pdo->commit();
                 header('Location: index.php');
                 exit;
@@ -86,16 +91,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 ?>
 
-<main class="container py-5">
+<div class="signup-container">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h2 class="card-title text-center mb-4">Créer un compte</h2>
-                    
+            <div class="card signup-card">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="signup-title text-center mb-4">Créer un compte</h2>
+
                     <?php if (!empty($errors)): ?>
                         <div class="alert alert-danger">
-                            <ul class="mb-0">
+                            <ul class="signup-error-list">
                                 <?php foreach ($errors as $error): ?>
                                     <li><?= $error ?></li>
                                 <?php endforeach; ?>
@@ -103,87 +108,81 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </div>
                     <?php endif; ?>
 
-                    <p class="text-center mb-4">
+                    <div class="signup-promo-box">
                         Faites un geste pour la planète, on s'occupe du reste.<br>
                         <strong>20 crédits offerts</strong> à l'inscription !
-                    </p>
+                    </div>
 
                     <form method="POST" class="needs-validation" novalidate>
                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="nom" class="form-label">Nom</label>
-                                <input type="text" class="form-control" id="nom" name="nom" required 
+
+                        <div class="row mb-4">
+                            <div class="col-sm-6 mb-3 mb-sm-0">
+                                <label for="nom" class="signup-label">Nom</label>
+                                <input type="text" class="form-control signup-input" id="nom" name="nom" required
                                        value="<?= isset($_POST['nom']) ? htmlspecialchars($_POST['nom']) : '' ?>">
                             </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="prenom" class="form-label">Prénom</label>
-                                <input type="text" class="form-control" id="prenom" name="prenom" required
+
+                            <div class="col-sm-6">
+                                <label for="prenom" class="signup-label">Prénom</label>
+                                <input type="text" class="form-control signup-input" id="prenom" name="prenom" required
                                        value="<?= isset($_POST['prenom']) ? htmlspecialchars($_POST['prenom']) : '' ?>">
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="pseudo" class="form-label">Pseudo</label>
-                            <input type="text" class="form-control" id="pseudo" name="pseudo" required
+                        <div class="mb-4">
+                            <label for="pseudo" class="signup-label">Pseudo</label>
+                            <input type="text" class="form-control signup-input" id="pseudo" name="pseudo" required
                                    value="<?= isset($_POST['pseudo']) ? htmlspecialchars($_POST['pseudo']) : '' ?>">
                         </div>
 
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required
+                        <div class="mb-4">
+                            <label for="email" class="signup-label">Email</label>
+                            <input type="email" class="form-control signup-input" id="email" name="email" required
                                    value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>">
                         </div>
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Mot de passe</label>
+                        <div class="mb-4">
+                            <label for="password" class="signup-label">Mot de passe</label>
                             <div class="input-group">
-                                <input type="password" class="form-control" id="password" name="password" required>
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
-                                    </svg>
-                                </button>
+                                <input type="password" class="form-control signup-input rounded" id="password" name="password" required>
+                                <div class="input-group-append position-absolute end-0 top-50 translate-middle-y me-2">
+                                    <i class="bi bi-eye-slash text-muted" style="cursor: pointer;" id="togglePassword"></i>
+                                </div>
                             </div>
-                            <div class="form-text">
+                            <div class="text-center mt-2 text-muted small">
                                 Le mot de passe doit contenir au moins :
-                                <ul class="mb-0">
-                                    <li>8 caractères</li>
-                                    <li>Une majuscule</li>
-                                    <li>Une minuscule</li>
-                                    <li>Un chiffre</li>
-                                    <li>Un caractère spécial (@, #, $, %...)</li>
-                                </ul>
+                                <div class="text-center">
+                                    <span>• 8 caractères</span><br>
+                                    <span>• Une majuscule</span><br>
+                                    <span>• Une minuscule</span><br>
+                                    <span>• Un chiffre</span><br>
+                                    <span>• Un caractère spécial (@, #, $, %...)</span>
+                                </div>
                             </div>
                         </div>
 
                         <div class="mb-4">
-                            <label for="confirm_password" class="form-label">Confirmer le mot de passe</label>
+                            <label for="confirm_password" class="signup-label">Confirmer le mot de passe</label>
                             <div class="input-group">
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
-                                    </svg>
-                                </button>
+                                <input type="password" class="form-control signup-input rounded" id="confirm_password" name="confirm_password" required>
+                                <div class="input-group-append position-absolute end-0 top-50 translate-middle-y me-2">
+                                    <i class="bi bi-eye-slash text-muted" style="cursor: pointer;" id="toggleConfirmPassword"></i>
+                                </div>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 py-2">S'inscrire</button>
-                        
-                        <p class="text-center mt-3 mb-0">
-                            Déjà inscrit ? <a href="connexion.php" class="text-decoration-none">Se connecter</a>
+                        <button type="submit" class="btn signup-submit-btn w-50 p-2 m-2">S'inscrire</button>
+
+                        <p class="text-center mb-0">
+                            Déjà inscrit ? <a href="connexion.php" class="signup-login-link">Se connecter</a>
                         </p>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-</main>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -191,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupPasswordToggle(inputId, toggleId) {
         const input = document.getElementById(inputId);
         const toggle = document.getElementById(toggleId);
-        
+
         if (input && toggle) {
             toggle.addEventListener('click', function() {
                 const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -228,6 +227,25 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
     });
+
+    // Fonction pour changer l'icône de visibilité du mot de passe
+    function togglePasswordVisibility(inputId, toggleId) {
+        const input = document.getElementById(inputId);
+        const toggleIcon = document.getElementById(toggleId).querySelector('i');
+
+        document.getElementById(toggleId).addEventListener('click', function() {
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggleIcon.classList.replace('bi-eye-slash', 'bi-eye');
+            } else {
+                input.type = 'password';
+                toggleIcon.classList.replace('bi-eye', 'bi-eye-slash');
+            }
+        });
+    }
+
+    togglePasswordVisibility('password', 'togglePassword');
+    togglePasswordVisibility('confirm_password', 'toggleConfirmPassword');
 });
 </script>
 

@@ -1,29 +1,28 @@
 * {
-	margin: 0;
-	padding: 0;
+    margin: 0;
+    padding: 0;
     font-family: "Roboto", sans-serif;
-	text-decoration: none;
+    text-decoration: none;
     font-size: 18px;
+    box-sizing: border-box;
 }
 
-p{
-    margin:0;
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
 }
 
 html, body {
-    height: 100%; 
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    justify-content: center; /* Centre verticalement */
-    align-items: center; /* Centre horizontalement */
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
-main{
-    flex: 1;
-    min-height: 100vh;
-    padding-bottom: 100px;
-    box-sizing: border-box;
+main {
+    flex: 1;  /* Cette ligne est importante */
+    margin-bottom: 50px; /* Ajoute un espace avant le footer */
+    position : relative;
 }
 
 a, a:link, a:visited, a:hover, a:active {
@@ -33,67 +32,143 @@ a, a:link, a:visited, a:hover, a:active {
 }
 
 
-/* RESPONSIVE BARRE */
-.navbar-ecoride {
-    padding: 0.5rem 1rem;
+.d-flex {
+    flex-wrap: wrap;
 }
 
-.navbar-menu-container ul {
-    gap: 1rem;
+.navbar-ecoride {
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 9999;
+}
+
+.navbar-menu-container {
+    position: relative;
+    z-index: 9999;
+}
+
+/* Style pour le menu déroulant */
+.dropdown-menu {
+    position: absolute !important; /* Forcer la position absolue */
+    background-color: white !important;
+    z-index: 9999 !important;
+    display: none;
+    min-width: 200px;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    padding: 8px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* S'assurer que le dropdown s'affiche correctement */
+.dropdown-menu.show {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    max-height: none !important;
+}
+
+.navbar-toggler {
+    display: none;
+    background: none;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.nav-link.dropdown-toggle svg.bi.bi-list {
+    display: none;
+}
+
+.btn-connect,
+.btn-disconnect {
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 20px 30px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    font-weight: 400;
+    font-size: large;
+}
+
+.btn-connect {
+    background-color: #28a745; 
+}
+
+.btn-connect:hover {
+    background-color: #218838;
+}
+
+.btn-disconnect {
+    background-color: #dc3545; 
+}
+
+.btn-disconnect:hover {
+    background-color: #c82333;
 }
 
 .user-info-container {
-    gap: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .pseudo-display {
-    font-size: 1.2rem;
+    color: black;
 }
 
-/* Breakpoint 1440px */
-@media (max-width: 1440px) {
-    .navbar-menu-container ul {
-        gap: 0.8rem;
-    }
-    
-    .nav-link {
-        padding: 0.8rem 1rem;
-    }
+.navbar-ecoride .dropdown-menu {
+    max-height: 0;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+    overflow: hidden;
 }
 
-/* Breakpoint 1280px */
-@media (max-width: 1280px) {
-    .navbar-logo-container img {
-        width: 180px;
-        height: 90px;
-    }
+.navbar-ecoride .dropdown-toggle[aria-expanded="true"] + .dropdown-menu {
+    max-height: 500px;
+    visibility: visible;
+    opacity: 1;
 }
 
-/* Breakpoint 1024px */
+.user-info-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.navbar-menu-container ul {
+    display: flex;
+    list-style: none;
+    gap: 15px;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar-logo-container img {
+    max-width: 200px;
+    height: auto;
+}
+
+
 @media (max-width: 1024px) {
-    .navbar-ecoride {
-        padding: 0.5rem;
-    }
-    
-    .pseudo-display {
-        font-size: 1rem;
+    .navbar-toggler {
+        display: block;
+        margin-bottom: 10px;
     }
 
-    .btn-connect,
-    .btn-disconnect {
-        padding: 0.8rem 1.2rem;
-        font-size: 0.9rem;
-    }
-}
-
-/* Breakpoint 768px */
-@media (max-width: 768px) {
-    .d-flex.flex-wrap {
-        flex-direction: column;
-        gap: 1rem;
+    .navbar-collapse {
+        display: none;
     }
 
-    .navbar-menu-container {
+    .navbar-collapse.show {
+        display: block;
         width: 100%;
     }
 
@@ -105,67 +180,188 @@ a, a:link, a:visited, a:hover, a:active {
     .nav-link {
         width: 100%;
         text-align: center;
+        padding: 10px 0;
+    }
+
+    .navbar-ecoride .d-flex {
+        flex-direction: column;
     }
 
     .user-info-container {
         width: 100%;
         justify-content: center;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .navbar-logo-container {
-        order: -1;
+        margin-bottom: 10px;
+        flex-direction: column;
     }
 
     .navbar-logo-container img {
-        width: 150px;
-        height: 75px;
+        max-width: 150px;
     }
 
-    .dropdown-menu {
-        width: 100%;
-        text-align: center;
-    }
-}
-
-/* Breakpoint 480px */
-@media (max-width: 480px) {
     .btn-connect,
     .btn-disconnect {
         width: 100%;
-        padding: 0.6rem 1rem;
+        margin-bottom: 10px;
     }
 
     .pseudo-display {
-        width: 100%;
         text-align: center;
-        font-size: 0.9rem;
+        width: 100%;
+        margin-bottom: 10px;
     }
 
-    .navbar-logo-container img {
-        width: 120px;
-        height: 60px;
+    .container-fluid {
+        padding: 10px !important;
     }
 }
 
-/* Breakpoint 320px */
-@media (max-width: 320px) {
-    .navbar-ecoride {
-        padding: 0.3rem;
+@media (max-width: 992px) {
+    .navbar-toggler {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .navbar-collapse {
+        display: none;
+    }
+
+    .navbar-collapse.show {
+        display: block;
+        width: 100%;
+    }
+
+    .navbar-menu-container ul {
+        flex-direction: column;
+        width: 100%;
     }
 
     .nav-link {
-        padding: 0.5rem;
-        font-size: 0.9rem;
+        width: 100%;
+        text-align: center;
+        padding: 10px 0;
     }
 
-    .nav-link svg {
-        width: 24px;
-        height: 24px;
+    .navbar-ecoride .d-flex {
+        flex-direction: column;
+    }
+
+    .user-info-container {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 10px;
+        flex-direction: column;
+    }
+
+    .navbar-logo-container img {
+        max-width: 150px;
+    }
+
+    .btn-connect,
+    .btn-disconnect {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .pseudo-display {
+        text-align: center;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .container-fluid {
+        padding: 10px !important;
     }
 }
 
+
+@media (max-width: 576px) {
+    .navbar-logo-container img {
+        max-width: 120px;
+    }
+
+    .nav-link {
+        font-size: 16px;
+    }
+
+    .btn-connect,
+    .btn-disconnect {
+        padding: 15px 20px;
+    }
+}
+
+.support-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+}
+
+.support-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.support-card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+
+.card-header {
+    padding: 1rem;
+    text-align: center;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.contact-info {
+    margin-top: 1rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+
+.contact-icon {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .support-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .support-title {
+        font-size: 2rem;
+    }
+
+    .support-subtitle {
+        font-size: 1rem;
+    }
+}
+
+footer {
+    background-color: #F4B749 ;    
+    margin-top: auto; /* Force le footer en bas */
+    width: 100%;
+    padding: 0 15px;
+}
 
 .image-backgroundHistoire {
     background-image: url('images/natureHistoire.jpg');
@@ -248,6 +444,123 @@ a, a:link, a:visited, a:hover, a:active {
         width: 100%;
     }
 }
+
+
+.signup-container {
+    min-height: 95vh; /* Réduit de 100vh à 95vh */
+    padding: 1rem 0; /* Réduit le padding */
+}
+
+.signup-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    max-width: 800px; /* Limite la largeur maximale */
+    margin: 0 auto;
+}
+
+.signup-title {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.signup-input {
+    border: 2px solid #eee;
+    border-radius: 8px;
+    padding: 12px;
+    transition: all 0.3s ease;
+    height: auto; /* Assure une hauteur uniforme */
+}
+
+.signup-input:focus {
+    border-color: #F4B749;
+    box-shadow: 0 0 0 0.2rem rgba(244,183,73,0.25);
+}
+
+.signup-label {
+    font-weight: 500;
+    color: #444;
+}
+
+.signup-submit-btn {
+    background-color: #F4B749;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.signup-submit-btn:hover {
+    background-color: #e5a93a;
+    transform: translateY(-2px);
+}
+
+/* Style spécifique pour corriger le problème de la taille des champs mot de passe */
+.input-group .signup-input {
+    width: 100% !important; /* Force la pleine largeur */
+    flex: 1 1 auto; /* Permet au champ de grandir */
+}
+
+.input-group {
+    width: 100%; /* Assure que le groupe prend toute la largeur */
+}
+
+.input-group-text {
+    background: transparent;
+    cursor: pointer;
+}
+
+.input-group-text:hover {
+    color: #F4B749;
+}
+
+
+.signup-toggle-btn:hover {
+    background-color: #F4B749;
+    border-color: #F4B749;
+    color: white;
+}
+
+.signup-promo-box {
+    background-color: rgba(244,183,73,0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.signup-login-link {
+    color: #F4B749;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.signup-login-link:hover {
+    color: #e5a93a;
+}
+
+.signup-password-requirements {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+.signup-error-list {
+    margin-bottom: 0;
+    padding-left: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .signup-container {
+        padding: 1rem;
+    }
+    
+    .signup-card {
+        margin: 0 1rem;
+    }
+}
+
 
 .toast-container {
     position: fixed;
@@ -1094,10 +1407,11 @@ textarea {
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+    max-width: 300px;
+    margin-left: 0;
+    margin-right: auto;
 }
+
 .comment-card {
     background-color: #f8f9fa;
     border-radius: 10px;
@@ -1193,6 +1507,11 @@ textarea {
     margin-bottom: 20px;
 }
 
+
+.container-max-width {
+    width: 100%;
+    max-width: 800px;
+}
 
 .dashboard-container {
     background-color: #fff;
@@ -1769,118 +2088,6 @@ textarea {
     }
 }
 
-        .navbar-ecoride {
-            background-color: #f8f9fa;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .navbar-ecoride .nav-link {
-            color: #333 !important;
-            transition: all 0.3s ease;
-            position: relative;
-            padding: 15px 20px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .navbar-ecoride .nav-link svg {
-            margin-bottom: 5px;
-            width: 32px;
-            height: 32px;
-            transition: transform 0.5s ease;
-        }
-
-        .navbar-ecoride .nav-link:hover svg {
-            transform: rotate(15deg) translateY(-5px);
-        }
-
-        .navbar-menu-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-grow: 1;
-        }
-
-        .navbar-menu-container ul {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .navbar-logo-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .btn-connect,
-        .btn-disconnect {
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 20px 30px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            height: 40px;
-            font-weight: 400;
-            font-size: large;
-        }
-
-        .btn-connect {
-            background-color: #28a745; 
-        }
-
-        .btn-connect:hover {
-            background-color: #218838;
-        }
-
-        .btn-disconnect {
-            background-color: #dc3545; 
-        }
-
-        .btn-disconnect:hover {
-            background-color: #c82333;
-        }
-
-        .user-info-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .pseudo-display {
-            color: black;
-        }
-
-        .navbar-ecoride .dropdown-menu {
-            max-height: 0;
-            visibility: hidden;
-            opacity: 0;
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-
-        .navbar-ecoride .dropdown-toggle[aria-expanded="true"] + .dropdown-menu {
-            max-height: 500px;
-            visibility: visible;
-            opacity: 1;
-        }
-
-        @media (max-width: 992px) {
-            .navbar-menu-container ul {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
 .pseudo-display{
 font-weight: 400;
 font-size: large;

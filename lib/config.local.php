@@ -1,15 +1,14 @@
 <?php
 return [
     'db' => [
-        'host' => 'db',
+        'host' => 'localhost',
         'name' => 'ecoride',
-        'user' => 'ecoride_user',
-        'pass' => 'secure_password',
-        'charset' => 'utf8mb4',
-        'port' => '3306'
+        'user' => 'root',
+        'pass' => 'MattLi2024!!',
+        'charset' => 'utf8mb4'
     ],
     'mongodb' => [
-        'host' => 'mongodb',
+        'host' => 'localhost',
         'port' => '27017',
         'db' => 'creditsPlateforme'
     ],
