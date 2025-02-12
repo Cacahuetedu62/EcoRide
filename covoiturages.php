@@ -1,5 +1,21 @@
 <?php
 require_once('templates/header.php');
+require_once('lib/config.php');
+require_once('lib/pdo.php');
+
+// Fonction d'extraction du nom de la ville
+function extractCityName($fullLocation) {
+    // Séparer par des virgules et prendre le premier élément
+    $parts = explode(',', $fullLocation);
+    
+    // Nettoyer et retourner le premier élément (généralement la ville)
+    $city = trim($parts[0]);
+    
+    // Enlever le code postal s'il est attaché
+    $city = preg_replace('/^\d+\s*/', '', $city);
+    
+    return $city;
+}
 ?>
 
 <section class="d-flex m-3 justify-content-center">
@@ -11,6 +27,7 @@ require_once('templates/header.php');
                        placeholder="Entrez une ville de départ" required
                        list="ville_depart-list"
                        value="<?php echo isset($_POST['ville_depart']) ? htmlspecialchars($_POST['ville_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                <datalist id="ville_depart-list"></datalist>
                 <div class="invalid-feedback">
                     Veuillez saisir une ville de départ
                 </div>
@@ -22,6 +39,7 @@ require_once('templates/header.php');
                        placeholder="Entrez une ville d'arrivée" required
                        list="ville_arrive-list"
                        value="<?php echo isset($_POST['ville_arrive']) ? htmlspecialchars($_POST['ville_arrive'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                <datalist id="ville_arrive-list"></datalist>
                 <div class="invalid-feedback">
                     Veuillez saisir une ville d'arrivée
                 </div>
@@ -39,9 +57,12 @@ require_once('templates/header.php');
 
             <div class="form-group">
                 <label for="nb_passagers" class="form-label">Nombre de passagers</label>
-                <input type="number" class="form-control" id="nb_passagers" name="nb_passagers" placeholder="Nombre de passagers" required value="<?php echo isset($_POST['nb_passagers']) ? htmlspecialchars($_POST['nb_passagers'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                <input type="number" class="form-control" id="nb_passagers" name="nb_passagers" 
+                       placeholder="Nombre de passagers" required 
+                       value="<?php echo isset($_POST['nb_passagers']) ? htmlspecialchars($_POST['nb_passagers'], ENT_QUOTES, 'UTF-8') : '1'; ?>"
+                       min="1" max="8">
                 <div class="invalid-feedback">
-                    Veuillez saisir le nombre de passagers
+                    Veuillez saisir le nombre de passagers (1-8)
                 </div>
             </div>
 
@@ -69,7 +90,7 @@ require_once('templates/header.php');
 
                     <div class="form-group">
                         <label for="duree" class="form-label">Durée du trajet</label>
-                        <input type="text" class="form-control" id="duree" name="duree" placeholder="Durée du trajet (en heures)"
+                        <input type="number" step="0.5" class="form-control" id="duree" name="duree" placeholder="Durée du trajet (en heures)"
                                value="' . (isset($_POST['duree']) ? htmlspecialchars($_POST['duree'], ENT_QUOTES, 'UTF-8') : '') . '">
                     </div>
 
@@ -92,34 +113,27 @@ require_once('templates/header.php');
 
 <?php
 if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
-    // Récupérer les données du formulaire
+    // Récupérer et nettoyer les données du formulaire
     $ville_depart = $_POST['ville_depart'];
     $ville_arrive = $_POST['ville_arrive'];
     $date_depart = $_POST['date_depart'];
     $nb_passagers = $_POST['nb_passagers'];
+    
+    // Extraire les noms de ville propres
+    $ville_depart_clean = extractCityName($ville_depart);
+    $ville_arrive_clean = extractCityName($ville_arrive);
+
+    // Autres filtres optionnels
     $ecologique = isset($_POST['ecologique']) ? 1 : 0;
     $prix_min = isset($_POST['prix_min']) ? $_POST['prix_min'] : null;
     $duree = isset($_POST['duree']) ? $_POST['duree'] : null;
     $note_min = isset($_POST['note_min']) ? $_POST['note_min'] : null;
 
-    if (empty($ville_depart) || strlen($ville_depart) < 2) {
-        die("La ville de départ est trop courte ou vide");
+    // Validation de base
+    if (empty($ville_depart_clean) || empty($ville_arrive_clean)) {
+        echo "<div class='alert alert-danger'>Veuillez saisir des villes valides.</div>";
+        exit;
     }
-    if (empty($ville_arrive) || strlen($ville_arrive) < 2) {
-        die("La ville d'arrivée est trop courte ou vide");
-    }
-
-    if ($duree && !is_numeric($duree)) {
-        die("La durée du trajet doit être un nombre valide.");
-    }
-
-    $duree = (int) $duree;  // Assurez-vous que la durée est un entier
-
-    // Filtrage pour assainir les villes en supprimant les caractères spéciaux HTML
-    $ville_depart = htmlspecialchars($ville_depart, ENT_QUOTES, 'UTF-8');
-    $ville_arrive = htmlspecialchars($ville_arrive, ENT_QUOTES, 'UTF-8');
-    $date_depart = htmlspecialchars($date_depart, ENT_QUOTES, 'UTF-8');
-    $nb_passagers = intval($nb_passagers); // Assurer que le nombre de passagers est un entier
 
     // Préparer la requête SQL
     $sql = "SELECT DISTINCT t.*, u.pseudo, u.photo, u.note_moyenne, v.energie, v.nb_places AS voiture_places, t.prix_personnes,
@@ -129,11 +143,18 @@ if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
     JOIN utilisateurs u ON tu.utilisateur_id = u.id
     LEFT JOIN avis a ON a.trajet_id = t.id
     LEFT JOIN voitures v ON v.utilisateur_id = u.id
-    WHERE t.lieu_depart LIKE :ville_depart
-    AND t.lieu_arrive LIKE :ville_arrive
+    WHERE (
+        LOWER(t.lieu_depart) LIKE LOWER(:ville_depart) OR 
+        LOWER(t.lieu_depart) LIKE CONCAT('%', LOWER(:ville_depart), '%')
+    )
+    AND (
+        LOWER(t.lieu_arrive) LIKE LOWER(:ville_arrive) OR 
+        LOWER(t.lieu_arrive) LIKE CONCAT('%', LOWER(:ville_arrive), '%')
+    )
     AND t.date_depart = :date_depart
     AND t.nb_places >= :nb_passagers";
 
+    // Ajout des filtres conditionnels
     if ($ecologique) {
         $sql .= " AND v.energie IN ('électrique', 'hybride')";
     }
@@ -144,126 +165,129 @@ if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
         $sql .= " AND TIMESTAMPDIFF(HOUR, CONCAT(t.date_depart, ' ', t.heure_depart), CONCAT(t.date_arrive, ' ', t.heure_arrive)) >= :duree";
     }
     if ($note_min) {
-        $sql .= " AND ROUND(u.note_moyenne, 1) >= :note_min"; // Arrondir la moyenne à 1 décimale
+        $sql .= " AND ROUND(u.note_moyenne, 1) >= :note_min";
     }
 
-    $stmt = $pdo->prepare($sql);
+    try {
+        // Préparer et exécuter la requête
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':ville_depart', '%' . $ville_depart_clean . '%');
+        $stmt->bindValue(':ville_arrive', '%' . $ville_arrive_clean . '%');
+        $stmt->bindValue(':date_depart', $date_depart);
+        $stmt->bindValue(':nb_passagers', $nb_passagers, PDO::PARAM_INT);
 
-    // Lier les paramètres
-    $stmt->bindValue(':ville_depart', '%' . $ville_depart . '%');
-    $stmt->bindValue(':ville_arrive', '%' . $ville_arrive . '%');
-    $stmt->bindValue(':date_depart', $date_depart);
-    $stmt->bindValue(':nb_passagers', $nb_passagers, PDO::PARAM_INT);
-    if ($prix_min) {
-        $stmt->bindValue(':prix_min', $prix_min, PDO::PARAM_INT);
-    }
-    if ($duree) {
-        $stmt->bindValue(':duree', $duree, PDO::PARAM_STR);
-    }
-    if ($note_min) {
-        $stmt->bindValue(':note_min', $note_min, PDO::PARAM_INT);
-    }
+        // Liaison des paramètres optionnels
+        if ($prix_min) {
+            $stmt->bindValue(':prix_min', $prix_min, PDO::PARAM_INT);
+        }
+        if ($duree) {
+            $stmt->bindValue(':duree', $duree, PDO::PARAM_STR);
+        }
+        if ($note_min) {
+            $stmt->bindValue(':note_min', $note_min, PDO::PARAM_INT);
+        }
 
-    // Exécuter la requête
-    $stmt->execute();
+        $stmt->execute();
+        $trajets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Vérifier si des trajets correspondent
-    $trajets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Filtrer les trajets avec places disponibles
+        $trajets_disponibles = array_filter($trajets, function($trajet) {
+            return $trajet['nb_places'] >= 1;
+        });
 
-    $trajets_disponibles = array_filter($trajets, function($trajet) {
-        return $trajet['nb_places'] >= 1; // Vérifier si au moins une place est disponible
-    });
-
-    if (count($trajets_disponibles) > 0) {
-        // Afficher les résultats
-        foreach ($trajets_disponibles as $trajet) {
-            // Vérifier si le trajet est écologique (si l'énergie est électrique || hybride)
-            $ecologique = ($trajet['energie'] === 'électrique' || $trajet['energie'] === 'hybride') ? 'Oui' : 'Non';
-            ?>
-
-    <div class="m-3"><h4>Trajet n° <?= htmlspecialchars($trajet['id']) ?></h4></div>
-    <section class="recapTrajet d-flex">
-        <div class="trajetComplet p-3">
-            <h3>Départ</h3>
-            <label for="#" class="form-label">Ville de départ</label>
-            <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_depart']) ?>" disabled>
-
-            <label for="#" class="form-label">Date de départ</label>
-            <input type="date" class="form-control" value="<?= $trajet['date_depart'] ?>" disabled>
-
-            <label for="#" class="form-label">Heure de départ</label>
-            <input type="text" class="form-control" value="<?= $trajet['heure_depart'] ?>" disabled>
-        </div>
-
-        <div class="trajetComplet p-3">
-            <h3>Arrivée</h3>
-            <label for="#" class="form-label">Ville d'arrivée</label>
-            <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_arrive']) ?>" disabled>
-
-            <label for="#" class="form-label">Date d'arrivée</label>
-            <input type="date" class="form-control" value="<?= $trajet['date_arrive'] ?>" disabled>
-
-            <label for="#" class="form-label">Heure d'arrivée</label>
-            <input type="text" class="form-control" value="<?= $trajet['heure_arrive'] ?>" disabled>
-        </div>
-
-        <div class="trajetComplet p-3">
-            <h4>Informations sur le chauffeur</h4>
-            <p class="profilPhotoPseudo">
-                <img src="<?= htmlspecialchars($trajet['photo']) ?>" alt="Photo du chauffeur" class="bd-placeholder-img rounded-circle" width="75" height="75">
-                <?= htmlspecialchars($trajet['pseudo']) ?>
-            </p>
-
-            <p>Note :
-            <?php
-                $note_moyenne = $trajet['note_moyenne'];
-                for ($i = 0; $i < $note_moyenne; $i++) {
-                    echo "🚗"; // Affichage de l'icône pour chaque point de la note
-                }
-            ?>
-            </p>
-
-            <p>Nombre de places restantes :<?= $trajet['nb_places'] ?></p>
-            <p>Prix :<?= $trajet['prix_personnes'] ?> € par personne</p>
-            <p>
-                <?php
-                if ($ecologique) {
-                    echo "🌱 C'est un trajet écologique*";
-                } else {
-                    echo "⛽ Ce trajet n'est pas écologique*";
-                }
+        if (count($trajets_disponibles) > 0) {
+            // Affichage des trajets
+            foreach ($trajets_disponibles as $trajet) {
+                $ecologique = ($trajet['energie'] === 'électrique' || $trajet['energie'] === 'hybride') ? 'Oui' : 'Non';
                 ?>
-            </p>
-            <p style="font-size: 15px;">*Un trajet est dit "écologique" s'il est effectué avec une voiture électrique/hybride</p>
-            <div>
-                <button class="btn btn-success mt-2" name="détails"><a href="reservations.php?id=<?php echo htmlspecialchars($trajet['id']); ?>">+ détails</a></button>
-            </div>
-        </div>
-    </section>
+ <div class="m-3"><h4>Trajet n° <?= htmlspecialchars($trajet['id']) ?></h4></div>
+<section class="recapTrajet d-flex">
+    <div class="trajetComplet p-3">
+        <h3>Départ</h3>
+        <label for="#" class="form-label">Ville de départ</label>
+        <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_depart']) ?>" disabled>
 
-    <?php
-    }
-    } else {
-         // Affichage du toast ici seulement quand aucun trajet n'est trouvé
-         ?>
-         <!-- Toast Bootstrap pour "Aucun trajet trouvé" -->
-         <div class="toast-container p-3 position-fixed top-50 start-50 translate-middle z-index-5">
-             <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                 <div class="toast-header">
-                     <strong class="me-auto">Résultat de la recherche</strong>
-                     <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                 </div>
-                 <div class="toast-body">
-                     Aucun trajet trouvé pour les dates sélectionnées. Peut-être que des trajets sont disponibles à d'autres dates. Essayez de modifier vos dates de départ.
-                 </div>
-         <?php
+        <label for="#" class="form-label">Date de départ</label>
+        <input type="date" class="form-control" value="<?= $trajet['date_depart'] ?>" disabled>
+
+        <label for="#" class="form-label">Heure de départ</label>
+        <input type="text" class="form-control" value="<?= $trajet['heure_depart'] ?>" disabled>
+    </div>
+
+    <div class="trajetComplet p-3">
+        <h3>Arrivée</h3>
+        <label for="#" class="form-label">Ville d'arrivée</label>
+        <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_arrive']) ?>" disabled>
+
+        <label for="#" class="form-label">Date d'arrivée</label>
+        <input type="date" class="form-control" value="<?= $trajet['date_arrive'] ?>" disabled>
+
+        <label for="#" class="form-label">Heure d'arrivée</label>
+        <input type="text" class="form-control" value="<?= $trajet['heure_arrive'] ?>" disabled>
+    </div>
+
+    <div class="trajetComplet p-3">
+        <h4>Informations sur le chauffeur</h4>
+        <p class="profilPhotoPseudo">
+            <img src="<?= htmlspecialchars($trajet['photo']) ?>" alt="Photo du chauffeur" class="bd-placeholder-img rounded-circle" width="75" height="75">
+            <?= htmlspecialchars($trajet['pseudo']) ?>
+        </p>
+
+        <p>Note :
+        <?php
+            $note_moyenne = $trajet['note_moyenne'];
+            for ($i = 0; $i < $note_moyenne; $i++) {
+                echo "🚗"; // Affichage de l'icône pour chaque point de la note
+            }
+        ?>
+        </p>
+
+        <p>Nombre de places restantes : <?= $trajet['nb_places'] ?></p>
+        <p>Prix : <?= $trajet['prix_personnes'] ?> € par personne</p>
+        <p>
+            <?php
+            $ecologique = ($trajet['energie'] === 'électrique' || $trajet['energie'] === 'hybride') ? 'Oui' : 'Non';
+            if ($ecologique === 'Oui') {
+                echo "🌱 C'est un trajet écologique*";
+            } else {
+                echo "⛽ Ce trajet n'est pas écologique*";
+            }
+            ?>
+        </p>
+        <p style="font-size: 15px;">*Un trajet est dit "écologique" s'il est effectué avec une voiture électrique/hybride</p>
+        <div>
+            <button class="btn btn-success mt-2" name="détails">
+                <a href="reservations.php?id=<?php echo htmlspecialchars($trajet['id']); ?>">+ détails</a>
+            </button>
+        </div>
+    </div>
+</section>
+                <?php
+            }
+        } else {
+            // Aucun trajet trouvé
+            ?>
+            <div class="toast-container p-3 position-fixed top-50 start-50 translate-middle z-index-5">
+                <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <strong class="me-auto">Résultat de la recherche</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        Aucun trajet trouvé pour les dates sélectionnées. Peut-être que des trajets sont disponibles à d'autres dates. Essayez de modifier vos dates de départ.
+                    </div>
+                </div>
+            </div>
+            <?php
+        }
+    } catch (PDOException $e) {
+        // Gestion des erreurs de base de données
+        echo "<div class='alert alert-danger'>Erreur de recherche : " . htmlspecialchars($e->getMessage()) . "</div>";
     }
 }
 ?>
-</div>
 
 <script>
-// Fonction d'autocomplétion
 function setupAutocomplete(inputId) {
     const input = document.getElementById(inputId);
     let timeout = null;
@@ -272,23 +296,31 @@ function setupAutocomplete(inputId) {
         clearTimeout(timeout);
         const query = this.value;
 
-        if (query.length < 3) return; // Attendre au moins 3 caractères
+        if (query.length < 3) return;
 
         timeout = setTimeout(() => {
             fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}, France&format=json&limit=5`)
                 .then(response => response.json())
                 .then(data => {
                     const datalist = document.getElementById(inputId + '-list');
-                    if (!datalist) {
-                        const newDatalist = document.createElement('datalist');
-                        newDatalist.id = inputId + '-list';
-                        input.parentNode.appendChild(newDatalist);
-                        input.setAttribute('list', inputId + '-list');
-                    }
 
-                    document.getElementById(inputId + '-list').innerHTML = data
-                        .map(item => `<option value="${item.display_name}">`)
+                    // Filtrer et formater les résultats
+                    const formattedCities = data
+                        .map(item => {
+                            // Extraction de la ville et du code postal
+                            const parts = item.display_name.split(',');
+                            const cityWithPostcode = parts[0].trim();
+                            return cityWithPostcode;
+                        })
+                        .filter((city, index, self) => self.indexOf(city) === index) // Éliminer les doublons
+                        .slice(0, 5); // Limiter à 5 résultats
+
+                    datalist.innerHTML = formattedCities
+                        .map(city => `<option value="${city}">`)
                         .join('');
+                })
+                .catch(error => {
+                    console.error('Erreur d\'autocomplétion:', error);
                 });
         }, 300);
     });
@@ -299,14 +331,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Ajouter les datalists pour l'autocomplétion
     setupAutocomplete('ville_depart');
     setupAutocomplete('ville_arrive');
-});
 
-// Toast Bootstrap
-var toastElement = document.querySelector('.toast');
-if (toastElement) {
-    var toast = new bootstrap.Toast(toastElement);
-    toast.show();
-}
+    // Initialisation du toast Bootstrap
+    var toastElement = document.querySelector('.toast');
+    if (toastElement) {
+        var toast = new bootstrap.Toast(toastElement);
+        toast.show();
+    }
+});
 </script>
 
 <?php

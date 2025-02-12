@@ -101,10 +101,13 @@ try {
                                         <span class="fw-bold"><?= htmlspecialchars($trajet['lieu_arrive'], ENT_QUOTES, 'UTF-8') ?></span>
                                     </div>
                                     <div class="small text-muted">
-                                        <p class="mb-1"><i class="fas fa-calendar me-2"></i><?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?></p>
-                                        <p class="mb-1"><i class="fas fa-clock me-2"></i><?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?></p>
-                                        <?php if (!empty($trajet['participants'])): ?>
-                                            <p class="mb-1"><i class="fas fa-users me-2"></i>Participants : <?= htmlspecialchars($trajet['participants'], ENT_QUOTES, 'UTF-8') ?></p>
+
+                                    <p class="mb-1"><i class="fas fa-calendar me-2"></i>Départ le <?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?>
+                                    <i class="fas fa-clock me-2"></i>À <?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?></p>                                      
+                                    
+                                    <?php if (!empty($trajet['participants'])): ?>
+                                            
+                                        <p class="mb-1"><i class="fas fa-users me-2"></i>Participants : <?= htmlspecialchars($trajet['participants'], ENT_QUOTES, 'UTF-8') ?></p>
                                         <?php endif; ?>
                                     </div>
                                 </div>

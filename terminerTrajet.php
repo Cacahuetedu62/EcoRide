@@ -54,6 +54,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
 
         $pdo->commit();
 
+// Après $pdo->commit();
+echo "<div class='mt-5'>
+    <div class='alert alert-success'>
+        <h4 class='alert-heading mb-3'>Trajet terminé avec succès !</h4>
+        
+        <p><i class='fas fa-envelope me-2'></i> Un email a été envoyé à vos passagers pour qu'ils puissent donner leur avis sur le trajet.</p>
+        
+        <hr>
+        
+        <p class='mb-0'><strong>Comment recevoir vos crédits ?</strong></p>
+        <p>Une fois que le passager aura donné son avis, notre équipe le validera et vos crédits seront automatiquement versés sur votre compte.</p>
+        
+        <div class='mt-4'>
+            <a href='mesTrajets.php' class='btn btn-primary'>Retour à mes trajets</a>
+        </div>
+    </div>
+</div>";
+
+
         $subject = "Votre trajet est terminé";
         $message = "
             <html>
@@ -90,13 +109,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
             $mail->send();
 
             // Affichage du message de confirmation
-            echo "<div class='container'>";
-            echo "<h2>Trajet Terminé</h2>";
-            echo "<p>Votre trajet a été terminé avec succès.</p>";
-            echo "<p>Un email a été envoyé au passager pour connaître son avis et lui donner une note. Une fois cet avis validé par nos équipes, vous serez crédité sur votre compte du montant du trajet (moins 2 crédits pour la plateforme).</p>";
-            echo "<p>Merci pour votre participation!</p>";
-            echo "<a href='index.php' class='btn btn-primary'>Retour à l'accueil</a>";
-            echo "</div>";
+            $message = "
+            <html>
+            <head>
+                <title>Votre trajet est terminé</title>
+                <meta charset='UTF-8'>
+            </head>
+            <body>
+                <p>Bonjour,</p>
+                <p>Le trajet que vous avez effectué est maintenant terminé. Rendez-vous sur votre espace pour donner votre avis et votre note.</p>
+                <p><a href='http://localhost:3000/connexion.php?redirect=" . urlencode("avis.php?trajet_id=$trajet_id") . "'>Cliquez ici pour accéder à votre espace et soumettre votre avis</a></p>
+                <p>Merci pour votre participation!</p>
+            </body>
+            </html>
+        ";
 
         } catch (Exception $e) {
             echo "L'email n'a pas pu être envoyé : {$mail->ErrorInfo}";

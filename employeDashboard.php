@@ -61,14 +61,46 @@ function validateComment($comment) {
 
 function gererCredits($pdo, $creditsCollection, $avis_utilisateur_id, $trajet_id) {
     try {
+        // Vérifier si les crédits ont déjà été traités pour cet avis
+        $sql = "SELECT COUNT(*) FROM avis 
+                WHERE trajet_id = :trajet_id 
+                AND utilisateur_id = :utilisateur_id 
+                AND statut = 'validé'";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':trajet_id', $trajet_id, PDO::PARAM_INT);
+        $stmt->bindParam(':utilisateur_id', $avis_utilisateur_id, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        if ($stmt->fetchColumn() > 0) {
+            error_log("Les crédits ont déjà été traités pour cet avis");
+            return false;
+        }
+
+        // Vérifier si une commission existe déjà dans MongoDB pour ce trajet
+        $dateNow = new DateTime();
+        $debut_jour = $dateNow->format('Y-m-d 00:00:00');
+        $fin_jour = $dateNow->format('Y-m-d 23:59:59');
+        
+        $existe_deja = $creditsCollection->findOne([
+            'type' => 'commission_avis',
+            'date' => [
+                '$gte' => $debut_jour,
+                '$lte' => $fin_jour
+            ],
+            'trajet_id' => $trajet_id
+        ]);
+
+        if ($existe_deja) {
+            error_log("Une commission existe déjà pour ce trajet aujourd'hui");
+            return false;
+        }
+
         // Début de la transaction MySQL
         $pdo->beginTransaction();
 
-        // Récupérer le prix du trajet et l'ID du chauffeur via la jointure
+        // Récupérer le prix du trajet et l'ID du chauffeur
         $sql = "SELECT 
-                t.prix_personnes, 
-                t.prix_total, 
-                t.nb_places,
+                t.prix_personnes,
                 tu.utilisateur_id as chauffeur_id
                 FROM trajets t
                 JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
@@ -85,43 +117,41 @@ function gererCredits($pdo, $creditsCollection, $avis_utilisateur_id, $trajet_id
             throw new Exception("Trajet non trouvé ou chauffeur non trouvé");
         }
 
-        // Calculer commission plateforme (2 crédits)
+        // Commission plateforme (2 crédits)
         $commission = 2;
-        
-        // On utilise prix_personnes car c'est le prix par personne
+        // Prix total pour le passager
         $prix_pour_passager = $trajetInfo['prix_personnes'];
+        // Montant que reçoit le chauffeur (prix - commission)
         $montant_final = $prix_pour_passager - $commission;
 
-        // 1. Ajouter les crédits de commission à MongoDB (plateforme)
-        $dateNow = new DateTime();
-        $formattedDate = $dateNow->format('Y-m-d H:i:s');
-        $creditsCollection->insertOne([
-            'montant' => $commission,
-            'type' => 'commission_avis',
-            'date' => $formattedDate,
-            'description' => 'Commission sur validation d\'avis'
-        ]);
-
-        // 2. Débiter les crédits de l'utilisateur dans MySQL
+        // 1. Débiter les crédits du passager
         $sql = "UPDATE utilisateurs SET credits = credits - :montant WHERE id = :user_id";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':montant', $prix_pour_passager, PDO::PARAM_STR);
         $stmt->bindParam(':user_id', $avis_utilisateur_id, PDO::PARAM_INT);
         $stmt->execute();
 
-        // 3. Créditer le chauffeur
+        // 2. Créditer le chauffeur (moins la commission)
         $sql = "UPDATE utilisateurs SET credits = credits + :montant_final WHERE id = :chauffeur_id";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':montant_final', $montant_final, PDO::PARAM_STR);
         $stmt->bindParam(':chauffeur_id', $trajetInfo['chauffeur_id'], PDO::PARAM_INT);
         $stmt->execute();
 
-        // Si tout s'est bien passé, on valide la transaction
+        // 3. Enregistrer la commission
+        $formattedDate = $dateNow->format('Y-m-d H:i:s');
+        $creditsCollection->insertOne([
+            'montant' => $commission,
+            'type' => 'commission_avis',
+            'date' => $formattedDate,
+            'description' => 'Commission sur validation d\'avis',
+            'trajet_id' => $trajet_id
+        ]);
+
         $pdo->commit();
         return true;
 
     } catch (Exception $e) {
-        // En cas d'erreur, on annule la transaction
         $pdo->rollBack();
         error_log("Erreur lors de la gestion des crédits: " . $e->getMessage());
         return false;

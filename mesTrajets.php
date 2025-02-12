@@ -90,7 +90,7 @@ LEFT JOIN reservations r ON t.id = r.trajet_id
 WHERE (tu.utilisateur_id = :utilisateur_id OR r.utilisateur_id = :utilisateur_id)
   AND (r.statut != 'termine' OR r.statut IS NULL)
 GROUP BY t.id, r.id, tu.utilisateur_id
-ORDER BY r.date_reservation DESC
+ORDER BY t.date_depart DESC, r.date_reservation DESC
 LIMIT :limit OFFSET :offset";
 
 $statement = $pdo->prepare($sql);

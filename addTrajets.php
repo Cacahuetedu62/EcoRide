@@ -271,7 +271,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <label for="preferences" class="form-label">Préférences supplémentaires</label>
-                                        <textarea class="form-control" id="preferences" name="preferences" rows="3"></textarea>
+                                        <textarea class="form-control" id="preferences" name="preferences" rows="3" 
+                                        placeholder="Exemples : Musique souhaitée, arrêts prévus, conversation ou silence, etc."></textarea>
                                     </div>
                                     <p class="text-muted text-center mb-3">
                                         <i class="fas fa-info-circle"></i> Cliquez sur les options ci-dessous si vous les acceptez
@@ -313,53 +314,70 @@ function calculateRoute() {
     const heureDepart = document.getElementById('heure_depart').value;
     const dateDepart = document.getElementById('date_depart').value;
 
-    if (depart && arrive && heureDepart && dateDepart) {
-        // Conversion des adresses en coordonnées
-        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(depart)}, France&format=json&limit=1`)
-            .then(response => response.json())
-            .then(dataDepart => {
-                fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(arrive)}, France&format=json&limit=1`)
-                    .then(response => response.json())
-                    .then(dataArrive => {
-                        if (dataDepart.length === 0 || dataArrive.length === 0) {
-                            alert('Une des adresses n\'a pas été trouvée. Veuillez vérifier votre saisie.');
-                            return;
-                        }
-
-                        const coordsDepart = [dataDepart[0].lon, dataDepart[0].lat];
-                        const coordsArrive = [dataArrive[0].lon, dataArrive[0].lat];
-
-                        // Calcul de l'itinéraire
-                        fetch(`https://router.project-osrm.org/route/v1/driving/${coordsDepart[0]},${coordsDepart[1]};${coordsArrive[0]},${coordsArrive[1]}?overview=false`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.routes && data.routes[0]) {
-                                    const duration = Math.round(data.routes[0].duration / 60); // minutes
-                                    const distance = Math.round(data.routes[0].distance / 1000); // km
-
-                                    // Calcul de l'heure d'arrivée
-                                    const departDateTime = new Date(dateDepart + ' ' + heureDepart);
-                                    const arrivalTime = new Date(departDateTime.getTime() + (duration * 60 * 1000));
-
-                                    // Mise à jour des champs
-                                    document.getElementById('date_arrive').value = arrivalTime.toISOString().split('T')[0];
-                                    document.getElementById('heure_arrive').value =
-                                        ('0' + arrivalTime.getHours()).slice(-2) + ':' +
-                                        ('0' + arrivalTime.getMinutes()).slice(-2);
-                                    document.getElementById('trajet-info').innerHTML =
-                                        `Distance: ${distance} km<br>Durée estimée: ${duration} minutes`;
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Erreur:', error);
-                                alert('Erreur lors du calcul du trajet');
-                            });
-                    });
-            });
+    // Validate inputs more strictly
+    if (!depart || !arrive || !heureDepart || !dateDepart) {
+        console.error('Incomplete route information');
+        return;
     }
+
+    // Use a more specific geocoding approach
+    Promise.all([
+        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(depart)}, France&format=json&addressdetails=1&limit=1`),
+        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(arrive)}, France&format=json&addressdetails=1&limit=1`)
+    ])
+    .then(([departResponse, arriveResponse]) => 
+        Promise.all([departResponse.json(), arriveResponse.json()])
+    )
+    .then(([dataDepart, dataArrive]) => {
+        if (dataDepart.length === 0 || dataArrive.length === 0) {
+            throw new Error('One or both locations not found');
+        }
+
+        const coordsDepart = [dataDepart[0].lon, dataDepart[0].lat];
+        const coordsArrive = [dataArrive[0].lon, dataArrive[0].lat];
+
+        return fetch(`https://router.project-osrm.org/route/v1/driving/${coordsDepart[0]},${coordsDepart[1]};${coordsArrive[0]},${coordsArrive[1]}?overview=false`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Route calculation failed');
+                }
+                return response.json();
+            });
+    })
+    .then(data => {
+        if (!data.routes || !data.routes[0]) {
+            throw new Error('No route found');
+        }
+
+        const duration = Math.round(data.routes[0].duration / 60); // minutes
+        const distance = Math.round(data.routes[0].distance / 1000); // km
+
+        // Calcul de l'heure d'arrivée
+        const departDateTime = new Date(dateDepart + ' ' + heureDepart);
+        const arrivalTime = new Date(departDateTime.getTime() + (duration * 60 * 1000));
+
+        // Mise à jour des champs
+        document.getElementById('date_arrive').value = arrivalTime.toISOString().split('T')[0];
+        document.getElementById('heure_arrive').value =
+            ('0' + arrivalTime.getHours()).slice(-2) + ':' +
+            ('0' + arrivalTime.getMinutes()).slice(-2);
+    })
+    .catch(error => {
+        console.error('Route calculation error:', error);
+        
+        // More user-friendly error handling
+        let errorMessage = 'Une erreur est survenue lors du calcul du trajet.';
+        if (error.message.includes('not found')) {
+            errorMessage = 'Un ou plusieurs lieux n\'ont pas été trouvés. Veuillez vérifier votre saisie.';
+        } else if (error.message.includes('No route found')) {
+            errorMessage = 'Aucun itinéraire n\'a pu être calculé entre ces deux points.';
+        }
+        
+        // Display error to user
+        alert(errorMessage);
+    });
 }
 
-// Fonction d'autocomplétion
 function setupAutocomplete(inputId) {
     const input = document.getElementById(inputId);
     let timeout = null;
@@ -368,27 +386,42 @@ function setupAutocomplete(inputId) {
         clearTimeout(timeout);
         const query = this.value;
 
-        if (query.length < 3) return; // Attendre au moins 3 caractères
+        if (query.length < 3) return; // Wait for at least 3 characters
 
         timeout = setTimeout(() => {
-            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}, France&format=json&limit=5`)
+            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}, France&format=json&addressdetails=1&limit=5`)
                 .then(response => response.json())
                 .then(data => {
-                    const datalist = document.getElementById(inputId + '-list');
+                    // Create datalist if it doesn't exist
+                    let datalist = document.getElementById(inputId + '-list');
                     if (!datalist) {
-                        const newDatalist = document.createElement('datalist');
-                        newDatalist.id = inputId + '-list';
-                        input.parentNode.appendChild(newDatalist);
+                        datalist = document.createElement('datalist');
+                        datalist.id = inputId + '-list';
+                        input.parentNode.appendChild(datalist);
                         input.setAttribute('list', inputId + '-list');
                     }
 
-                    document.getElementById(inputId + '-list').innerHTML = data
-                        .map(item => `<option value="${item.display_name}">`)
+                    // Populate datalist with more specific location information
+                    datalist.innerHTML = data
+                        .map(item => {
+                            // Combine city, postcode, and potentially other details
+                            const displayValue = [
+                                item.address.city || item.address.town || item.address.village,
+                                item.address.postcode,
+                                item.address.state
+                            ].filter(Boolean).join(', ');
+
+                            return `<option value="${displayValue}">`;
+                        })
                         .join('');
+                })
+                .catch(error => {
+                    console.error('Autocomplete error:', error);
                 });
         }, 300);
     });
 
+    // Trigger route calculation on change
     input.addEventListener('change', calculateRoute);
 }
 

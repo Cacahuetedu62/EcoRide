@@ -2,10 +2,10 @@
 require_once('templates/header.php');
 ?>
 
-<div class="container mt-5">
+<div class="m-4">
     <!-- En-tête de la page d'administration -->
     <div class="row justify-content-center">
-        <div class="col-12 text-center mb-5">
+        <div class="col-12 text-center">
             <h1 class="display-4">Tableau de Bord Admin</h1>
             <p class="lead text-muted">Choisissez votre espace de travail</p>
         </div>

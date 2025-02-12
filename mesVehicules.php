@@ -101,12 +101,12 @@ $voitures = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <h2 class="text-center mb-4">Mes véhicules</h2>
 
         <!-- Messages de succès/erreur -->
-        <?php if (isset($success)): ?>
-            <div class="alert alert-success"><?php echo $success; ?></div>
-        <?php endif; ?>
-        <?php if (isset($erreur)): ?>
-            <div class="alert alert-danger"><?php echo $erreur; ?></div>
-        <?php endif; ?>
+        <?php if (isset($success) && !empty($success)): ?>
+    <div class="alert alert-success"><?php echo $success; ?></div>
+<?php endif; ?>
+<?php if (isset($erreur) && !empty($erreur)): ?>
+    <div class="alert alert-danger"><?php echo $erreur; ?></div>
+<?php endif; ?>
 
         <!-- Affichage des véhicules -->
         <div class="row">
@@ -207,13 +207,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelBtn = document.getElementById('cancelBtn');
 
     ajouterBtn.addEventListener('click', function() {
-        ajouterForm.style.display = 'block';
-        ajouterBtn.style.display = 'none';
+        ajouterForm.classList.remove('d-none'); // Enlever la classe d-none au lieu de changer style.display
+        ajouterBtn.classList.add('d-none'); // Cacher le bouton avec d-none
     });
 
     cancelBtn.addEventListener('click', function() {
-        ajouterForm.style.display = 'none';
-        ajouterBtn.style.display = 'block';
+        ajouterForm.classList.add('d-none'); // Remettre la classe d-none
+        ajouterBtn.classList.remove('d-none'); // Réafficher le bouton
         ajouterForm.querySelector('form').reset();
     });
 

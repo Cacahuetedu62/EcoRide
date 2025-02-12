@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     $utilisateur_id = htmlspecialchars($_SESSION['utilisateur']['id'], ENT_QUOTES, 'UTF-8');
-    echo "<div class='container'><div class='alert alert-info'>L'utilisateur connecté a l'ID : " . $utilisateur_id . "</div></div>";
+    // echo "<div class='container'><div class='alert alert-info'>L'utilisateur connecté a l'ID : " . $utilisateur_id . "</div></div>";
 
     // Récupérer les crédits de l'utilisateur connecté
     $sql_credits = "SELECT credits FROM utilisateurs WHERE id = :id";
@@ -22,10 +22,7 @@ if (isset($_SESSION['utilisateur']) && isset($_SESSION['utilisateur']['id'])) {
     echo "<div class='container'><div class='alert alert-warning'>Utilisateur non connecté.</div></div>";
     $credits = 0; // Définir les crédits à 0 si l'utilisateur n'est pas connecté
 }
-?>
 
-<main class="container py-5">
-<?php
 // Vérifier si un ID de trajet est passé via l'URL
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $trajet_id = (int) $_GET['id'];
@@ -57,8 +54,24 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         $places_suffisantes = $nb_places_dispo >= $nb_personnes;
         // Vérifiez si l'utilisateur a suffisamment de crédits
         $credits_suffisants = $credits >= ($prix_personne * $nb_personnes);
+
+        $sqlNote = "SELECT 
+        AVG(a.note) as note_moyenne, 
+        COUNT(*) as nombre_avis
+        FROM avis a
+        JOIN trajets t ON a.trajet_id = t.id
+        JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
+        WHERE tu.utilisateur_id = :utilisateur_id 
+        AND a.statut = 'valide'";
+$stmtNote = $pdo->prepare($sqlNote);
+$stmtNote->bindValue(':utilisateur_id', $trajet['utilisateur_id'], PDO::PARAM_INT);
+$stmtNote->execute();
+$noteResult = $stmtNote->fetch(PDO::FETCH_ASSOC);
+
+$note_moyenne = round($noteResult['note_moyenne'] ?? 0, 1);
 ?>
-    <div class="row">
+
+    <div class="row p-5">
         <div class="col-12">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
@@ -67,10 +80,10 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                     </h2>
                 </div>
 
-                <div class="card-body">
+                <div class="card-body p-5">
                     <!-- Départ et Arrivée -->
                     <div class="row mb-4">
-                        <div class="col-md-6">
+                        <div class="col-md-6 p-5">
                             <div class="card h-100">
                                 <div class="card-header bg-info text-white">
                                     <h4 class="mb-0">Départ</h4>
@@ -92,7 +105,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                             </div>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 p-5">
                             <div class="card h-100">
                                 <div class="card-header bg-info text-white">
                                     <h4 class="mb-0">Arrivée</h4>
@@ -117,7 +130,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
                     <!-- Détails du trajet -->
                     <div class="row mb-4">
-                        <div class="col-md-6">
+                    <div class="col-md-6 p-5">
                             <div class="card h-100">
                                 <div class="card-header bg-secondary text-white">
                                     <h4 class="mb-0">Durée et Prix</h4>
@@ -142,7 +155,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                             </div>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 p-5">
                             <div class="card h-100">
                                 <div class="card-header bg-secondary text-white">
                                     <h4 class="mb-0">Informations du Chauffeur</h4>
@@ -156,14 +169,14 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                     <h5 class="card-title"><?= htmlspecialchars($trajet['pseudo'], ENT_QUOTES, 'UTF-8') ?></h5>
 
                                     <div class="mb-2">
-                                        <strong>Note :</strong>
-                                        <?php
-                                        $note_moyenne = htmlspecialchars($trajet['note_moyenne'], ENT_QUOTES, 'UTF-8');
-                                        for ($i = 0; $i < $note_moyenne; $i++) {
-                                            echo "🚗";
-                                        }
-                                        ?>
-                                    </div>
+    <strong>Note :</strong>
+    <?php
+    for ($i = 0; $i < $note_moyenne; $i++) {
+        echo "🚗";
+    }
+    ?> 
+    (<?= $note_moyenne ?>/5)
+</div>
 
                                     <div class="mb-2">
                                         <a href="commentaires.php?id=<?= htmlspecialchars($trajet['utilisateur_id'], ENT_QUOTES, 'UTF-8') ?>"
@@ -258,21 +271,23 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                         <div class="card mb-4">
                             <div class="card-header bg-danger text-white">
                                 <h4 class="mb-0">Acceptation des conditions</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input" id="conditionsVente">
-                                    <label class="form-check-label" for="conditionsVente">
-                                        J'accepte les conditions de vente <a href="CGDV.php"> [ Je clic ici pour consulter les conditions générales de ventes ]</a>
-                                    </label>
                                 </div>
+                                    <div class="card-body">
+                                    <div class="form-check mb-2 d-flex align-items-center">
+                                        <input type="checkbox" class="form-check-input me-2" id="conditionsVente">
+                                        <label class="form-check-label" for="conditionsVente">
+                                            J'accepte les conditions de vente <a href="CGDV.php"> [ Je clic ici pour consulter les conditions générales de ventes ]</a>
+                                        </label>
+                                    </div>
 
-                                <div class="form-check mb-3">
-                                    <input type="checkbox" class="form-check-input" id="politiqueConfidentialite">
+                                <div class="form-check mb-3 d-flex align-items-center">
+                                    <input type="checkbox" class="form-check-input me-2" id="politiqueConfidentialite">
                                     <label class="form-check-label" for="politiqueConfidentialite">
-                                        J'accepte la politique de confidentialité <a href="mentionsLegales.php"> [ Je clic ici pour consulter les mentions légales ]</a>
+                                    J'accepte la politique de confidentialité <a href="mentionsLegales.php"> [ Je clic ici pour consulter les mentions légales ]</a>
                                     </label>
                                 </div>
+                            </div>
+                        </div>
 
                                 <div id="errorMessage" class="alert alert-danger" style="display: none;">
                                     <?php if (!$places_suffisantes): ?>
@@ -368,7 +383,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         validateConditions();
     });
     </script>
-</main>
+
 
 <?php
     } else {

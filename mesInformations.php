@@ -20,8 +20,28 @@ if (!file_exists($photos_path)) {
 
 // Vérification de la session
 if (!isset($_SESSION['utilisateur']) || !isset($_SESSION['utilisateur']['id'])) {
-    // Rediriger ou afficher un message d'erreur si l'utilisateur n'est pas connecté
+    header('Location: login.php');
     exit;
+}
+
+// Fonctions de validation
+function validatePhone($phone) {
+    $phone = preg_replace('/[^0-9]/', '', $phone);
+    return strlen($phone) === 10 ? $phone : false;
+}
+
+function validatePostalCode($code) {
+    $code = preg_replace('/[^0-9]/', '', $code);
+    return strlen($code) === 5 ? $code : false;
+}
+
+function validateEmail($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL);
+}
+
+function validateDate($date) {
+    $d = DateTime::createFromFormat('Y-m-d', $date);
+    return $d && $d->format('Y-m-d') === $date;
 }
 
 // Fonction pour valider une image
@@ -51,8 +71,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $errors = [];
     $photo = null;
 
+    // Validation du téléphone
+    if (!empty($_POST['telephone'])) {
+        $telephone = validatePhone($_POST['telephone']);
+        if (!$telephone) {
+            $errors[] = "Le numéro de téléphone doit contenir 10 chiffres.";
+        }
+    }
+
+    // Validation du code postal
+    if (!empty($_POST['code_postal'])) {
+        $code_postal = validatePostalCode($_POST['code_postal']);
+        if (!$code_postal) {
+            $errors[] = "Le code postal doit contenir 5 chiffres.";
+        }
+    }
+
+    // Validation de l'email
+    if (!empty($_POST['email'])) {
+        if (!validateEmail($_POST['email'])) {
+            $errors[] = "L'adresse email n'est pas valide.";
+        }
+    }
+
+    // Validation de la date de naissance
+    if (!empty($_POST['date_naissance'])) {
+        if (!validateDate($_POST['date_naissance'])) {
+            $errors[] = "La date de naissance n'est pas valide.";
+        }
+    }
+
     // Validation des champs obligatoires
-    $required_fields = ['pseudo', 'nom', 'prenom', 'email', 'telephone', 'date_naissance', 'adresse', 'code_postal', 'ville'];
+    $required_fields = ['pseudo', 'nom', 'prenom', 'email'];
     foreach ($required_fields as $field) {
         if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
             $errors[] = "Le champ $field est obligatoire.";
@@ -67,7 +117,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $photo_destination = $photos_path . DIRECTORY_SEPARATOR . $photo_name;
             $photo_db_path = 'uploads/photos/' . $photo_name;
 
-            // Vérification supplémentaire pour s'assurer que le dossier existe et est accessible
             if (!file_exists($photos_path)) {
                 $errors[] = "Le dossier de destination n'existe pas.";
             } elseif (!is_writable($photos_path)) {
@@ -81,18 +130,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         throw new Exception("Échec de l'upload");
                     }
                 } catch (Exception $e) {
-                    $errors[] = "Détails de l'erreur d'upload :";
-                    $errors[] = "- Message : " . $e->getMessage();
-                    $errors[] = "- Fichier source : " . $_FILES['photo']['tmp_name'];
-                    $errors[] = "- Destination : " . $photo_destination;
-                    $errors[] = "- Permissions du dossier : " . substr(sprintf('%o', fileperms($photos_path)), -4);
-                    $errors[] = "- Le dossier existe ? : " . (file_exists($photos_path) ? 'Oui' : 'Non');
-                    $errors[] = "- Droits d'écriture ? : " . (is_writable($photos_path) ? 'Oui' : 'Non');
-
-                    // Debug supplémentaire
-                    error_log("Erreur upload photo: " . print_r($_FILES, true));
-                    error_log("Destination: " . $photo_destination);
-                    error_log("Permissions dossier: " . substr(sprintf('%o', fileperms($photos_path)), -4));
+                    $errors[] = "Erreur lors de l'upload de la photo : " . $e->getMessage();
+                    error_log("Erreur upload photo: " . $e->getMessage());
                 }
             }
         } else {
@@ -103,7 +142,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Mise à jour des informations si pas d'erreur
     if (empty($errors)) {
         try {
-            // Préparer la requête SQL
+            $params = [
+                'pseudo' => htmlspecialchars($_POST['pseudo']),
+                'nom' => htmlspecialchars($_POST['nom']),
+                'prenom' => htmlspecialchars($_POST['prenom']),
+                'email' => filter_var($_POST['email'], FILTER_SANITIZE_EMAIL),
+                'telephone' => !empty($_POST['telephone']) ? validatePhone($_POST['telephone']) : null,
+                'date_naissance' => !empty($_POST['date_naissance']) ? $_POST['date_naissance'] : null,
+                'adresse' => !empty($_POST['adresse']) ? htmlspecialchars($_POST['adresse']) : null,
+                'code_postal' => !empty($_POST['code_postal']) ? validatePostalCode($_POST['code_postal']) : null,
+                'ville' => !empty($_POST['ville']) ? htmlspecialchars($_POST['ville']) : null,
+                'id' => $utilisateur_id
+            ];
+
             $sql = "UPDATE utilisateurs SET
                 pseudo = :pseudo,
                 nom = :nom,
@@ -115,38 +166,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 code_postal = :code_postal,
                 ville = :ville";
 
-            // Ajouter la photo à la requête si elle a été mise à jour
             if ($photo) {
                 $sql .= ", photo = :photo";
+                $params['photo'] = $photo;
             }
 
             $sql .= " WHERE id = :id";
 
-            // Préparer les paramètres
-            $params = [
-                'pseudo' => htmlspecialchars($_POST['pseudo']),
-                'nom' => htmlspecialchars($_POST['nom']),
-                'prenom' => htmlspecialchars($_POST['prenom']),
-                'email' => filter_var($_POST['email'], FILTER_SANITIZE_EMAIL),
-                'telephone' => htmlspecialchars($_POST['telephone']),
-                'date_naissance' => $_POST['date_naissance'],
-                'adresse' => htmlspecialchars($_POST['adresse']),
-                'code_postal' => htmlspecialchars($_POST['code_postal']),
-                'ville' => htmlspecialchars($_POST['ville']),
-                'id' => $utilisateur_id
-            ];
-
-            // Ajouter la photo aux paramètres seulement si elle existe
-            if ($photo) {
-                $params['photo'] = $photo;
-            }
-
-            // Debug des paramètres
-            foreach ($params as $key => $value) {
-                error_log("Paramètre $key : " . var_export($value, true));
-            }
-
-            // Exécuter la requête
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
 
@@ -158,15 +184,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
 
         } catch (PDOException $e) {
-            // Gestion détaillée des erreurs
             $errors[] = "Erreur lors de la mise à jour des informations : " . $e->getMessage();
             error_log("Erreur SQL: " . $e->getMessage());
-            error_log("Requête SQL: " . $sql);
-            error_log("Paramètres: " . print_r($params, true));
-
-            // Afficher les détails de l'erreur
-            $errorInfo = $stmt->errorInfo();
-            error_log("Détails de l'erreur : " . print_r($errorInfo, true));
         }
     }
 }
@@ -196,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
                 <?php endif; ?>
 
-                <form id="profileForm" method="POST" enctype="multipart/form-data">
+                <form id="profileForm" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
                     <div class="row mb-4">
                         <div class="col-md-4 text-center">
                             <div class="profile-photo-container mb-3">
@@ -217,56 +236,78 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <div class="form-group mb-3">
                                 <label for="pseudo">Pseudo</label>
                                 <input type="text" class="form-control" id="pseudo" name="pseudo"
-                                       value="<?= htmlspecialchars($utilisateur['pseudo']) ?>" disabled>
+                                       value="<?= htmlspecialchars($utilisateur['pseudo']) ?>" 
+                                       required
+                                       disabled>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="nom">Nom</label>
                                     <input type="text" class="form-control" id="nom" name="nom"
-                                           value="<?= htmlspecialchars($utilisateur['nom']) ?>" disabled>
+                                           value="<?= htmlspecialchars($utilisateur['nom']) ?>" 
+                                           required
+                                           disabled>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="prenom">Prénom</label>
                                     <input type="text" class="form-control" id="prenom" name="prenom"
-                                           value="<?= htmlspecialchars($utilisateur['prenom']) ?>" disabled>
+                                           value="<?= htmlspecialchars($utilisateur['prenom']) ?>" 
+                                           required
+                                           disabled>
                                 </div>
                             </div>
 
                             <div class="mb-3">
                                 <label for="email">Email</label>
                                 <input type="email" class="form-control" id="email" name="email"
-                                       value="<?= htmlspecialchars($utilisateur['email']) ?>" disabled>
+                                       value="<?= htmlspecialchars($utilisateur['email']) ?>" 
+                                       pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                                       required
+                                       disabled>
                             </div>
 
                             <div class="mb-3">
                                 <label for="telephone">Téléphone</label>
                                 <input type="tel" class="form-control" id="telephone" name="telephone"
-                                       value="<?= !empty($utilisateur['telephone']) ? htmlspecialchars($utilisateur['telephone']) : 'Non renseigné' ?>" disabled>
+                                       value="<?= !empty($utilisateur['telephone']) ? htmlspecialchars($utilisateur['telephone']) : '' ?>" 
+                                       pattern="[0-9]{10}"
+                                       title="Le numéro doit contenir 10 chiffres"
+                                       disabled>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label for="date_naissance">Date de naissance</label>
                                 <input type="date" class="form-control" id="date_naissance" name="date_naissance"
-                                       value="<?= !empty($utilisateur['date_naissance']) ? htmlspecialchars($utilisateur['date_naissance']) : '' ?>" disabled>
+                                       value="<?= !empty($utilisateur['date_naissance']) ? htmlspecialchars($utilisateur['date_naissance']) : '' ?>" 
+                                       disabled>
                             </div>
 
                             <div class="mb-3">
                                 <label for="adresse">Adresse</label>
                                 <input type="text" class="form-control" id="adresse" name="adresse"
-                                       value="<?= !empty($utilisateur['adresse']) ? htmlspecialchars($utilisateur['adresse']) : 'Non renseignée' ?>" disabled>
+                                       value="<?= !empty($utilisateur['adresse']) ? htmlspecialchars($utilisateur['adresse']) : '' ?>" 
+                                       disabled>
                             </div>
 
-                            <div class="col-md-4 mb-3">
-                                <label for="code_postal">Code Postal</label>
-                                <input type="text" class="form-control" id="code_postal" name="code_postal"
-                                       value="<?= !empty($utilisateur['code_postal']) ? htmlspecialchars($utilisateur['code_postal']) : 'Non renseigné' ?>" disabled>
-                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="code_postal">Code Postal</label>
+                                    <input type="text" class="form-control" id="code_postal" name="code_postal" 
+                                           maxlength="5" 
+                                           pattern="[0-9]{5}"
+                                           title="Le code postal doit contenir 5 chiffres"
+                                           value="<?= !empty($utilisateur['code_postal']) ? htmlspecialchars($utilisateur['code_postal']) : '' ?>" 
+                                           disabled>
+                                </div>
 
-                            <div class="col-md-8 mb-3">
-                                <label for="ville">Ville</label>
-                                <input type="text" class="form-control" id="ville" name="ville"
-                                       value="<?= !empty($utilisateur['ville']) ? htmlspecialchars($utilisateur['ville']) : 'Non renseignée' ?>" disabled>
+                                <div class="col-md-8 mb-3">
+                                    <label for="ville">Ville</label>
+                                    <input type="text" class="form-control" id="ville" name="ville"
+                                           list="villes-suggestions"
+                                           value="<?= !empty($utilisateur['ville']) ? htmlspecialchars($utilisateur['ville']) : '' ?>" 
+                                           disabled>
+                                </div>
                             </div>
 
                             <div class="text-center mt-4">
@@ -289,6 +330,97 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
 
 <script>
+function validateForm() {
+    const telephone = document.getElementById('telephone');
+    const email = document.getElementById('email');
+    const codePostal = document.getElementById('code_postal');
+    
+    // Validation du téléphone
+    if (telephone.value) {
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!phoneRegex.test(telephone.value)) {
+            alert("Le numéro de téléphone doit contenir 10 chiffres.");
+            telephone.focus();
+            return false;
+        }
+    }
+
+    // Validation de l'email
+    if (email.value) {
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email.value)) {
+            alert("L'adresse email n'est pas valide.");
+            email.focus();
+            return false;
+        }
+    }
+
+    // Validation du code postal
+    if (codePostal.value) {
+        const cpRegex = /^[0-9]{5}$/;
+        if (!cpRegex.test(codePostal.value)) {
+            alert("Le code postal doit contenir 5 chiffres.");
+            codePostal.focus();
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Setup de l'autocomplétion du code postal
+function setupPostalAutocomplete() {
+    const codePostalInput = document.getElementById('code_postal');
+    const villeInput = document.getElementById('ville');
+    let timeout = null;
+
+    codePostalInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        const query = this.value;
+
+        // Vérifier que le code postal a 5 chiffres
+        if (query.length !== 5 || !/^\d+$/.test(query)) {
+            return;
+        }
+
+        timeout = setTimeout(() => {
+            fetch(`https://geo.api.gouv.fr/communes?codePostal=${encodeURIComponent(query)}&fields=nom,code,codesPostaux`)
+                .then(response => response.json())
+                .then(data => {
+                    // Créer ou récupérer la datalist
+                    let datalist = document.getElementById('villes-suggestions');
+                    if (!datalist) {
+                        datalist = document.createElement('datalist');
+                        datalist.id = 'villes-suggestions';
+                        document.body.appendChild(datalist);
+                    }
+
+                    // Lier la datalist à l'input ville
+                    villeInput.setAttribute('list', 'villes-suggestions');
+
+                    // Remplir la datalist avec les villes
+                    datalist.innerHTML = data
+                        .map(item => `<option value="${item.nom}">`)
+                        .join('');
+
+                    // Si une seule ville est trouvée, la sélectionner automatiquement
+                    if (data.length === 1) {
+                        villeInput.value = data[0].nom;
+                    } else {
+                        // Vider le champ ville si le code postal change
+                        villeInput.value = '';
+                    }
+
+                    // Activer le champ ville
+                    villeInput.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Erreur d\'autocomplétion:', error);
+                });
+        }, 300);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Prévisualisation de la photo
     const photoInput = document.getElementById('photo');
@@ -304,12 +436,32 @@ document.addEventListener('DOMContentLoaded', function() {
             reader.readAsDataURL(file);
         }
     });
+
+    // Initialiser l'autocomplétion du code postal
+    setupPostalAutocomplete();
+    
+    // Ajouter la validation en temps réel du code postal
+    const codePostalInput = document.getElementById('code_postal');
+    codePostalInput.addEventListener('input', function() {
+        validatePostalCode(this);
+    });
 });
+
+function validatePostalCode(input) {
+    const value = input.value;
+    if (value.length > 5) {
+        input.value = value.slice(0, 5);
+    }
+    // Ne garder que les chiffres
+    input.value = input.value.replace(/\D/g, '');
+}
 
 function editForm() {
     // Activer tous les champs
     document.querySelectorAll('#profileForm input, #profileForm select').forEach(input => {
-        input.disabled = false;
+        if (input.id !== 'ville') { // Ne pas activer le champ ville tout de suite
+            input.disabled = false;
+        }
     });
 
     // Afficher/masquer les boutons
@@ -326,5 +478,7 @@ function cancelEdit() {
     window.location.reload();
 }
 </script>
+
+
 
 <?php require_once('templates/footer.php'); ?>
