@@ -479,9 +479,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <td colspan="9" class="no-data">Aucun avis en attente pour les trajets terminés.</td>
                 </tr>
             <?php endif; ?>
-        </tbody>
-    </table>
+            </tbody>
+</table>
 </div>
+
 
 <div id="commentModal" class="modal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
     <div class="modal-content">

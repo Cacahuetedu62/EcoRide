@@ -16,7 +16,7 @@ require_once('templates/header.php');
 
             <div class="toc-section mb-5">
                 <div class="toc-card">
-                    <h3>Table des matières</h3>
+                    <h2>Table des matières</h2>
                     <div class="toc-grid">
                         <a href="#section1">1. Préambule</a>
                         <a href="#section2">2. Définitions</a>
@@ -44,23 +44,23 @@ require_once('templates/header.php');
                     <h2>2. Définitions</h2>
                     <div class="definitions-grid">
                         <div class="definition-card">
-                            <h4>Utilisateur</h4>
+                            <h3>Utilisateur</h3>
                             <p>Toute personne physique ou morale utilisant le service de covoiturage.</p>
                         </div>
                         <div class="definition-card">
-                            <h4>Conducteur</h4>
+                            <h3>Conducteur</h3>
                             <p>Utilisateur proposant un trajet en covoiturage.</p>
                         </div>
                         <div class="definition-card">
-                            <h4>Passager</h4>
+                            <h3>Passager</h3>
                             <p>Utilisateur réservant un trajet en covoiturage.</p>
                         </div>
                         <div class="definition-card">
-                            <h4>Trajet</h4>
+                            <h3>Trajet</h3>
                             <p>Déplacement proposé par un conducteur et réservé par un passager.</p>
                         </div>
                         <div class="definition-card">
-                            <h4>Service</h4>
+                            <h3>Service</h3>
                             <p>Ensemble des fonctionnalités proposées par EcoRide pour faciliter le covoiturage.</p>
                         </div>
                     </div>

@@ -114,7 +114,7 @@ $voitures = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="col-12 col-md-6 mb-4">
                     <div class="card h-100 shadow-sm hover-shadow">
                         <div class="card-body">
-                            <h5 class="card-title border-bottom pb-2 mb-3"><?php echo htmlspecialchars($voiture['marque'] . ' ' . $voiture['modele']); ?></h5>
+                            <h1 class="card-title border-bottom pb-2 mb-3"><?php echo htmlspecialchars($voiture['marque'] . ' ' . $voiture['modele']); ?></h1>
                             <div class="vehicle-details">
                                 <p class="mb-2"><span class="fw-bold">Immatriculation:</span> <?php echo htmlspecialchars($voiture['immatriculation']); ?></p>
                                 <p class="mb-2"><span class="fw-bold">Énergie:</span> <?php echo htmlspecialchars($voiture['energie']); ?></p>
@@ -125,8 +125,8 @@ $voitures = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <form method="POST" class="delete-form mt-3" data-vehicle="<?php echo htmlspecialchars($voiture['marque'] . ' ' . $voiture['modele']); ?>">
                                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                                 <input type="hidden" name="id" value="<?php echo $voiture['id']; ?>">
-                                <button type="button" class="btn btn-danger w-100 delete-btn">Supprimer</button>
-                                <input type="submit" name="supprimer_vehicule" class="d-none">
+                                <button type="button" class="btn btn-danger btn-lg">Supprimer</button>
+                               <input type="submit" name="supprimer_vehicule" class="d-none">
                             </form>
                         </div>
                     </div>

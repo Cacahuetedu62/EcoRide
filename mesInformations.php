@@ -259,13 +259,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
 
                             <div class="mb-3">
-                                <label for="email">Email</label>
-                                <input type="email" class="form-control" id="email" name="email"
-                                       value="<?= htmlspecialchars($utilisateur['email']) ?>" 
-                                       pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                                       required
-                                       disabled>
-                            </div>
+    <label for="email">Email</label>
+    <input type="email" class="form-control" id="email" name="email"
+           value="<?= htmlspecialchars($utilisateur['email']) ?>" 
+           pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+           required
+           disabled
+           autocomplete="email">
+</div>
+
 
                             <div class="mb-3">
                                 <label for="telephone">Téléphone</label>

@@ -67,54 +67,73 @@ try {
 $nb_personnes = isset($_POST['nb_personnes']) ? (int)$_POST['nb_personnes'] : 1;
 $places_suffisantes = $trajet['voiture_places'] >= $nb_personnes;
 $credits_suffisants = $trajet['credits'] >= ($trajet['prix_personnes'] * $nb_personnes);
+
+$sqlNote = "SELECT 
+AVG(a.note) as note_moyenne, 
+COUNT(*) as nombre_avis
+FROM avis a
+JOIN trajets t ON a.trajet_id = t.id
+JOIN trajet_utilisateur tu ON t.id = tu.trajet_id
+WHERE tu.utilisateur_id = :utilisateur_id 
+AND a.statut = 'valide'";
+$stmtNote = $pdo->prepare($sqlNote);
+$stmtNote->bindValue(':utilisateur_id', $trajet['utilisateur_id'], PDO::PARAM_INT);
+$stmtNote->execute();
+$noteResult = $stmtNote->fetch(PDO::FETCH_ASSOC);
+
+$note_moyenne = round($noteResult['note_moyenne'] ?? 0, 1);
+
 ?>
+<span>
+<a href="javascript:history.back()" class="buttonVert m-3">Retour</a>
+</span>
 
-<div class="container">
-<a href="javascript:history.back()" class="btn btn-secondary p-2">Retour</a>
-
-
-    <div class="container">
+<section class="detailsTrajets p-5">
         <!-- Titre principal -->
         <div class="row justify-content-center">
             <div class="col-12">
-                <h4 class="text-center mt-4">Détails du trajet n° <?= htmlspecialchars($trajet['id']) ?></h4>
+                <h1 class="text-center m-4">Détails du trajet n° <?= htmlspecialchars($trajet['id']) ?></h1>
             </div>
         </div>
 
-        <!-- Informations sur le trajet -->
-        <div class="row mb-3">
-            <!-- Départ -->
-            <div class="col-md-6 departArrive">
-                <h4>Départ</h4>
-                <label class="form-label">Ville de départ</label>
-                <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_depart']) ?>" disabled>
-                <label class="form-label">Date</label>
-                <input type="date" class="form-control" value="<?= $trajet['date_depart'] ?>" disabled>
-                <label class="form-label">Heure</label>
-                <input type="text" class="form-control" value="<?= $trajet['heure_depart'] ?>" disabled>
-            </div>
+<!-- Informations sur le trajet -->
+<div class="row mb-3">
+    <!-- Départ -->
+    <div class="col-md-6 departArrive">
+        <h2>Départ</h2>
+        <label for="ville_depart" class="form-label">Ville de départ</label>
+        <input type="text" id="ville_depart" class="form-control" value="<?= htmlspecialchars($trajet['lieu_depart']) ?>" disabled>
+        
+        <label for="date_depart" class="form-label">Date</label>
+        <input type="date" id="date_depart" class="form-control" value="<?= $trajet['date_depart'] ?>" disabled>
+        
+        <label for="heure_depart" class="form-label">Heure</label>
+        <input type="text" id="heure_depart" class="form-control" value="<?= $trajet['heure_depart'] ?>" disabled>
+    </div>
 
-            <!-- Arrivée -->
-            <div class="col-md-6 departArrive">
-                <h4>Arrivée</h4>
-                <label class="form-label">Ville d'arrivée</label>
-                <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_arrive']) ?>" disabled>
-                <label class="form-label">Date</label>
-                <input type="date" class="form-control" value="<?= $trajet['date_arrive'] ?>" disabled>
-                <label class="form-label">Heure</label>
-                <input type="text" class="form-control" value="<?= $trajet['heure_arrive'] ?>" disabled>
-            </div>
-        </div>
+    <!-- Arrivée -->
+    <div class="col-md-6 departArrive">
+        <h2>Arrivée</h2>
+        <label for="ville_arrivee" class="form-label">Ville d'arrivée</label>
+        <input type="text" id="ville_arrivee" class="form-control" value="<?= htmlspecialchars($trajet['lieu_arrive']) ?>" disabled>
+        
+        <label for="date_arrivee" class="form-label">Date</label>
+        <input type="date" id="date_arrivee" class="form-control" value="<?= $trajet['date_arrive'] ?>" disabled>
+        
+        <label for="heure_arrivee" class="form-label">Heure</label>
+        <input type="text" id="heure_arrivee" class="form-control" value="<?= $trajet['heure_arrive'] ?>" disabled>
+    </div>
+</div>
 
         <!-- Durée et réservation -->
         <div class="row mb-3">
             <div class="col-md-6 departArrive">
-                <h4>Durée du trajet</h4>
+                <h2>Durée du trajet</h2>
                 <p><?= floor($trajet['duree_minutes'] / 60) . ' h ' . ($trajet['duree_minutes'] % 60) . ' min' ?></p>
             </div>
 
             <div class="col-md-6 departArrive">
-                <h4>Réservation</h4>
+                <h2>Réservation</h2>
                 <p>Places restantes : <?= $trajet['voiture_places'] ?></p>
                 <p>Prix par personne : <?= $trajet['prix_personnes'] ?> €</p>
 
@@ -147,7 +166,7 @@ $prix_total = $trajet['prix_personnes'] * $total_passagers;
         <!-- Informations sur le chauffeur -->
         <div class="row mb-3">
             <div class="col-md-6 departArrive">
-                <h4>Informations sur le chauffeur</h4>
+                <h2>Informations sur le chauffeur</h2>
                 <p class="profilPhotoPseudo">
             <img src="<?= htmlspecialchars($trajet['photo']) ?>" alt="Photo du chauffeur" class="bd-placeholder-img rounded-circle" width="75" height="75">
             <?= htmlspecialchars($trajet['pseudo']) ?>
@@ -155,11 +174,12 @@ $prix_total = $trajet['prix_personnes'] * $total_passagers;
 
                 <!-- Note du chauffeur -->
                 <p>Note :
-                    <?php if (!empty($trajet['note_moyenne']) && (int)$trajet['note_moyenne'] > 0): ?>
-                        <?= str_repeat("🚗", (int)$trajet['note_moyenne']) ?>
-                    <?php else: ?>
-                        <span>Pas encore de note</span>
-                    <?php endif; ?>
+                <?php
+    for ($i = 0; $i < $note_moyenne; $i++) {
+        echo "🚗";
+    }
+    ?> 
+    (<?= $note_moyenne ?>/5)
                 </p>
 
                 <!-- Lien vers les commentaires -->
@@ -170,13 +190,13 @@ $prix_total = $trajet['prix_personnes'] * $total_passagers;
 
             <!-- Informations sur la voiture -->
             <div class="col-md-6 departArrive">
-                <h4>Voiture</h4>
+                <h2>Voiture</h2>
                 <p>Modèle : <?= htmlspecialchars($trajet['modele']) ?></p>
                 <p>Marque : <?= htmlspecialchars($trajet['marque']) ?></p>
                 <p>Énergie : <?= htmlspecialchars($trajet['energie']) ?></p>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 
 <?php

@@ -471,3 +471,6 @@ CREATE TABLE admin_logs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 DESCRIBE avis;
+
+CREATE INDEX idx_lieu_depart ON trajets(lieu_depart);
+CREATE INDEX idx_prix_personnes ON trajets(prix_personnes);

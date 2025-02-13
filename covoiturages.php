@@ -102,7 +102,7 @@ function extractCityName($fullLocation) {
                     </div>
 
                     <div class="form-group">
-                        <button class="btn btn-success m-3" type="submit" name="filtrer">Appliquer les filtres</button>
+                        <button class="buttonVert" type="submit" name="filtrer">Appliquer les filtres</button>
                     </div>
                 </div>
             ';
@@ -256,7 +256,7 @@ if (isset($_POST['chercher']) || isset($_POST['filtrer'])) {
         </p>
         <p style="font-size: 15px;">*Un trajet est dit "écologique" s'il est effectué avec une voiture électrique/hybride</p>
         <div>
-            <button class="btn btn-success mt-2" name="détails">
+            <button class="buttonVert" name="détails">
                 <a href="reservations.php?id=<?php echo htmlspecialchars($trajet['id']); ?>">+ détails</a>
             </button>
         </div>

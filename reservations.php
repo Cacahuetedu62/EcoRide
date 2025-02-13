@@ -71,69 +71,68 @@ $noteResult = $stmtNote->fetch(PDO::FETCH_ASSOC);
 $note_moyenne = round($noteResult['note_moyenne'] ?? 0, 1);
 ?>
 
-    <div class="row p-5">
-        <div class="col-12">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="text-center mb-0">
-                        Détails du trajet n° <?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>
-                    </h2>
-                </div>
-
-                <div class="card-body p-5">
-                    <!-- Départ et Arrivée -->
-                    <div class="row mb-4">
-                        <div class="col-md-6 p-5">
-                            <div class="card h-100">
-                                <div class="card-header bg-info text-white">
-                                    <h4 class="mb-0">Départ</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <label class="form-label">Ville de départ</label>
-                                        <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_depart'], ENT_QUOTES, 'UTF-8') ?>" disabled>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Date de départ</label>
-                                        <input type="date" class="form-control" value="<?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?>" disabled>
-                                    </div>
-                                    <div>
-                                        <label class="form-label">Heure de départ</label>
-                                        <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?>" disabled>
-                                    </div>
-                                </div>
+<div class="row p-5">
+    <div class="col-12">
+        <div class="card shadow-sm m-5">
+            <div class="card-header">
+                <h1 class="text-center mb-0">
+                    Détails du trajet n° <?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>
+                </h1>
+            <div class="card-body p-4">
+                <!-- Départ et Arrivée -->
+                <div class="row mb-4">
+                    <div class="col-md-6 p-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-secondary text-white">
+                                <h2 class="mb-0">Départ</h2>
                             </div>
-                        </div>
-
-                        <div class="col-md-6 p-5">
-                            <div class="card h-100">
-                                <div class="card-header bg-info text-white">
-                                    <h4 class="mb-0">Arrivée</h4>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="lieu_depart" class="form-label">Ville de départ</label>
+                                    <input type="text" id="lieu_depart" class="form-control" value="<?= htmlspecialchars($trajet['lieu_depart'], ENT_QUOTES, 'UTF-8') ?>" disabled>
                                 </div>
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <label class="form-label">Ville d'arrivée</label>
-                                        <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['lieu_arrive'], ENT_QUOTES, 'UTF-8') ?>" disabled>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Date d'arrivée</label>
-                                        <input type="date" class="form-control" value="<?= htmlspecialchars($trajet['date_arrive'], ENT_QUOTES, 'UTF-8') ?>" disabled>
-                                    </div>
-                                    <div>
-                                        <label class="form-label">Heure d'arrivée</label>
-                                        <input type="text" class="form-control" value="<?= htmlspecialchars($trajet['heure_arrive'], ENT_QUOTES, 'UTF-8') ?>" disabled>
-                                    </div>
+                                <div class="mb-3">
+                                    <label for="date_depart" class="form-label">Date de départ</label>
+                                    <input type="date" id="date_depart" class="form-control" value="<?= htmlspecialchars($trajet['date_depart'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+                                </div>
+                                <div>
+                                    <label for="heure_depart" class="form-label">Heure de départ</label>
+                                    <input type="text" id="heure_depart" class="form-control" value="<?= htmlspecialchars($trajet['heure_depart'], ENT_QUOTES, 'UTF-8') ?>" disabled>
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <div class="col-md-6 p-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-secondary text-white">
+                                <h2 class="mb-0">Arrivée</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="lieu_arrive" class="form-label">Ville d'arrivée</label>
+                                    <input type="text" id="lieu_arrive" class="form-control" value="<?= htmlspecialchars($trajet['lieu_arrive'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="date_arrive" class="form-label">Date d'arrivée</label>
+                                    <input type="date" id="date_arrive" class="form-control" value="<?= htmlspecialchars($trajet['date_arrive'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+                                </div>
+                                <div>
+                                    <label for="heure_arrive" class="form-label">Heure d'arrivée</label>
+                                    <input type="text" id="heure_arrive" class="form-control" value="<?= htmlspecialchars($trajet['heure_arrive'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
                     <!-- Détails du trajet -->
                     <div class="row mb-4">
-                    <div class="col-md-6 p-5">
+                    <div class="col-md-6 p-4">
                             <div class="card h-100">
                                 <div class="card-header bg-secondary text-white">
-                                    <h4 class="mb-0">Durée et Prix</h4>
+                                    <h2 class="mb-0">Durée et Prix</h2>
                                 </div>
                                 <div class="card-body">
                                     <p class="mb-2">
@@ -155,10 +154,10 @@ $note_moyenne = round($noteResult['note_moyenne'] ?? 0, 1);
                             </div>
                         </div>
 
-                        <div class="col-md-6 p-5">
+                        <div class="col-md-6 p-4">
                             <div class="card h-100">
                                 <div class="card-header bg-secondary text-white">
-                                    <h4 class="mb-0">Informations du Chauffeur</h4>
+                                    <h2 class="mb-0">Informations du Chauffeur</h2>
                                 </div>
                                 <div class="card-body text-center">
                                     <img src="<?= htmlspecialchars($trajet['photo'], ENT_QUOTES, 'UTF-8') ?>"
@@ -166,7 +165,7 @@ $note_moyenne = round($noteResult['note_moyenne'] ?? 0, 1);
                                          class="rounded-circle mb-3"
                                          style="width: 100px; height: 100px; object-fit: cover;">
 
-                                    <h5 class="card-title"><?= htmlspecialchars($trajet['pseudo'], ENT_QUOTES, 'UTF-8') ?></h5>
+                                    <h3 class="card-title"><?= htmlspecialchars($trajet['pseudo'], ENT_QUOTES, 'UTF-8') ?></h3>
 
                                     <div class="mb-2">
     <strong>Note :</strong>
@@ -191,8 +190,8 @@ $note_moyenne = round($noteResult['note_moyenne'] ?? 0, 1);
 
                     <!-- Détails supplémentaires -->
                     <div class="card mb-4">
-                        <div class="card-header bg-success text-white">
-                            <h4 class="mb-0">Détails du Voyage</h4>
+                        <div class="card-header bg-secondary text-white">
+                            <h2 class="mb-0">Détails du Voyage</h2>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -242,8 +241,8 @@ $note_moyenne = round($noteResult['note_moyenne'] ?? 0, 1);
                         <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet_id, ENT_QUOTES, 'UTF-8') ?>">
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                         <div class="card mb-4">
-                            <div class="card-header bg-warning text-white">
-                                <h4 class="mb-0">Réservation</h4>
+                            <div class="card-header bg-secondary text-white">
+                                <h2 class="mb-0">Réservation</h2>
                             </div>
                             <div class="card-body">
                                 <div class="row">
@@ -254,7 +253,7 @@ $note_moyenne = round($noteResult['note_moyenne'] ?? 0, 1);
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <h5 class="mb-0">Prix total :</h5>
+                                            <h3 class="mb-0">Prix total :</h3>
                                             <span id="totalPrice" class="h4 text-primary">0 €</span>
                                         </div>
                                     </div>
@@ -269,7 +268,7 @@ $note_moyenne = round($noteResult['note_moyenne'] ?? 0, 1);
 
                         <!-- Conditions -->
                         <div class="card mb-4">
-                            <div class="card-header bg-danger text-white">
+                            <div class="card-header bg-secondary text-white">
                                 <h4 class="mb-0">Acceptation des conditions</h4>
                                 </div>
                                     <div class="card-body">
@@ -306,7 +305,7 @@ $note_moyenne = round($noteResult['note_moyenne'] ?? 0, 1);
 
                                 <div class="text-center">
                                     <button type="submit" id="submitButton"
-                                            class="btn btn-success"
+                                            class="buttonVert"
                                             <?= (!$isUserLoggedIn || !$places_suffisantes || !$credits_suffisants) ? 'disabled' : '' ?>>
                                         Réserver
                                     </button>
@@ -371,7 +370,7 @@ $note_moyenne = round($noteResult['note_moyenne'] ?? 0, 1);
                 errorMessage.style.display = 'none';
             } else {
                 errorMessage.style.display = 'block';
-                errorMessage.innerHTML = '<p>Vous devez accepter les conditions de vente et la politique de confidentialité pour réserver ce trajet.</p>';
+                errorMessage.innerHTML = '<p style="color: black; font-size: 20px;"> ⚠️ Vous devez accepter les conditions de vente et la politique de confidentialité pour réserver ce trajet.</p>';
             }
         }
 

@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
 
                     <div class="text-center mt-4">
-                        <button class="btn btn-success btn-lg" type="submit" name="chercher">Publier le trajet</button>
+                        <button class="btn buttonVert w-50 p-3" type="submit" name="chercher">Publier le trajet</button>
                     </div>
                 </form>
             </div>

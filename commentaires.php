@@ -86,7 +86,7 @@ ORDER BY a.date_validation DESC";
                        </div>
 
                        <?php if ($commentaire['lieu_depart'] && $commentaire['lieu_arrive']): ?>
-                       <div class="comment-trip text-secondary small mt-3">
+                       <div class="comment-trip small mt-3">
                            <i class="fas fa-route me-2"></i>
                            Trajet : <?= htmlspecialchars($commentaire['lieu_depart']) ?> → <?= htmlspecialchars($commentaire['lieu_arrive']) ?>
                        </div>

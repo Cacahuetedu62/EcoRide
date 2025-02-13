@@ -288,7 +288,7 @@ try {
    <label class="admin-form-label" for="ville">Ville:</label>
    <input class="admin-form-input" type="text" id="ville" name="ville" autocomplete="address-level2" required>
    
-   <button class="admin-action-btn" type="submit">Créer</button>
+   <button class="buttonVert" type="submit">Créer</button>
 </form>
     </div>
 
@@ -298,7 +298,7 @@ try {
         <form method="POST" action="manage.php" class="admin-management-form">
             <label class="admin-form-label" for="user_id">ID Utilisateur:</label>
             <input class="admin-form-input" type="number" id="user_id" name="user_id" required>
-            <button class="admin-action-btn" type="submit" name="search_user">Rechercher</button>
+            <button class="buttonVert" type="submit" name="search_user">Rechercher</button>
         </form>
 
         <?php if (isset($_POST['search_user'])):

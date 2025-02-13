@@ -94,24 +94,30 @@ document.addEventListener('DOMContentLoaded', function() {
     <div>
         <div class="row m-4">
             <div class="col-md-4 mb-4">
-                <h5 class="mb-3">EcoRide</h5>
+                <p class="mb-3"><strong>EcoRide</strong></p>
                 <p>Votre solution de covoiturage électrique, alliant économie et écologie.</p>
                 <div class="social-links">
-                    <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="text-white me-3" aria-label="Visitez notre page Facebook">
+                    <i class="fab fa-facebook-f" aria-hidden="true"></i>
+                </a>
+                <a href="#" class="text-white me-3" aria-label="Suivez-nous sur Twitter">
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+                <a href="#" class="text-white me-3" aria-label="Retrouvez-nous sur Instagram">
+                    <i class="fab fa-instagram" aria-hidden="true"></i>
+                </a>
                 </div>
             </div>
             
             <div class="col-md-4 mb-4">
-                <h5 class="mb-3">Liens Rapides</h5>
+                <p class="mb-3"><strong>Liens Rapides</strong></p>
                 <ul class="list-unstyled">
                     <li><a href="contact.php" class="text-white-50">Nous contacter</a></li>
                 </ul>
             </div>
             
             <div class="col-md-4 mb-4">
-                <h5 class="mb-3">Informations Légales</h5>
+                <p class="mb-3"><strong>Informations Légales</strong></p>
                 <ul class="list-unstyled">
                     <li><a href="mentionsLegales.php" class="text-white-50">Mentions légales</a></li>
                     <li><a href="CGDV.php" class="text-white-50">Conditions Générales</a></li>

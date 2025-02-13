@@ -128,7 +128,7 @@ try {
                         <?php foreach ($trajets_chauffeur as $trajet): ?>
                             <div class="card mb-3" id="trajet-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
                                 <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">Trajet n° <?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?></h5>
+                                    <p class="mb-0 text-sm">Trajet n° <?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?></p>
                                     <span class="badge bg-<?= $trajet['statut'] === 'en_attente' ? 'warning' : ($trajet['statut'] === 'en_cours' ? 'info' : 'success') ?>">
                                         <?= ucfirst($trajet['statut']) ?>
                                     </span>
@@ -172,10 +172,10 @@ try {
                                         <?php elseif ($trajet['statut'] === 'en_cours'): ?>
                                             <form method="POST" action="terminerTrajet.php" class="me-2">
                                                 <input type="hidden" name="trajet_id" value="<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
-                                                <button type="submit" class="btn btn-danger btn-sm">Terminer le trajet</button>
+                                                <button type="submit" class="btn btn-danger btn-lg">Terminer le trajet</button>
                                             </form>
                                         <?php endif; ?>
-                                        <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-primary btn-sm">Détails</a>
+                                        <a href="detailsTrajet.php?trajet_id=<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-infos btn-lg">Détails</a>
                                     </div>
                                 </div>
                             </div>
@@ -202,7 +202,7 @@ try {
                         <?php foreach ($trajets_passager as $trajet): ?>
                             <div class="card mb-3" id="trajet-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">
                                 <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">Trajet n° <?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?></h5>
+                                    <p class="mb-0">Trajet n° <?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?></p>
                                     <span class="badge bg-<?= $trajet['statut'] === 'en_attente' ? 'warning' : ($trajet['statut'] === 'en_cours' ? 'info' : 'success') ?>">
                                         <?= ucfirst($trajet['statut']) ?>
                                     </span>
