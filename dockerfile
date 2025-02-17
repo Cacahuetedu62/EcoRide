@@ -26,7 +26,7 @@ RUN pecl install mongodb && \
 RUN a2enmod rewrite
 
 # Configuration PHP
-RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # Configuration du répertoire de travail
 WORKDIR /var/www/html
@@ -38,7 +38,10 @@ COPY . .
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
-# Installation des dépendances Composer si composer.json existe
+# Installation des dépendances Composer
 RUN if [ -f "composer.json" ]; then \
-        COMPOSER_ALLOW_SUPERUSER=1 composer install --no-interaction; \
+        COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-interaction; \
     fi
+
+# Configuration pour Heroku
+CMD apache2-foreground
