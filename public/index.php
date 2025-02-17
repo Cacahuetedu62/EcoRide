@@ -1,31 +1,35 @@
 <?php
-// Activez la compression Gzip 
-if (!ob_start("ob_gzhandler")) ob_start();  
+// Activez la compression Gzip
+if (!ob_start("ob_gzhandler")) ob_start();
 
-// Charger l'autoloader de Composer 
-require_once __DIR__ . '/../vendor/autoload.php'; 
+// Charger l'autoloader de Composer
+require_once __DIR__ . '/../vendor/autoload.php';
 
-// Charger la configuration à partir du bon chemin
-require_once __DIR__ . '/../lib/config.php';  
+// Charger la configuration
+require_once __DIR__ . '/../lib/config.php';
+require_once __DIR__ . '/../lib/pdo.php';
 
-// Déterminer l'environnement de production pour Heroku
-$isProduction = true;
+// Charger la page demandée
+$request_uri = $_SERVER['REQUEST_URI'];
+$base_path = '/';
 
-// Reste de votre code...
+// Nettoyer l'URI
+$clean_uri = strtok($request_uri, '?');
+$clean_uri = rtrim($clean_uri, '/');
 
-// Votre fichier principal de routage ou de contrôleur
-require_once('/app/index.php');
-
-// Routage
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$uri = urldecode($uri);
-
-// Affichez quelque chose si aucune route n'est trouvée
-if (empty($uri) || $uri === '/') {
-    // Chargez votre page d'accueil principale
-    echo "Bienvenue sur EcoRide !";
+if (empty($clean_uri) || $clean_uri === '/') {
+    require_once __DIR__ . '/../index.php';
 } else {
-    // Route par défaut ou page 404
-    http_response_code(404);
-    echo "Page non trouvée";
+    // Enlever le premier slash et ajouter .php
+    $file = __DIR__ . '/../' . ltrim($clean_uri, '/');
+    if (!str_ends_with($file, '.php')) {
+        $file .= '.php';
+    }
+    
+    if (file_exists($file)) {
+        require_once $file;
+    } else {
+        http_response_code(404);
+        echo "Page non trouvée";
+    }
 }
