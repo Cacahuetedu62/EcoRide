@@ -29,11 +29,15 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 # Configuration du répertoire de travail 
 WORKDIR /app  
 
-# Copie des fichiers du projet 
+# Copie de tous les fichiers nécessaires
+COPY composer.json composer.lock* ./
 COPY . /app
 
-# Copie explicite du dossier public 
+# Assurez-vous que les dossiers essentiels sont bien copiés
+COPY config /app/config
 COPY public /app/public
+COPY src /app/src
+COPY vendor /app/vendor
 
 # Permissions 
 RUN chown -R www-data:www-data /app \
