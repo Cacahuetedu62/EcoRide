@@ -35,9 +35,9 @@ if (empty($clean_uri) || $clean_uri === '/') {
 error_log("Fichier à charger : " . $main_file);
 
 // Si c'est une requête pour un fichier statique (css, images, etc.)
-if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico)$/i', $clean_uri)) {
+if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico|svg|webp)$/i', $clean_uri)) {
     $static_file = __DIR__ . '/../' . ltrim($clean_uri, '/');
-    error_log("Tentative de chargement du fichier statique : " . $static_file);
+    error_log("Tentative d'accès au fichier : " . $static_file);
     
     if (file_exists($static_file)) {
         $mime_types = [
@@ -47,16 +47,19 @@ if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico)$/i', $clean_uri)) {
             'png' => 'image/png',
             'gif' => 'image/gif',
             'js' => 'application/javascript',
-            'ico' => 'image/x-icon'
+            'ico' => 'image/x-icon',
+            'svg' => 'image/svg+xml',
+            'webp' => 'image/webp'
         ];
         $ext = strtolower(pathinfo($static_file, PATHINFO_EXTENSION));
+        error_log("Extension détectée : " . $ext);
         if (isset($mime_types[$ext])) {
             header('Content-Type: ' . $mime_types[$ext]);
             readfile($static_file);
             exit;
         }
     }
-    error_log("Fichier statique non trouvé : " . $static_file);
+    error_log("Fichier non trouvé : " . $static_file);
 }
 
 // Charger la page demandée avec header et footer
