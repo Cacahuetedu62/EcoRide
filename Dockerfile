@@ -1,6 +1,7 @@
-FROM php:8.2-apache
+# Utilisez une image PHP de base sans Apache
+FROM php:8.2-cli
 
-# Installation des dépendances système
+# Installation des dépendances PHP et des extensions nécessaires
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -22,10 +23,6 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN pecl install mongodb && \
     docker-php-ext-enable mongodb
 
-# Configuration Apache : désactivation des modules incompatibles et activation du module mpm_prefork
-RUN a2dismod mpm_event mpm_worker \
-    && a2enmod mpm_prefork
-
 # Configuration PHP
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
@@ -44,8 +41,8 @@ RUN if [ -f "composer.json" ]; then \
         COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-interaction; \
     fi
 
-# Exposer le port 80
-EXPOSE 80
+# Exposer le port 5000 pour Heroku
+EXPOSE 5000
 
-# Commande de démarrage
-CMD ["apache2-foreground"]
+# Commande de démarrage pour utiliser PHP intégré
+CMD ["php", "-S", "0.0.0.0:5000", "-t", "public"]

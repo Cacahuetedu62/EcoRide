@@ -1,10 +1,18 @@
 <?php
+// Active la compression Gzip
+if (!ob_start("ob_gzhandler")) ob_start();
+
 // Charger l'autoloader de Composer en premier
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config/config.php';
 
 // Imports explicites
 use MongoDB\Client;
+
+// Gestion de la réécriture d'URL
+if ($_SERVER['REQUEST_URI'] != '/' && !file_exists($_SERVER['REQUEST_URI'])) {
+    include 'index.php';  // Redirection vers index.php pour les routes non existantes
+}
 
 try {
     // Test MySQL
