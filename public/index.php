@@ -33,3 +33,11 @@ if (empty($clean_uri) || $clean_uri === '/') {
         echo "Page non trouvée";
     }
 }
+
+// En haut du fichier, ajoutez :
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Et après la ligne qui définit $clean_uri, ajoutez :
+echo "URI demandée : " . $clean_uri . "<br>";
+echo "Chemin du fichier : " . $file . "<br>";
