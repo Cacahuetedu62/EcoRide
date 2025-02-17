@@ -1,7 +1,7 @@
-setup:
-  addons:
-    - plan: heroku-postgresql
-      as: DATABASE
 build:
+  config:
+    PHP_EXTENSIONS: mongodb pdo pdo_mysql
   docker:
     web: Dockerfile
+run:
+  web: php -S 0.0.0.0:$PORT public/index.php
