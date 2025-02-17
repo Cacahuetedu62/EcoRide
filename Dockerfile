@@ -34,7 +34,7 @@ COPY composer.json composer.lock* ./
 COPY . /app
 
 # Assurez-vous que les dossiers essentiels sont bien copiés
-COPY config /app/config
+COPY lib /app/lib
 COPY public /app/public
 COPY src /app/src
 COPY vendor /app/vendor
