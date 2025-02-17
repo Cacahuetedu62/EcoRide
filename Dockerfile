@@ -25,7 +25,9 @@ RUN pecl install mongodb && \
 # Configuration Apache
 RUN a2dismod mpm_event && \
     a2enmod mpm_prefork && \
-    a2enmod rewrite
+    a2enmod rewrite && \
+    apachectl -M | grep mpm
+
 
 # Configuration PHP
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
