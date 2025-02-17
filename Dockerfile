@@ -22,12 +22,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN pecl install mongodb && \
     docker-php-ext-enable mongodb
 
-# Configuration Apache
-RUN a2dismod mpm_event && \
-    a2enmod mpm_prefork && \
-    a2enmod rewrite && \
-    apachectl -M | grep mpm
-
+# Configuration Apache : désactivation des modules incompatibles et activation du module mpm_prefork
+RUN a2dismod mpm_event mpm_worker \
+    && a2enmod mpm_prefork
 
 # Configuration PHP
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
