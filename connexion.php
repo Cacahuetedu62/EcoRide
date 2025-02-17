@@ -12,49 +12,40 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Ajouter du débogage détaillé
-error_log("Début du processus de connexion");
-error_log("Session ID: " . session_id());
-error_log("Session data: " . print_r($_SESSION, true));
-
-// Vérifier si une URL de redirection existe dans la requête
-if (isset($_GET['redirect'])) {
-    $_SESSION['redirect_after_login'] = urldecode($_GET['redirect']);
-    error_log("URL de redirection définie: " . $_SESSION['redirect_after_login']);
-}
+error_log("=== DÉBUT PROCESSUS CONNEXION ===");
+error_log("Session ID initial: " . session_id());
+error_log("Session initiale: " . print_r($_SESSION, true));
+error_log("REQUEST_URI: " . $_SERVER['REQUEST_URI']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    error_log("Tentative de connexion reçue");
-    error_log("POST data: " . print_r($_POST, true));
+    error_log("=== TRAITEMENT POST ===");
+    error_log("Données POST: " . print_r($_POST, true));
 
     if (isset($_POST['pseudo']) && isset($_POST['password'])) {
         $pseudo = trim($_POST['pseudo']);
         $password = $_POST['password'];
 
-        error_log("Tentative de connexion pour l'utilisateur: " . $pseudo);
-
         try {
-            // Recherche de l'utilisateur dans la base de données
+            // Recherche de l'utilisateur
             $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE pseudo = :pseudo");
             $stmt->execute(['pseudo' => $pseudo]);
             $utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            error_log("Résultat de la recherche utilisateur: " . ($utilisateur ? "trouvé" : "non trouvé"));
+            error_log("Recherche utilisateur pour: " . $pseudo);
+            error_log("Résultat: " . ($utilisateur ? "trouvé" : "non trouvé"));
 
             if ($utilisateur) {
-                // Vérification si le compte est suspendu
                 if ($utilisateur['suspendu'] == 1) {
-                    error_log("Tentative de connexion à un compte suspendu: " . $pseudo);
-                    echo "<div class='alert alert-danger'>Votre compte a été suspendu. Veuillez contacter le support.</div>";
-                    exit;
-                }
-
-                if (password_verify($password, $utilisateur['password'])) {
-                    error_log("Mot de passe vérifié avec succès pour: " . $pseudo);
+                    $error = "Votre compte a été suspendu. Veuillez contacter le support.";
+                    error_log("Tentative sur compte suspendu: " . $pseudo);
+                } elseif (password_verify($password, $utilisateur['password'])) {
+                    error_log("=== CONNEXION RÉUSSIE ===");
                     
-                    // Régénérer l'ID de session pour plus de sécurité
+                    // Régénérer l'ID de session
                     session_regenerate_id(true);
                     error_log("Nouveau Session ID: " . session_id());
                 
+                    // Stocker les infos utilisateur en session
                     $_SESSION['utilisateur'] = [
                         'id' => $utilisateur['id'],
                         'pseudo' => $utilisateur['pseudo'],
@@ -62,36 +53,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'type_acces' => $utilisateur['type_acces']
                     ];
 
-                    error_log("Session après connexion: " . print_r($_SESSION, true));
+                    error_log("Session après login: " . print_r($_SESSION, true));
 
-                    // Redirection intelligente
-                    $redirect_url = isset($_SESSION['redirect_after_login']) 
-                        ? $_SESSION['redirect_after_login'] 
-                        : 'index.php';
+                    // Construire l'URL de redirection
+                    $base_url = 'https://' . $_SERVER['HTTP_HOST'];
+                    $redirect_url = $base_url . '/index.php';
                     
-                    unset($_SESSION['redirect_after_login']); // Nettoyer après utilisation
+                    error_log("=== REDIRECTION ===");
+                    error_log("URL de redirection: " . $redirect_url);
                     
-                    error_log("Redirection vers: " . $redirect_url);
-                    
-                    // Assurez-vous que la sortie est vide avant la redirection
-                    ob_clean();
+                    // Vider tout buffer de sortie
+                    while (ob_get_level()) {
+                        ob_end_clean();
+                    }
+
+                    // Redirection avec URL absolue
                     header("Location: " . $redirect_url);
                     exit();
                 } else {
-                    error_log("Échec de la vérification du mot de passe pour: " . $pseudo);
                     $error = "Identifiants incorrects! Veuillez réessayer.";
+                    error_log("Échec vérification mot de passe: " . $pseudo);
                 }
             } else {
-                error_log("Utilisateur non trouvé: " . $pseudo);
                 $error = "Identifiants incorrects! Veuillez réessayer.";
+                error_log("Utilisateur non trouvé: " . $pseudo);
             }
         } catch (PDOException $e) {
-            error_log("Erreur PDO lors de la connexion: " . $e->getMessage());
             $error = "Une erreur est survenue. Veuillez réessayer plus tard.";
+            error_log("Erreur PDO: " . $e->getMessage());
         }
     } else {
-        error_log("Formulaire incomplet");
         $error = "Veuillez remplir tous les champs.";
+        error_log("Formulaire incomplet");
     }
 }
 
@@ -109,7 +102,8 @@ if (isset($error)) {
         <h2 class="text-center">Se connecter</h2>
         <form method="POST" class="login-form">
             <label for="pseudo">Pseudo :</label>
-            <input type="text" name="pseudo" id="pseudo" required>
+            <input type="text" name="pseudo" id="pseudo" required 
+                   value="<?php echo isset($_POST['pseudo']) ? htmlspecialchars($_POST['pseudo']) : ''; ?>">
 
             <label for="password">Mot de passe :</label>
             <input type="password" name="password" id="password" required>
@@ -145,6 +139,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php
-require_once('templates/footer.php');
-?>
+<?php require_once('templates/footer.php'); ?>

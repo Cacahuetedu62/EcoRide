@@ -1,4 +1,8 @@
 <?php
+error_log("=== DEBUG INDEX ===");
+error_log("Session ID: " . session_id());
+error_log("Session data: " . print_r($_SESSION, true));
+
 if (!ob_start("ob_gzhandler")) ob_start();
 
 error_reporting(E_ALL);
