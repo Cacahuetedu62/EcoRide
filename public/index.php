@@ -12,5 +12,11 @@ if ($_SERVER['REQUEST_URI'] != '/' && !file_exists($_SERVER['DOCUMENT_ROOT'] . $
     include 'index.php';
 }
 
+// Vérifie et utilise le port Heroku
+$port = getenv('PORT') ?: 5000;
+
+// Le reste de votre code...
+echo "Application démarrée sur le port $port";
+
 // Votre logique principale de routage ici
 echo "Bienvenue sur EcoRide !";
