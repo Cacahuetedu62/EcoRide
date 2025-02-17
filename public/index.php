@@ -2,9 +2,16 @@
 // Activez la compression Gzip 
 if (!ob_start("ob_gzhandler")) ob_start();  
 
-// Chemins absolus pour Heroku
-require_once('/app/vendor/autoload.php'); 
-require_once('/app/config/config.php');  
+// Charger l'autoloader de Composer 
+require_once __DIR__ . '/../vendor/autoload.php'; 
+
+// Charger la configuration à partir du bon chemin
+require_once __DIR__ . '/../lib/config.php';  
+
+// Déterminer l'environnement de production pour Heroku
+$isProduction = true;
+
+// Reste de votre code...
 
 // Votre fichier principal de routage ou de contrôleur
 require_once('/app/index.php');
