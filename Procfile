@@ -1,1 +1,2 @@
-web: php -S 0.0.0.0:5000 -t public
+web: php -S 0.0.0.0:$PORT -t public
+
