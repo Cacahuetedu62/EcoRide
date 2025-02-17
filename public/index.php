@@ -2,6 +2,9 @@
 // Activez la compression Gzip
 if (!ob_start("ob_gzhandler")) ob_start();
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Charger l'autoloader de Composer
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -17,27 +20,23 @@ $base_path = '/';
 $clean_uri = strtok($request_uri, '?');
 $clean_uri = rtrim($clean_uri, '/');
 
+// Définir le chemin du fichier
 if (empty($clean_uri) || $clean_uri === '/') {
-    require_once __DIR__ . '/../index.php';
+    $file = __DIR__ . '/../index.php';
 } else {
     // Enlever le premier slash et ajouter .php
     $file = __DIR__ . '/../' . ltrim($clean_uri, '/');
     if (!str_ends_with($file, '.php')) {
         $file .= '.php';
     }
-    
-    if (file_exists($file)) {
-        require_once $file;
-    } else {
-        http_response_code(404);
-        echo "Page non trouvée";
-    }
 }
 
-// En haut du fichier, ajoutez :
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Et après la ligne qui définit $clean_uri, ajoutez :
 echo "URI demandée : " . $clean_uri . "<br>";
 echo "Chemin du fichier : " . $file . "<br>";
+
+if (file_exists($file)) {
+    require_once $file;
+} else {
+    http_response_code(404);
+    echo "Page non trouvée";
+}
