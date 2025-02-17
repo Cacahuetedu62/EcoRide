@@ -22,8 +22,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN pecl install mongodb && \
     docker-php-ext-enable mongodb
 
-# Activation du module rewrite d'Apache
-RUN a2enmod rewrite
+# Configuration Apache
+RUN a2dismod mpm_event && \
+    a2enmod mpm_prefork && \
+    a2enmod rewrite
 
 # Configuration PHP
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
@@ -43,5 +45,8 @@ RUN if [ -f "composer.json" ]; then \
         COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-interaction; \
     fi
 
-# Configuration pour Heroku
-CMD apache2-foreground
+# Exposer le port 80
+EXPOSE 80
+
+# Commande de démarrage
+CMD ["apache2-foreground"]
