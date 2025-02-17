@@ -1,7 +1,7 @@
 # Utilisez une image PHP de base sans Apache 
 FROM php:8.2-cli  
 
-# Installation des dépendances PHP et des extensions nécessaires 
+# Installation des dépendances système 
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -30,16 +30,20 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 WORKDIR /app  
 
 # Copie des fichiers du projet 
-COPY . .  
+COPY . /app
+
+# Copie explicite du dossier public 
+COPY public /app/public
 
 # Permissions 
 RUN chown -R www-data:www-data /app \
     && chmod -R 755 /app  
 
 # Installation des dépendances Composer 
-RUN if [ -f "composer.json" ]; then \
-        COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-interaction; \
-    fi  
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
+    --no-dev \
+    --no-interaction \
+    --optimize-autoloader
 
 # Exposer le port dynamique de Heroku 
 EXPOSE 5000  
