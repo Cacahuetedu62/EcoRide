@@ -6,8 +6,14 @@ ini_set('display_errors', 1);
 require_once('lib/pdo.php');
 require_once('lib/config.php');
 
-// Démarrer la session avant toute logique de connexion
-session_start();
+
+// Vérifier si la session n'est pas déjà démarrée
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Ajouter du débogage
+error_log("Début du processus de connexion");
 
 // Vérifier si une URL de redirection existe dans la requête
 if (isset($_GET['redirect'])) {

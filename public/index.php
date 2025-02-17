@@ -19,6 +19,9 @@ $request_uri = $_SERVER['REQUEST_URI'];
 $clean_uri = strtok($request_uri, '?');
 $clean_uri = rtrim($clean_uri, '/');
 
+// Ajouter du débogage
+error_log("URI demandée : " . $clean_uri);
+
 // Définir le fichier à charger
 if (empty($clean_uri) || $clean_uri === '/') {
     $main_file = __DIR__ . '/../index.php';
@@ -29,9 +32,13 @@ if (empty($clean_uri) || $clean_uri === '/') {
     }
 }
 
+error_log("Fichier à charger : " . $main_file);
+
 // Si c'est une requête pour un fichier statique (css, images, etc.)
-if (preg_match('/\.(css|jpg|jpeg|png|gif|js)$/', $clean_uri)) {
+if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico)$/i', $clean_uri)) {
     $static_file = __DIR__ . '/../' . ltrim($clean_uri, '/');
+    error_log("Tentative de chargement du fichier statique : " . $static_file);
+    
     if (file_exists($static_file)) {
         $mime_types = [
             'css' => 'text/css',
@@ -39,13 +46,17 @@ if (preg_match('/\.(css|jpg|jpeg|png|gif|js)$/', $clean_uri)) {
             'jpeg' => 'image/jpeg',
             'png' => 'image/png',
             'gif' => 'image/gif',
-            'js' => 'application/javascript'
+            'js' => 'application/javascript',
+            'ico' => 'image/x-icon'
         ];
-        $ext = pathinfo($static_file, PATHINFO_EXTENSION);
-        header('Content-Type: ' . $mime_types[$ext]);
-        readfile($static_file);
-        exit;
+        $ext = strtolower(pathinfo($static_file, PATHINFO_EXTENSION));
+        if (isset($mime_types[$ext])) {
+            header('Content-Type: ' . $mime_types[$ext]);
+            readfile($static_file);
+            exit;
+        }
     }
+    error_log("Fichier statique non trouvé : " . $static_file);
 }
 
 // Charger la page demandée avec header et footer
