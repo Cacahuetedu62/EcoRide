@@ -156,12 +156,11 @@ function sendNotificationEmail($trajet_id, $role) {
     // Crée une instance de PHPMailer
     $mail = new PHPMailer(true);
     try {
-        // Configuration SMTP
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = $config['smtp']['host'];
         $mail->SMTPAuth = true;
-        $mail->Username = 'testing.projets.siteweb@gmail.com';
-        $mail->Password = 'sljw jlop qtyy mqae';
+        $mail->Username = $config['smtp']['user'];
+        $mail->Password = $config['smtp']['pass'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
     

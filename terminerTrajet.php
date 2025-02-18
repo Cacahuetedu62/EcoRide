@@ -92,10 +92,10 @@ echo "<div class='mt-5'>
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
+            $mail->Host = $config['smtp']['host'];
             $mail->SMTPAuth = true;
-            $mail->Username = 'testing.projets.siteweb@gmail.com';
-            $mail->Password = 'sljw jlop qtyy mqae';
+            $mail->Username = $config['smtp']['user'];
+            $mail->Password = $config['smtp']['pass'];
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 

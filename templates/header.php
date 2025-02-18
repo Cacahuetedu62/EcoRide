@@ -2,13 +2,16 @@
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
-// Inclure les fichiers de configuration et de connexion à la base de données
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: Sat, 1 Jan 2000 00:00:00 GMT");
+
 require_once('lib/config.php');
 require_once('lib/pdo.php');
 
-// Redirection HTTPS (désactivée pour le moment)
+// // Redirection HTTPS (désactivée pour le moment)
 // if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
-//     header("Location: https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+//      header("Location: https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
 //     exit();
 // }
 
