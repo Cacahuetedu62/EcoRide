@@ -56,7 +56,7 @@ docker-compose up -d --build
 
 5. Accédez à l'application via
 
-http://localhost:8080
+[http://localhost:8080](https://ecoride-projet-32f6b3dd2af2.herokuapp.com/)
 
 
 🔐 Sécurité
@@ -67,7 +67,7 @@ http://localhost:8080
 - Sessions sécurisées
 - Validation des entrées
 - En-têtes de sécurité configurés
-- Tests de sécurité avec Nikto
+- Tests de sécurité avec Nikto + SNYK
 
 📱 Interface Responsive
 
