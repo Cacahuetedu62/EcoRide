@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $logs[] = "Données POST: " . print_r($_POST, true);
 
     if (isset($_POST['pseudo']) && isset($_POST['password'])) {
+        $logs[] = "Champs de connexion reçus";
         $pseudo = trim($_POST['pseudo']);
         $password = $_POST['password'];
 
@@ -90,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $logs[] = "Formulaire incomplet";
     }
 }
+
 
 // Inclusion du header et du contenu HTML
 require_once('templates/header.php');
