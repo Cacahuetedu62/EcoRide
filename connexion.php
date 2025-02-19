@@ -6,10 +6,12 @@ require_once('lib/config.prod.php');
 
 // Fonction pour se connecter à la base de données
 function getConnection() {
-    $host = 'localhost'; // Remplace par l'hôte de ta base de données
-    $dbname = 'ecoride'; // Nom de ta base de données
-    $username = 'ton_utilisateur'; // Nom d'utilisateur de la base de données
-    $password = 'ton_mot_de_passe'; // Mot de passe de la base de données
+    $config = require 'lib/config.prod.php'; // Charge les paramètres de configuration
+
+    $host = $config['db']['host']; // Hôte de la base de données
+    $dbname = $config['db']['name']; // Nom de la base de données
+    $username = $config['db']['user']; // Nom d'utilisateur de la base de données
+    $password = $config['db']['pass']; // Mot de passe de la base de données
 
     try {
         $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
