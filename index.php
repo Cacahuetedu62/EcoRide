@@ -74,7 +74,7 @@ require_once('templates/header.php');
 
             <div class="carousselImageDescription">
                 <div class="col-lg-4 d-flex flex-column align-items-center text-center">
-                    <img src="" class="https://res.cloudinary.com/dmktstvsg/image/upload/v1739960426/nyrkg1emsa1ifzuq4vkb.jpg" width="200" height="150" alt="poignée de main">
+                    <img src="" class="https://res.cloudinary.com/dmktstvsg/image/upload/v1739960426/nyrkg1emsa1ifzuq4vkb.jpg" width="200" height="140" alt="poignée de main">
                     <p class="p-3">Le covoiturage favorise la solidarité et l'entraide entre les conducteurs et passagers, permettant de partager des trajets tout en économisant de l'argent. C'est aussi une manière de renforcer les liens sociaux et d'encourager une mobilité plus responsable.</p>
                 </div>
                 <div class="col-lg-4 d-flex flex-column align-items-center text-center">

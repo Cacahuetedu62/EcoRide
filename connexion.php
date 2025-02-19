@@ -11,15 +11,18 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Tableau pour stocker les logs
+$logs = [];
+
 // Ajouter du débogage détaillé
-error_log("=== DÉBUT PROCESSUS CONNEXION ===");
-error_log("Session ID initial: " . session_id());
-error_log("Session initiale: " . print_r($_SESSION, true));
-error_log("REQUEST_URI: " . $_SERVER['REQUEST_URI']);
+$logs[] = "=== DÉBUT PROCESSUS CONNEXION ===";
+$logs[] = "Session ID initial: " . session_id();
+$logs[] = "Session initiale: " . print_r($_SESSION, true);
+$logs[] = "REQUEST_URI: " . $_SERVER['REQUEST_URI'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    error_log("=== TRAITEMENT POST ===");
-    error_log("Données POST: " . print_r($_POST, true));
+    $logs[] = "=== TRAITEMENT POST ===";
+    $logs[] = "Données POST: " . print_r($_POST, true);
 
     if (isset($_POST['pseudo']) && isset($_POST['password'])) {
         $pseudo = trim($_POST['pseudo']);
@@ -31,19 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute(['pseudo' => $pseudo]);
             $utilisateur = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            error_log("Recherche utilisateur pour: " . $pseudo);
-            error_log("Résultat: " . ($utilisateur ? "trouvé" : "non trouvé"));
+            $logs[] = "Recherche utilisateur pour: " . $pseudo;
+            $logs[] = "Résultat: " . ($utilisateur ? "trouvé" : "non trouvé");
 
             if ($utilisateur) {
                 if ($utilisateur['suspendu'] == 1) {
                     $error = "Votre compte a été suspendu. Veuillez contacter le support.";
-                    error_log("Tentative sur compte suspendu: " . $pseudo);
+                    $logs[] = "Tentative sur compte suspendu: " . $pseudo;
                 } elseif (password_verify($password, $utilisateur['password'])) {
-                    error_log("=== CONNEXION RÉUSSIE ===");
+                    $logs[] = "=== CONNEXION RÉUSSIE ===";
                     
                     // Régénérer l'ID de session
                     session_regenerate_id(true);
-                    error_log("Nouveau Session ID: " . session_id());
+                    $logs[] = "Nouveau Session ID: " . session_id();
                 
                     // Stocker les infos utilisateur en session
                     $_SESSION['utilisateur'] = [
@@ -53,14 +56,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'type_acces' => $utilisateur['type_acces']
                     ];
 
-                    error_log("Session après login: " . print_r($_SESSION, true));
+                    $logs[] = "Session après login: " . print_r($_SESSION, true);
 
                     // Construire l'URL de redirection
                     $base_url = 'https://' . $_SERVER['HTTP_HOST'];
                     $redirect_url = $base_url . '/index.php';
                     
-                    error_log("=== REDIRECTION ===");
-                    error_log("URL de redirection: " . $redirect_url);
+                    $logs[] = "=== REDIRECTION ===";
+                    $logs[] = "URL de redirection: " . $redirect_url;
                     
                     // Vider tout buffer de sortie
                     while (ob_get_level()) {
@@ -72,19 +75,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit();
                 } else {
                     $error = "Identifiants incorrects! Veuillez réessayer.";
-                    error_log("Échec vérification mot de passe: " . $pseudo);
+                    $logs[] = "Échec vérification mot de passe: " . $pseudo;
                 }
             } else {
                 $error = "Identifiants incorrects! Veuillez réessayer.";
-                error_log("Utilisateur non trouvé: " . $pseudo);
+                $logs[] = "Utilisateur non trouvé: " . $pseudo;
             }
         } catch (PDOException $e) {
             $error = "Une erreur est survenue. Veuillez réessayer plus tard.";
-            error_log("Erreur PDO: " . $e->getMessage());
+            $logs[] = "Erreur PDO: " . $e->getMessage();
         }
     } else {
         $error = "Veuillez remplir tous les champs.";
-        error_log("Formulaire incomplet");
+        $logs[] = "Formulaire incomplet";
     }
 }
 
@@ -95,6 +98,9 @@ require_once('templates/header.php');
 if (isset($error)) {
     echo "<div class='alert alert-danger'>" . htmlspecialchars($error) . "</div>";
 }
+
+// Afficher les logs
+echo "<pre>" . implode("\n", $logs) . "</pre>";
 ?>
 
 <section class="loginRegister d-flex justify-content-center m-5">
