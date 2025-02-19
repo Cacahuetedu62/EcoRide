@@ -1,6 +1,8 @@
 <?php
-// Démarrer la session
-session_start();
+require_once('lib/config.php');
+require_once('lib/pdo.php');
+require_once('lib/config.prod.php');
+
 
 // Fonction pour se connecter à la base de données
 function getConnection() {
