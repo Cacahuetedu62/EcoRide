@@ -1,4 +1,11 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+session_start();
+
+echo "Débogage : index.php atteint"; // Vérifie si le fichier est bien chargé
+
+exit;
 require_once('lib/config.php');
 require_once('lib/pdo.php');
 require_once('templates/header.php');
