@@ -56,6 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'credits' => $utilisateur['credits'] ?? 0
             ];
             $debug_messages[] = "Connexion réussie";
+            header('Location: index.php');
+            exit(); // Assurez-vous d'ajouter cette ligne pour arrêter l'exécution du script
         } else {
             $erreur = 'Identifiants incorrects';
             $debug_messages[] = "Échec de l'authentification";
