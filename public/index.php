@@ -28,11 +28,11 @@ error_log("URI demandée : " . $clean_uri);
 
 // Définir le fichier à charger
 if (empty($clean_uri) || $clean_uri === '/') {
-    $main_file = __DIR__ . '/../index.php';
+    $main_file = __DIR__ . '/../index.php'; // Page d'accueil
 } else {
     $main_file = __DIR__ . '/../' . ltrim($clean_uri, '/');
     if (!str_ends_with($main_file, '.php')) {
-        $main_file .= '.php';
+        $main_file .= '.php'; // Ajouter .php si non spécifié
     }
 }
 
@@ -68,12 +68,12 @@ if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico|svg|webp)$/i', $clean_uri)) {
 
 // Charger la page demandée avec header et footer
 if (file_exists($main_file)) {
-    require_once __DIR__ . '/../templates/header.php';
-    require_once $main_file;
-    require_once __DIR__ . '/../templates/footer.php';
+    require_once __DIR__ . '/../templates/header.php'; // Inclure l'en-tête
+    require_once $main_file; // Inclure le contenu principal
+    require_once __DIR__ . '/../templates/footer.php'; // Inclure le pied de page
 } else {
-    http_response_code(404);
+    http_response_code(404); // Code d'erreur 404 si fichier non trouvé
     require_once __DIR__ . '/../templates/header.php';
-    require_once __DIR__ . '/../404.php';
+    require_once __DIR__ . '/../404.php'; // Page 404 personnalisée
     require_once __DIR__ . '/../templates/footer.php';
 }

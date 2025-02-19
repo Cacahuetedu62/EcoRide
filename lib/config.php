@@ -101,4 +101,4 @@ if (DEBUG_MODE) {
 header('X-XSS-Protection: 1; mode=block');
 header('X-Content-Type-Options: nosniff');
 
-define('PROJECT_ROOT', $_SERVER['DOCUMENT_ROOT'] . '/');
+
