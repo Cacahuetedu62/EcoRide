@@ -51,23 +51,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo = getConnection();
             
-            // Debug log
             logMessage("Tentative de connexion pour l'utilisateur: $pseudo");
             
-            $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE pseudo = :pseudo");
+            // Modification de la requête pour récupérer toutes les informations nécessaires
+            $stmt = $pdo->prepare("SELECT id, pseudo, password, credits FROM utilisateurs WHERE pseudo = :pseudo");
             $stmt->execute(['pseudo' => $pseudo]);
             $utilisateur = $stmt->fetch();
             
             if ($utilisateur) {
                 logMessage("Utilisateur trouvé dans la base de données");
                 
-                // Utilisation de 'password' au lieu de 'motdepasse'
                 if (password_verify($motdepasse, $utilisateur['password'])) {
-                    $_SESSION['user_id'] = $utilisateur['id'];
-                    $_SESSION['pseudo'] = $utilisateur['pseudo'];
-                    logMessage("Connexion réussie pour l'utilisateur: $pseudo");
+                    // Stockage des informations dans la session
+                    $_SESSION['utilisateur'] = [
+                        'id' => $utilisateur['id'],
+                        'pseudo' => $utilisateur['pseudo'],
+                        'credits' => $utilisateur['credits'] ?? 0
+                    ];
                     
-                    header('Location: accueil.php');
+                    logMessage("Connexion réussie pour l'utilisateur: {$utilisateur['pseudo']}");
+                    logMessage("Session créée avec ID: " . session_id());
+                    
+                    // Redirection vers index.php au lieu de accueil.php
+                    header('Location: index.php');
                     exit();
                 } else {
                     $erreur = 'Identifiants incorrects';
@@ -109,6 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </section>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
