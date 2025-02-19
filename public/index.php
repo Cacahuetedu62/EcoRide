@@ -41,18 +41,20 @@ if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico|svg|webp)$/i', $clean_uri)) {
     $file_found = false;
 
     foreach ($search_paths as $base_path) {
-        // Vérifier d'abord si le fichier existe directement
+        error_log("Checking path: " . $base_path . $clean_path);
         if (file_exists($base_path . $clean_path)) {
             $static_file = $base_path . $clean_path;
             $file_found = true;
+            error_log("File found: " . $static_file);
             break;
         }
 
-        // Vérifier aussi juste le nom du fichier (pour les images dans les sous-dossiers)
         $filename = basename($clean_path);
+        error_log("Checking filename: " . $base_path . $filename);
         if (file_exists($base_path . $filename)) {
             $static_file = $base_path . $filename;
             $file_found = true;
+            error_log("File found: " . $static_file);
             break;
         }
     }
@@ -107,6 +109,7 @@ if (file_exists($main_file)) {
             $files = glob($directory . '/*.{jpg,jpeg,png,gif}', GLOB_BRACE);
             foreach ($files as $file) {
                 $image_path = str_replace(__DIR__ . '/../', '', $file);
+                error_log("Displaying image: " . $image_path);
                 echo '<img src="' . $image_path . '" alt="' . basename($file) . '" style="width: 200px; margin: 10px;">';
             }
         }
