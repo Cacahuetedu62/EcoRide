@@ -1,16 +1,11 @@
 <?php
-session_start(); // Ajout de session_start() au début
+session_start();
 require_once('lib/config.php');
 require_once('lib/pdo.php');
 require_once('lib/config.prod.php');
 
 // Fonction pour se connecter à la base de données
 function getConnection() {
-    static $pdo = null;
-    if ($pdo !== null) {
-        return $pdo;
-    }
-
     $config = require 'lib/config.prod.php';
     try {
         $pdo = new PDO(
@@ -29,13 +24,11 @@ function getConnection() {
     }
 }
 
-// Fonction pour ajouter des logs avec plus de détails
 function logMessage($message) {
     $logFile = __DIR__ . '/logs/logs.txt';
     $timestamp = date('Y-m-d H:i:s');
     $logEntry = "[$timestamp] $message" . PHP_EOL;
     
-    // Vérification du dossier logs
     $logDir = dirname($logFile);
     if (!is_dir($logDir)) {
         mkdir($logDir, 0777, true);
@@ -44,11 +37,9 @@ function logMessage($message) {
     file_put_contents($logFile, $logEntry, FILE_APPEND);
 }
 
-// Variables pour stocker les messages
 $erreur = '';
 $success = '';
 
-// Vérification de la soumission du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pseudo = trim($_POST['pseudo'] ?? '');
     $motdepasse = $_POST['motdepasse'] ?? '';
@@ -58,27 +49,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         logMessage('Tentative de connexion avec champs vides');
     } else {
         try {
-            // Connexion à la base de données
             $pdo = getConnection();
-
-            // Requête préparée pour vérifier les identifiants
+            
+            // Debug log
+            logMessage("Tentative de connexion pour l'utilisateur: $pseudo");
+            
             $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE pseudo = :pseudo");
             $stmt->execute(['pseudo' => $pseudo]);
             $utilisateur = $stmt->fetch();
-
-            logMessage("Tentative de connexion pour l'utilisateur: $pseudo");
-
-            if ($utilisateur && password_verify($motdepasse, $utilisateur['motdepasse'])) {
-                // Authentification réussie
-                $_SESSION['user_id'] = $utilisateur['id'];
-                $_SESSION['pseudo'] = $utilisateur['pseudo'];
-                logMessage("Connexion réussie pour l'utilisateur: $pseudo");
+            
+            if ($utilisateur) {
+                logMessage("Utilisateur trouvé dans la base de données");
                 
-                header('Location: accueil.php');
-                exit();
+                // Utilisation de 'password' au lieu de 'motdepasse'
+                if (password_verify($motdepasse, $utilisateur['password'])) {
+                    $_SESSION['user_id'] = $utilisateur['id'];
+                    $_SESSION['pseudo'] = $utilisateur['pseudo'];
+                    logMessage("Connexion réussie pour l'utilisateur: $pseudo");
+                    
+                    header('Location: accueil.php');
+                    exit();
+                } else {
+                    $erreur = 'Identifiants incorrects';
+                    logMessage("Échec de la vérification du mot de passe pour l'utilisateur: $pseudo");
+                }
             } else {
                 $erreur = 'Identifiants incorrects';
-                logMessage("Échec de connexion pour l'utilisateur: $pseudo");
+                logMessage("Aucun utilisateur trouvé avec le pseudo: $pseudo");
             }
         } catch (PDOException $e) {
             logMessage('Erreur PDO : ' . $e->getMessage());
@@ -88,16 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!-- Affichage des messages d'erreur ou de succès -->
 <?php if (!empty($erreur)): ?>
     <div class="alert alert-danger">
         <?php echo htmlspecialchars($erreur); ?>
-    </div>
-<?php endif; ?>
-
-<?php if (!empty($success)): ?>
-    <div class="alert alert-success">
-        <?php echo htmlspecialchars($success); ?>
     </div>
 <?php endif; ?>
 
