@@ -12,21 +12,26 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['type_acces']) || $_SESSION
 
 $message = "";
 
-// Fonction d'envoi d'email
+// Fonction d'envoi d'email avec des identifiants sécurisés
 function sendEmail($to, $subject, $body) {
     $mail = new PHPMailer(true);
+    
+    // Charger la configuration
+    $config = require __DIR__ . '/../lib/config.prod.php'; 
+    $smtpConfig = $config['smtp'];
+
     try {
         // Configuration SMTP
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = $smtpConfig['host'];
         $mail->SMTPAuth = true;
-        $mail->Username = 'testing.projets.siteweb@gmail.com';
-        $mail->Password = 'sljw jlop qtyy mqae';
+        $mail->Username = $smtpConfig['user'];
+        $mail->Password = $smtpConfig['pass'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
         // Configuration de l'expéditeur et du destinataire
-        $mail->setFrom('rogez.aurore01@gmail.com', 'EcoRide');
+        $mail->setFrom($smtpConfig['user'], 'EcoRide');
         $mail->addAddress($to);
 
         // Contenu

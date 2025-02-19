@@ -170,7 +170,7 @@ function envoyer_email_rejet($destinataire, $nom_utilisateur) {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
-        // En développement, tous les emails vont à votre adresse
+        // En développement, tous les emails vont à mon adresse perso
         $destinataire_test = 'rogez.aurore01@gmail.com';
         
         // Configuration de l'expéditeur et du destinataire
@@ -413,7 +413,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <table class="dashboard-table">
         <thead>
             <tr>
-                <th>N° Avis</th> <!-- Nouvelle colonne pour l'ID de l'avis -->
+                <th>N° Avis</th> 
                 <th>N° Trajet</th>
                 <th>Participants</th>
                 <th>Emails</th>
@@ -429,7 +429,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php if (count($results) > 0): ?>
                 <?php foreach ($results as $row): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($row["avis_id"]); ?></td> <!-- Affichage du N° Avis -->
+                    <td><?php echo htmlspecialchars($row["avis_id"]); ?></td> 
                     <td><?php echo htmlspecialchars($row["trajet_id"]); ?></td>
                     <td>
                         <?php echo format_with_badges($row["participants_info"]); ?>
@@ -575,7 +575,7 @@ function confirmAction(form) {
         : 'Êtes-vous sûr de vouloir valider cet avis ? Les crédits seront transférés.';
         
     if (confirm(message)) {
-        // Laisser le temps au formulaire de se soumettre avant de recharger
+        // Laisser le temps au formulaire de se soumettre avant de recharger = trop long ! à travailler
         setTimeout(() => {
             window.location.reload();
         }, 100);

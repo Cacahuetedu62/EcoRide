@@ -82,9 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fonction pour désactiver les cookies non essentiels
     function disableNonEssentialCookies() {
-        // Ajoutez ici le code pour désactiver les cookies non essentiels
         console.log('Cookies non essentiels désactivés');
-        // Exemple : désactiver Google Analytics
         window['ga-disable-YOUR_GOOGLE_ANALYTICS_ID'] = true;
     }
 });

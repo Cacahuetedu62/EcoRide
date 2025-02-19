@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($trajet && $trajet['nb_places'] >= $nb_personnes) {
                 // Calculer le coût total
                 $total_cost = $trajet['prix_personnes'] * $nb_personnes;
-?>
+                ?>
                 <div class="confirmation-container">
                     <div class="row justify-content-center">
                         <div class="col-md-8 p-5">
@@ -73,13 +73,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <?php } ?>
 
                                         <div class="d-flex align-items-center justify-content-center boutons-reservation">
-    <button type="submit" name="confirm" value="1" class="buttonVert m-3 w-25 w-md-auto">
-        Oui, réserver maintenant
-    </button>
-    <a href="index.php" class="buttonVert m-3 w-25 w-md-auto">
-        Annuler
-    </a>
-</div>
+                                            <button type="submit" name="confirm" value="1" class="buttonVert m-3 w-25 w-md-auto">Oui, réserver maintenant</button>
+                                            <a href="index.php" class="buttonVert m-3 w-25 w-md-auto">Annuler</a>
+                                        </div>
                                     </form>
                                 </div>
                             </div>

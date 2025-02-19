@@ -16,7 +16,7 @@ foreach ($tables as $table) {
     $columnsStmt = $pdo->query($columnsQuery);
     $columns = $columnsStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Récupérer les clés étrangères de la table
+    // Récupére les clés étrangères de la table
     $foreignKeysQuery = "
         SELECT
             CONSTRAINT_NAME,
@@ -33,7 +33,7 @@ foreach ($tables as $table) {
     $foreignKeysStmt = $pdo->query($foreignKeysQuery);
     $foreignKeys = $foreignKeysStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Ajouter les informations à la structure de la base de données
+
     $databaseStructure[$table] = [
         'columns' => $columns,
         'foreign_keys' => $foreignKeys

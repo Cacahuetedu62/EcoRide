@@ -314,13 +314,13 @@ function calculateRoute() {
     const heureDepart = document.getElementById('heure_depart').value;
     const dateDepart = document.getElementById('date_depart').value;
 
-    // Validate inputs more strictly
+
     if (!depart || !arrive || !heureDepart || !dateDepart) {
         console.error('Incomplete route information');
         return;
     }
 
-    // Use a more specific geocoding approach
+
     Promise.all([
         fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(depart)}, France&format=json&addressdetails=1&limit=1`),
         fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(arrive)}, France&format=json&addressdetails=1&limit=1`)
@@ -365,15 +365,14 @@ function calculateRoute() {
     .catch(error => {
         console.error('Route calculation error:', error);
         
-        // More user-friendly error handling
+
         let errorMessage = 'Une erreur est survenue lors du calcul du trajet.';
         if (error.message.includes('not found')) {
             errorMessage = 'Un ou plusieurs lieux n\'ont pas été trouvés. Veuillez vérifier votre saisie.';
         } else if (error.message.includes('No route found')) {
             errorMessage = 'Aucun itinéraire n\'a pu être calculé entre ces deux points.';
         }
-        
-        // Display error to user
+
         alert(errorMessage);
     });
 }
@@ -386,13 +385,13 @@ function setupAutocomplete(inputId) {
         clearTimeout(timeout);
         const query = this.value;
 
-        if (query.length < 3) return; // Wait for at least 3 characters
+        if (query.length < 3) return;
 
         timeout = setTimeout(() => {
             fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}, France&format=json&addressdetails=1&limit=5`)
                 .then(response => response.json())
                 .then(data => {
-                    // Create datalist if it doesn't exist
+
                     let datalist = document.getElementById(inputId + '-list');
                     if (!datalist) {
                         datalist = document.createElement('datalist');
@@ -401,10 +400,10 @@ function setupAutocomplete(inputId) {
                         input.setAttribute('list', inputId + '-list');
                     }
 
-                    // Populate datalist with more specific location information
+
                     datalist.innerHTML = data
                         .map(item => {
-                            // Combine city, postcode, and potentially other details
+
                             const displayValue = [
                                 item.address.city || item.address.town || item.address.village,
                                 item.address.postcode,
@@ -421,7 +420,7 @@ function setupAutocomplete(inputId) {
         }, 300);
     });
 
-    // Trigger route calculation on change
+
     input.addEventListener('change', calculateRoute);
 }
 

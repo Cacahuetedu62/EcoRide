@@ -2,7 +2,7 @@
 session_start();
 require_once('lib/pdo.php');
 require_once('lib/config.php');
-require_once('vendor/autoload.php'); // Assurez-vous que PHPMailer est inclus
+require_once('vendor/autoload.php'); 
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -170,8 +170,15 @@ function sendNotificationEmail($trajet_id, $role) {
     
         // Contenu de l'email
         $mail->isHTML(true);
-        $mail->Subject = 'Test Email';
-        $mail->Body = 'Ceci est un email de test.';
+        $mail->Subject = 'Annulation de votre trajet - EcoRide';
+        $mail->Body = "
+            <p>Bonjour,</p>
+            <p>Nous vous informons que le conducteur a annulé le trajet auquel vous étiez inscrit.</p>
+            <p>Rassurez-vous, aucun frais n'a été prélevé. Votre situation reste inchangée.</p>
+            <p>Vous pouvez rechercher un autre trajet sur notre plateforme ou contacter notre service client si vous avez des questions.</p>
+            <p>Merci pour votre compréhension.</p>
+            <p>L'équipe EcoRide</p>
+        ";
     
         // Envoie de l'email
         $mail->send();

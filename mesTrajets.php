@@ -193,11 +193,7 @@ try {
                 <h3 class="text-center py-2 mb-4 border-bottom">Trajets en tant que passager</h3>
                 <div class="card-body">
                     <?php
-                    $trajets_passager = array_slice(
-    array_filter($trajets, fn($trajet) => $trajet['role'] === 'passager'),
-    0,
-    2
-);
+                    $trajets_passager = array_slice(array_filter($trajets, fn($trajet) => $trajet['role'] === 'passager'),0,2);
                     if (!empty($trajets_passager)): ?>
                         <?php foreach ($trajets_passager as $trajet): ?>
                             <div class="card mb-3" id="trajet-<?= htmlspecialchars($trajet['id'], ENT_QUOTES, 'UTF-8') ?>">

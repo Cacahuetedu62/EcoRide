@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trajet_id'])) {
 
         $pdo->commit();
 
-// Après $pdo->commit();
+
 echo "<div class='mt-5'>
     <div class='alert alert-success'>
         <h4 class='alert-heading mb-3'>Trajet terminé avec succès !</h4>
@@ -71,23 +71,6 @@ echo "<div class='mt-5'>
         </div>
     </div>
 </div>";
-
-
-        $subject = "Votre trajet est terminé";
-        $message = "
-            <html>
-            <head>
-                <title>Votre trajet est terminé</title>
-                <meta charset='UTF-8'>
-            </head>
-            <body>
-                <p>Bonjour,</p>
-                <p>Le trajet que vous avez effectué est maintenant terminé. Rendez-vous sur votre espace pour donner votre avis et votre note.</p>
-                <p><a href='http://localhost:3000/avis.php?trajet_id=$trajet_id'>Cliquez ici pour accéder à votre espace et soumettre votre avis</a></p>
-                <p>Merci pour votre participation!</p>
-            </body>
-            </html>
-        ";
 
         $mail = new PHPMailer(true);
         try {
@@ -108,21 +91,31 @@ echo "<div class='mt-5'>
 
             $mail->send();
 
-            // Affichage du message de confirmation
-            $message = "
-            <html>
-            <head>
-                <title>Votre trajet est terminé</title>
-                <meta charset='UTF-8'>
-            </head>
-            <body>
-                <p>Bonjour,</p>
-                <p>Le trajet que vous avez effectué est maintenant terminé. Rendez-vous sur votre espace pour donner votre avis et votre note.</p>
-                <p><a href='http://localhost:3000/connexion.php?redirect=" . urlencode("avis.php?trajet_id=$trajet_id") . "'>Cliquez ici pour accéder à votre espace et soumettre votre avis</a></p>
-                <p>Merci pour votre participation!</p>
-            </body>
-            </html>
-        ";
+
+$subject = "Action requise : Validez votre trajet EcoRide";
+$message = "
+    <html>
+    <head>
+        <title>Action requise : Validez votre trajet EcoRide</title>
+        <meta charset='UTF-8'>
+    </head>
+    <body>
+        <p>Bonjour,</p>
+        <p>Votre trajet avec EcoRide est maintenant terminé, mais il reste une dernière étape importante.</p>
+        <p>💡 <strong>Pourquoi est-ce important ?</strong></p>
+        <ul>
+            <li>✅ <strong>Sans validation</strong>, le paiement ne sera pas traité.</li>
+            <li>✅ Le conducteur ne recevra pas sa rémunération.</li>
+            <li>✅ La plateforme ne pourra pas finaliser la transaction.</li>
+        </ul>
+        <p>📢 <strong>Nous avons besoin de votre retour !</strong></p>
+        <p>Merci de bien vouloir noter et commenter votre trajet pour finaliser le processus.</p>
+        <p><a href='http://localhost:3000/avis.php?trajet_id=$trajet_id' style='color: white; background: #28a745; padding: 10px 15px; text-decoration: none; border-radius: 5px;'>💬 Je valide mon trajet</a></p>
+        <p>Si vous avez rencontré un problème, contactez notre support.</p>
+        <p>Merci pour votre confiance et à bientôt sur EcoRide ! 🚗💚</p>
+    </body>
+    </html>
+";
 
         } catch (Exception $e) {
             echo "L'email n'a pas pu être envoyé : {$mail->ErrorInfo}";

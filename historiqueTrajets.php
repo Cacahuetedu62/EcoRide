@@ -16,7 +16,7 @@ $trajets_par_page = 2; // Nombre de trajets par page
 $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, ['options' => ['default' => 1, 'min_range' => 1]]);
 $offset = ($page - 1) * $trajets_par_page;
 
-// Requête SQL pour récupérer l'historique des trajets avec pagination
+// Requête SQL pour récupérer l'historique les trajets avec pagination
 $sql = "
     SELECT DISTINCT
         t.id,

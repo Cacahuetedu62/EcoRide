@@ -168,14 +168,14 @@ $note_moyenne = round($noteResult['note_moyenne'] ?? 0, 1);
                                     <h3 class="card-title"><?= htmlspecialchars($trajet['pseudo'], ENT_QUOTES, 'UTF-8') ?></h3>
 
                                     <div class="mb-2">
-    <strong>Note :</strong>
-    <?php
-    for ($i = 0; $i < $note_moyenne; $i++) {
-        echo "🚗";
-    }
-    ?> 
-    (<?= $note_moyenne ?>/5)
-</div>
+                                        <strong>Note :</strong>
+                                        <?php
+                                         for ($i = 0; $i < $note_moyenne; $i++) {
+                                         echo "🚗";
+                                        }
+                                        ?> 
+                                        (<?= $note_moyenne ?>/5)
+                                    </div>
 
                                     <div class="mb-2">
                                         <a href="commentaires.php?id=<?= htmlspecialchars($trajet['utilisateur_id'], ENT_QUOTES, 'UTF-8') ?>"

@@ -98,7 +98,7 @@ if (!isset($_SESSION['csrf_token'])) {
                         clearTimeout(timeout);
                         const query = this.value;
 
-                        if (query.length < 3) return; // Attendre au moins 3 caractères
+                        if (query.length < 3) return; 
 
                         timeout = setTimeout(() => {
                             fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}, France&format=json&limit=5`)
@@ -200,10 +200,8 @@ if (!isset($_SESSION['csrf_token'])) {
                     }
 
                     // Fonction pour activer les cookies non essentiels
-                    function enableNonEssentialCookies() {
-                        // Ajoutez ici le code pour activer les cookies non essentiels
-                        console.log('Cookies non essentiels activés');
-                        // Exemple : activer Google Analytics
+                    function enableNonEssentialCookies() {                        
+                        console.log('Cookies non essentiels activés');                        
                         window.dataLayer = window.dataLayer || [];
                         function gtag(){dataLayer.push(arguments);}
                         gtag('js', new Date());
@@ -211,10 +209,8 @@ if (!isset($_SESSION['csrf_token'])) {
                     }
 
                     // Fonction pour désactiver les cookies non essentiels
-                    function disableNonEssentialCookies() {
-                        // Ajoutez ici le code pour désactiver les cookies non essentiels
-                        console.log('Cookies non essentiels désactivés');
-                        // Exemple : désactiver Google Analytics
+                    function disableNonEssentialCookies() {                        
+                        console.log('Cookies non essentiels désactivés');                        
                         window['ga-disable-YOUR_GOOGLE_ANALYTICS_ID'] = true;
                     }
                 });
