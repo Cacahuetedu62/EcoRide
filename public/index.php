@@ -42,7 +42,7 @@ error_log("Fichier à charger : " . $main_file);
 if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico|svg|webp)$/i', $clean_uri)) {
     $static_file = __DIR__ . '/../' . ltrim($clean_uri, '/');
     error_log("Tentative d'accès au fichier : " . $static_file);
-
+    
     if (file_exists($static_file)) {
         $mime_types = [
             'css' => 'text/css',
@@ -77,4 +77,3 @@ if (file_exists($main_file)) {
     require_once __DIR__ . '/../404.php';
     require_once __DIR__ . '/../templates/footer.php';
 }
-?>
