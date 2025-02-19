@@ -1,14 +1,16 @@
 <?php
+require_once('lib/config.php');
+require_once('lib/pdo.php');
+require_once('templates/header.php');
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
 
-echo "Débogage : index.php atteint"; // Vérifie si le fichier est bien chargé
-
+echo "Index chargé !";
+var_dump($_SESSION); // Affiche le contenu de la session
 exit;
-require_once('lib/config.php');
-require_once('lib/pdo.php');
-require_once('templates/header.php');
+
 
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
