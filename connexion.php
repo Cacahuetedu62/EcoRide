@@ -1,120 +1,155 @@
 <?php
+// Activer l'affichage des erreurs PHP
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Démarrer la session et vérifier son statut
 session_start();
+echo "<!-- Session ID: " . session_id() . " -->";
+echo "<!-- Session status: " . session_status() . " -->";
+
 require_once('lib/config.php');
 require_once('lib/pdo.php');
 require_once('lib/config.prod.php');
 
-// Fonction pour se connecter à la base de données
-function getConnection() {
-    $config = require 'lib/config.prod.php';
-    try {
-        $pdo = new PDO(
-            "mysql:host={$config['db']['host']};dbname={$config['db']['name']};charset=utf8mb4",
-            $config['db']['user'],
-            $config['db']['pass'],
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-            ]
-        );
-        return $pdo;
-    } catch (PDOException $e) {
-        logMessage('Erreur de connexion : ' . $e->getMessage());
-        die('Erreur de connexion à la base de données.');
-    }
-}
-
+// Amélioration de la fonction de log
 function logMessage($message) {
     $logFile = __DIR__ . '/logs/logs.txt';
     $timestamp = date('Y-m-d H:i:s');
     $logEntry = "[$timestamp] $message" . PHP_EOL;
     
+    // Vérification du dossier logs avec message d'erreur
     $logDir = dirname($logFile);
     if (!is_dir($logDir)) {
-        mkdir($logDir, 0777, true);
+        echo "<!-- Création du dossier logs -->";
+        if (!mkdir($logDir, 0777, true)) {
+            echo "<!-- Erreur: Impossible de créer le dossier logs -->";
+            error_log("Impossible de créer le dossier logs");
+        }
     }
     
-    file_put_contents($logFile, $logEntry, FILE_APPEND);
+    // Vérification des permissions d'écriture
+    if (!is_writable($logDir)) {
+        echo "<!-- Erreur: Le dossier logs n'est pas accessible en écriture -->";
+        error_log("Le dossier logs n'est pas accessible en écriture");
+    }
+    
+    // Tentative d'écriture avec gestion d'erreur
+    if (file_put_contents($logFile, $logEntry, FILE_APPEND) === false) {
+        echo "<!-- Erreur: Impossible d'écrire dans le fichier de log -->";
+        error_log("Impossible d'écrire dans le fichier de log");
+    }
+}
+
+// Test de connexion à la base de données
+function getConnection() {
+    try {
+        $config = require 'lib/config.prod.php';
+        echo "<!-- Tentative de connexion à la base de données -->";
+        
+        $dsn = "mysql:host={$config['db']['host']};dbname={$config['db']['name']};charset=utf8mb4";
+        echo "<!-- DSN: " . $dsn . " -->";
+        
+        $pdo = new PDO($dsn, $config['db']['user'], $config['db']['pass'],
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+        
+        echo "<!-- Connexion à la base de données réussie -->";
+        return $pdo;
+    } catch (PDOException $e) {
+        echo "<!-- Erreur PDO: " . htmlspecialchars($e->getMessage()) . " -->";
+        logMessage('Erreur de connexion : ' . $e->getMessage());
+        die('Erreur de connexion à la base de données: ' . $e->getMessage());
+    }
 }
 
 $erreur = '';
-$success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    echo "<!-- Début du traitement POST -->";
+    
     $pseudo = trim($_POST['pseudo'] ?? '');
     $motdepasse = $_POST['motdepasse'] ?? '';
-
-    if (empty($pseudo) || empty($motdepasse)) {
-        $erreur = 'Veuillez remplir tous les champs';
-        logMessage('Tentative de connexion avec champs vides');
-    } else {
-        try {
-            $pdo = getConnection();
+    
+    echo "<!-- Pseudo reçu: " . htmlspecialchars($pseudo) . " -->";
+    
+    try {
+        $pdo = getConnection();
+        $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE pseudo = :pseudo");
+        $stmt->execute(['pseudo' => $pseudo]);
+        
+        echo "<!-- Requête SQL exécutée -->";
+        
+        $utilisateur = $stmt->fetch();
+        
+        if ($utilisateur) {
+            echo "<!-- Utilisateur trouvé dans la base de données -->";
             
-            logMessage("Tentative de connexion pour l'utilisateur: $pseudo");
-            
-            // Modification de la requête pour récupérer toutes les informations nécessaires
-            $stmt = $pdo->prepare("SELECT id, pseudo, password, credits FROM utilisateurs WHERE pseudo = :pseudo");
-            $stmt->execute(['pseudo' => $pseudo]);
-            $utilisateur = $stmt->fetch();
-            
-            if ($utilisateur) {
-                logMessage("Utilisateur trouvé dans la base de données");
+            if (password_verify($motdepasse, $utilisateur['password'])) {
+                echo "<!-- Mot de passe vérifié avec succès -->";
                 
-                if (password_verify($motdepasse, $utilisateur['password'])) {
-                    // Stockage des informations dans la session
-                    $_SESSION['utilisateur'] = [
-                        'id' => $utilisateur['id'],
-                        'pseudo' => $utilisateur['pseudo'],
-                        'credits' => $utilisateur['credits'] ?? 0
-                    ];
-                    
-                    logMessage("Connexion réussie pour l'utilisateur: {$utilisateur['pseudo']}");
-                    logMessage("Session créée avec ID: " . session_id());
-                    
-                    // Redirection vers index.php au lieu de accueil.php
-                    header('Location: index.php');
-                    exit();
-                } else {
-                    $erreur = 'Identifiants incorrects';
-                    logMessage("Échec de la vérification du mot de passe pour l'utilisateur: $pseudo");
-                }
+                $_SESSION['utilisateur'] = [
+                    'id' => $utilisateur['id'],
+                    'pseudo' => $utilisateur['pseudo'],
+                    'credits' => $utilisateur['credits'] ?? 0
+                ];
+                
+                echo "<!-- Session créée -->";
+                var_dump($_SESSION);  // Afficher le contenu de la session
+                
+                header('Location: index.php');
+                exit();
             } else {
+                echo "<!-- Échec de la vérification du mot de passe -->";
                 $erreur = 'Identifiants incorrects';
-                logMessage("Aucun utilisateur trouvé avec le pseudo: $pseudo");
             }
-        } catch (PDOException $e) {
-            logMessage('Erreur PDO : ' . $e->getMessage());
-            $erreur = 'Une erreur est survenue lors de la connexion';
+        } else {
+            echo "<!-- Aucun utilisateur trouvé -->";
+            $erreur = 'Identifiants incorrects';
         }
+    } catch (Exception $e) {
+        echo "<!-- Erreur: " . htmlspecialchars($e->getMessage()) . " -->";
+        $erreur = 'Une erreur est survenue: ' . $e->getMessage();
     }
 }
 ?>
 
-<?php if (!empty($erreur)): ?>
-    <div class="alert alert-danger">
-        <?php echo htmlspecialchars($erreur); ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connexion</title>
+</head>
+<body>
+    <!-- Affichage du contenu de la session -->
+    <div style="display: none;">
+        <?php var_dump($_SESSION); ?>
     </div>
-<?php endif; ?>
 
-<section class="loginRegister d-flex justify-content-center m-5">
-    <div class="loginRegister-container p-2">
-        <h2 class="text-center">Se connecter</h2>
-        <form method="POST" class="login-form">
-            <label for="pseudo">Pseudo :</label>
-            <input type="text" name="pseudo" id="pseudo" required 
-                   value="<?php echo isset($_POST['pseudo']) ? htmlspecialchars($_POST['pseudo']) : ''; ?>">
-
-            <label for="password">Mot de passe :</label>
-            <input type="password" name="motdepasse" id="password" required>
-
-            <button class="buttonVert m-3" type="submit">Se connecter</button>
-        </form>
-        <div class="text-center">
-            <p>Pas de compte ? <a href="inscription.php">Créer un compte</a></p>
+    <?php if (!empty($erreur)): ?>
+        <div class="alert alert-danger">
+            <?php echo htmlspecialchars($erreur); ?>
         </div>
-    </div>
-</section>
+    <?php endif; ?>
+
+    <section class="loginRegister d-flex justify-content-center m-5">
+        <div class="loginRegister-container p-2">
+            <h2 class="text-center">Se connecter</h2>
+            <form method="POST" class="login-form">
+                <label for="pseudo">Pseudo :</label>
+                <input type="text" name="pseudo" id="pseudo" required 
+                       value="<?php echo isset($_POST['pseudo']) ? htmlspecialchars($_POST['pseudo']) : ''; ?>">
+
+                <label for="password">Mot de passe :</label>
+                <input type="password" name="motdepasse" id="password" required>
+
+                <button class="buttonVert m-3" type="submit">Se connecter</button>
+            </form>
+            <div class="text-center">
+                <p>Pas de compte ? <a href="inscription.php">Créer un compte</a></p>
+            </div>
+        </div>
+    </section>
 
 
 <script>
