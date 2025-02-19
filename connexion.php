@@ -4,9 +4,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Démarrer la session avant tout output HTML
-session_start();
-
 require_once('lib/config.php');
 require_once('lib/pdo.php');
 require_once('lib/config.prod.php');
