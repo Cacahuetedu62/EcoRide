@@ -4,6 +4,8 @@ error_log("=== DEBUG INDEX ===");
 error_log("Session ID: " . session_id());
 error_log("Session data: " . print_r($_SESSION, true));
 
+
+
 // Activer la compression de sortie avec gzip si possible
 if (!ob_start("ob_gzhandler")) ob_start();
 
@@ -15,6 +17,11 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/../vendor/autoload.php'; // Chargement des dépendances via Composer
 require_once __DIR__ . '/../lib/config.php'; // Fichier de configuration
 require_once __DIR__ . '/../lib/pdo.php'; // Connexion à la base de données
+ini_set('session.save_path', '/tmp');
+session_start();
+
+$_SESSION['test'] = 'session active';
+var_dump($_SESSION);
 
 // Initialiser la session si elle n'est pas déjà active
 if (session_status() === PHP_SESSION_NONE) {
