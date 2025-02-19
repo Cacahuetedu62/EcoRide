@@ -4,152 +4,132 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Démarrer la session et vérifier son statut
+// Démarrer la session avant tout output HTML
 session_start();
-echo "<!-- Session ID: " . session_id() . " -->";
-echo "<!-- Session status: " . session_status() . " -->";
 
 require_once('lib/config.php');
 require_once('lib/pdo.php');
 require_once('lib/config.prod.php');
 
-// Amélioration de la fonction de log
 function logMessage($message) {
     $logFile = __DIR__ . '/logs/logs.txt';
     $timestamp = date('Y-m-d H:i:s');
     $logEntry = "[$timestamp] $message" . PHP_EOL;
-    
-    // Vérification du dossier logs avec message d'erreur
-    $logDir = dirname($logFile);
-    if (!is_dir($logDir)) {
-        echo "<!-- Création du dossier logs -->";
-        if (!mkdir($logDir, 0777, true)) {
-            echo "<!-- Erreur: Impossible de créer le dossier logs -->";
-            error_log("Impossible de créer le dossier logs");
-        }
-    }
-    
-    // Vérification des permissions d'écriture
-    if (!is_writable($logDir)) {
-        echo "<!-- Erreur: Le dossier logs n'est pas accessible en écriture -->";
-        error_log("Le dossier logs n'est pas accessible en écriture");
-    }
-    
-    // Tentative d'écriture avec gestion d'erreur
-    if (file_put_contents($logFile, $logEntry, FILE_APPEND) === false) {
-        echo "<!-- Erreur: Impossible d'écrire dans le fichier de log -->";
-        error_log("Impossible d'écrire dans le fichier de log");
-    }
+    error_log($logEntry, 3, $logFile);
 }
 
-// Test de connexion à la base de données
 function getConnection() {
     try {
         $config = require 'lib/config.prod.php';
-        echo "<!-- Tentative de connexion à la base de données -->";
-        
-        $dsn = "mysql:host={$config['db']['host']};dbname={$config['db']['name']};charset=utf8mb4";
-        echo "<!-- DSN: " . $dsn . " -->";
-        
-        $pdo = new PDO($dsn, $config['db']['user'], $config['db']['pass'],
+        $pdo = new PDO(
+            "mysql:host={$config['db']['host']};dbname={$config['db']['name']};charset=utf8mb4",
+            $config['db']['user'],
+            $config['db']['pass'],
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
-        
-        echo "<!-- Connexion à la base de données réussie -->";
         return $pdo;
     } catch (PDOException $e) {
-        echo "<!-- Erreur PDO: " . htmlspecialchars($e->getMessage()) . " -->";
-        logMessage('Erreur de connexion : ' . $e->getMessage());
-        die('Erreur de connexion à la base de données: ' . $e->getMessage());
+        error_log('Erreur PDO : ' . $e->getMessage());
+        throw $e;
     }
 }
 
 $erreur = '';
+$debug_messages = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    echo "<!-- Début du traitement POST -->";
-    
-    $pseudo = trim($_POST['pseudo'] ?? '');
-    $motdepasse = $_POST['motdepasse'] ?? '';
-    
-    echo "<!-- Pseudo reçu: " . htmlspecialchars($pseudo) . " -->";
-    
     try {
+        $pseudo = trim($_POST['pseudo'] ?? '');
+        $motdepasse = $_POST['motdepasse'] ?? '';
+        
+        $debug_messages[] = "Tentative de connexion pour : " . htmlspecialchars($pseudo);
+        
         $pdo = getConnection();
         $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE pseudo = :pseudo");
         $stmt->execute(['pseudo' => $pseudo]);
-        
-        echo "<!-- Requête SQL exécutée -->";
-        
         $utilisateur = $stmt->fetch();
         
-        if ($utilisateur) {
-            echo "<!-- Utilisateur trouvé dans la base de données -->";
-            
-            if (password_verify($motdepasse, $utilisateur['password'])) {
-                echo "<!-- Mot de passe vérifié avec succès -->";
-                
-                $_SESSION['utilisateur'] = [
-                    'id' => $utilisateur['id'],
-                    'pseudo' => $utilisateur['pseudo'],
-                    'credits' => $utilisateur['credits'] ?? 0
-                ];
-                
-                echo "<!-- Session créée -->";
-                var_dump($_SESSION);  // Afficher le contenu de la session
-                
-                header('Location: index.php');
-                exit();
-            } else {
-                echo "<!-- Échec de la vérification du mot de passe -->";
-                $erreur = 'Identifiants incorrects';
-            }
+        if ($utilisateur && password_verify($motdepasse, $utilisateur['password'])) {
+            $_SESSION['utilisateur'] = [
+                'id' => $utilisateur['id'],
+                'pseudo' => $utilisateur['pseudo'],
+                'credits' => $utilisateur['credits'] ?? 0
+            ];
+            $debug_messages[] = "Connexion réussie";
+            header('Location: index.php');
+            exit();
         } else {
-            echo "<!-- Aucun utilisateur trouvé -->";
             $erreur = 'Identifiants incorrects';
+            $debug_messages[] = "Échec de l'authentification";
         }
     } catch (Exception $e) {
-        echo "<!-- Erreur: " . htmlspecialchars($e->getMessage()) . " -->";
-        $erreur = 'Une erreur est survenue: ' . $e->getMessage();
+        $erreur = 'Une erreur est survenue lors de la connexion';
+        $debug_messages[] = "Erreur : " . $e->getMessage();
     }
 }
 ?>
-
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Connexion</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - EcoRide</title>
+    <!-- Ajoutez ici vos liens CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Affichage du contenu de la session -->
-    <div style="display: none;">
-        <?php var_dump($_SESSION); ?>
-    </div>
-
-    <?php if (!empty($erreur)): ?>
-        <div class="alert alert-danger">
-            <?php echo htmlspecialchars($erreur); ?>
+    <?php if (!empty($debug_messages) && isset($_GET['debug'])): ?>
+        <div class="debug-info" style="background: #f8f9fa; padding: 15px; margin: 15px; border: 1px solid #ddd;">
+            <h3>Informations de débogage :</h3>
+            <pre><?php print_r($debug_messages); ?></pre>
+            <h4>Contenu de $_SESSION :</h4>
+            <pre><?php print_r($_SESSION); ?></pre>
         </div>
     <?php endif; ?>
 
-    <section class="loginRegister d-flex justify-content-center m-5">
-        <div class="loginRegister-container p-2">
-            <h2 class="text-center">Se connecter</h2>
-            <form method="POST" class="login-form">
-                <label for="pseudo">Pseudo :</label>
-                <input type="text" name="pseudo" id="pseudo" required 
-                       value="<?php echo isset($_POST['pseudo']) ? htmlspecialchars($_POST['pseudo']) : ''; ?>">
+    <div class="container">
+        <section class="loginRegister d-flex justify-content-center m-5">
+            <div class="loginRegister-container p-2">
+                <h2 class="text-center">Se connecter</h2>
+                
+                <?php if (!empty($erreur)): ?>
+                    <div class="alert alert-danger">
+                        <?php echo htmlspecialchars($erreur); ?>
+                    </div>
+                <?php endif; ?>
 
-                <label for="password">Mot de passe :</label>
-                <input type="password" name="motdepasse" id="password" required>
+                <form method="POST" class="login-form">
+                    <div class="mb-3">
+                        <label for="pseudo" class="form-label">Pseudo :</label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="pseudo" 
+                               id="pseudo" 
+                               required 
+                               value="<?php echo isset($_POST['pseudo']) ? htmlspecialchars($_POST['pseudo']) : ''; ?>">
+                    </div>
 
-                <button class="buttonVert m-3" type="submit">Se connecter</button>
-            </form>
-            <div class="text-center">
-                <p>Pas de compte ? <a href="inscription.php">Créer un compte</a></p>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Mot de passe :</label>
+                        <input type="password" 
+                               class="form-control" 
+                               name="motdepasse" 
+                               id="password" 
+                               required>
+                    </div>
+
+                    <div class="text-center">
+                        <button class="btn buttonVert m-3" type="submit">Se connecter</button>
+                    </div>
+                </form>
+
+                <div class="text-center">
+                    <p>Pas de compte ? <a href="inscription.php">Créer un compte</a></p>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 
 
 <script>
