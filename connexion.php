@@ -3,7 +3,6 @@ require_once('lib/config.php');
 require_once('lib/pdo.php');
 require_once('lib/config.prod.php');
 
-
 // Fonction pour se connecter à la base de données
 function getConnection() {
     $config = require 'lib/config.prod.php'; // Charge les paramètres de configuration
@@ -28,7 +27,11 @@ function logMessage($message) {
     $logFile = 'logs/logs.txt'; // Chemin du fichier de log
     $timestamp = date('Y-m-d H:i:s');
     $logEntry = "[$timestamp] $message" . PHP_EOL;
-    file_put_contents($logFile, $logEntry, FILE_APPEND);
+    
+    // Essaie d'écrire dans le fichier de log
+    if (file_put_contents($logFile, $logEntry, FILE_APPEND) === false) {
+        echo "Erreur d'écriture dans le fichier de log.";
+    }
 }
 
 // Vérification de la soumission du formulaire
@@ -43,6 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE pseudo = :pseudo");
     $stmt->execute(['pseudo' => $pseudo]);
     $utilisateur = $stmt->fetch();
+
+    // Log de la tentative de connexion
+    logMessage('Tentative de connexion avec pseudo : ' . $pseudo);
 
     if ($utilisateur && password_verify($motdepasse, $utilisateur['motdepasse'])) {
         // Authentification réussie
@@ -68,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                    value="<?php echo isset($_POST['pseudo']) ? htmlspecialchars($_POST['pseudo']) : ''; ?>">
 
             <label for="password">Mot de passe :</label>
-            <input type="password" name="password" id="password" required>
+            <input type="password" name="motdepasse" id="password" required> <!-- Change le nom pour correspondre à la variable -->
 
             <button class="buttonVert m-3" type="submit">Se connecter</button>
         </form>
