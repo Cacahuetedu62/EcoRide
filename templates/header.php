@@ -159,7 +159,7 @@ if (isset($_SESSION['utilisateur'])) {
 
                 <!-- Logo -->
                 <div class="navbar-logo-container">
-                    <img src="images\LogoEcoride.png" alt="Logo EcoRide" width="200" height="100">
+                    <img src="C:\Users\rogez\Desktop\Projets VSCODE\EcoRide\images\LogoEcoride.png" alt="Logo EcoRide" width="200" height="100">
                 </div>
             </div>
         </div>
