@@ -1,10 +1,10 @@
 <?php
 return [
     'db' => [
-        'host' => getenv('MYSQL_HOST') ?: 'mysql-votre-compte.alwaysdata.net',
-        'name' => getenv('MYSQL_DATABASE') ?: 'votre_base_alwaysdata',
-        'user' => getenv('MYSQL_USER') ?: 'votre_user_alwaysdata',
-        'pass' => getenv('MYSQL_PASSWORD') ?: 'votre_password_alwaysdata',
+        'host' => getenv('MYSQL_HOST') ?: 'mysql-rogez.alwaysdata.net',
+        'name' => getenv('MYSQL_DATABASE') ?: 'rogez_ecoride',
+        'user' => getenv('MYSQL_USER') ?: 'rogez',
+        'pass' => getenv('MYSQL_PASSWORD') ?: '120892Arras!',
         'charset' => 'utf8mb4'
     ],
 'mongodb' => [
