@@ -26,24 +26,38 @@ $clean_uri = rtrim($clean_uri, '/');
 // Ajouter du débogage
 error_log("URI demandée : " . $clean_uri);
 
-// Définir le fichier à charger
-if (empty($clean_uri) || $clean_uri === '/') {
-    $main_file = __DIR__ . '/../index.php';
-} else {
-    $main_file = __DIR__ . '/../' . ltrim($clean_uri, '/');
-    if (!str_ends_with($main_file, '.php')) {
-        $main_file .= '.php';
-    }
-}
-
-error_log("Fichier à charger : " . $main_file);
-
 // Si c'est une requête pour un fichier statique (css, images, etc.)
 if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico|svg|webp)$/i', $clean_uri)) {
-    $static_file = __DIR__ . '/../' . ltrim($clean_uri, '/');
-    error_log("Tentative d'accès au fichier : " . $static_file);
-    
-    if (file_exists($static_file)) {
+    // Liste des dossiers où chercher les fichiers statiques
+    $search_paths = [
+        __DIR__ . '/../', // Racine du projet
+        __DIR__ . '/../images/', // Dossier images
+        __DIR__ . '/../uploads/', // Dossier uploads
+        __DIR__ . '/../uploads/photos/', // Sous-dossier photos dans uploads
+        __DIR__ . '/assets/', // Dossier assets dans public si vous en avez un
+    ];
+
+    $clean_path = ltrim($clean_uri, '/');
+    $file_found = false;
+
+    foreach ($search_paths as $base_path) {
+        // Vérifier d'abord si le fichier existe directement
+        if (file_exists($base_path . $clean_path)) {
+            $static_file = $base_path . $clean_path;
+            $file_found = true;
+            break;
+        }
+        
+        // Vérifier aussi juste le nom du fichier (pour les images dans les sous-dossiers)
+        $filename = basename($clean_path);
+        if (file_exists($base_path . $filename)) {
+            $static_file = $base_path . $filename;
+            $file_found = true;
+            break;
+        }
+    }
+
+    if ($file_found) {
         $mime_types = [
             'css' => 'text/css',
             'jpg' => 'image/jpeg',
@@ -55,15 +69,29 @@ if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico|svg|webp)$/i', $clean_uri)) {
             'svg' => 'image/svg+xml',
             'webp' => 'image/webp'
         ];
+        
         $ext = strtolower(pathinfo($static_file, PATHINFO_EXTENSION));
-        error_log("Extension détectée : " . $ext);
         if (isset($mime_types[$ext])) {
+            // Ajouter des headers pour le cache
+            $cache_time = 604800; // Une semaine
+            header('Cache-Control: public, max-age=' . $cache_time);
+            header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $cache_time) . ' GMT');
             header('Content-Type: ' . $mime_types[$ext]);
             readfile($static_file);
             exit;
         }
     }
-    error_log("Fichier non trouvé : " . $static_file);
+    error_log("Fichier non trouvé après recherche dans tous les dossiers : " . $clean_path);
+}
+
+// Définir le fichier à charger pour les pages PHP
+if (empty($clean_uri) || $clean_uri === '/') {
+    $main_file = __DIR__ . '/../index.php';
+} else {
+    $main_file = __DIR__ . '/../' . ltrim($clean_uri, '/');
+    if (!str_ends_with($main_file, '.php')) {
+        $main_file .= '.php';
+    }
 }
 
 // Charger la page demandée avec header et footer
