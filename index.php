@@ -1,87 +1,158 @@
 <?php
+session_start();
 require_once('lib/config.php');
 require_once('lib/pdo.php');
 require_once('templates/header.php');
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-session_start();
 
+// Debug session
 echo "Index chargé !";
-var_dump($_SESSION); // Affiche le contenu de la session
+var_dump($_SESSION);
 exit;
-
 
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}?>
-    <script>
-        function loadContent(page) {
-            fetch(page)
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('content').innerHTML = data;
-                })
-                .catch(error => console.error('Error loading content:', error));
-        }
-    </script>
+}
+?>
 
-        <div class="containHistoire">
-            <div class="d-flex">
-                <div class="h-100 p-1 rounded-3 image-backgroundHistoire">
-                    <p class="descriptionHistoire">En choisissant EcoRide, vous contribuez à réduire les émissions de CO2 tout en profitant d'un transport économique et pratique.
-                        Grâce à notre plateforme facile d'accès, chacun peut trouver un trajet éco-responsable adapté à ses besoins. EcoRide, c'est la solution idéale pour ceux qui veulent voyager intelligemment, économiquement et en respectant la planète.
-                        Rejoignez notre communauté et participez à la révolution verte du transport !</p>
-                </div>
+<script>
+    function loadContent(page) {
+        fetch(page)
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('content').innerHTML = data;
+            })
+            .catch(error => console.error('Erreur lors du chargement du contenu:', error));
+    }
+</script>
 
-                <div class="col-md-4 p-1 d-flex justify-content-center" style="flex: 3;">
-                    <div class="col-md-7 col-lg-8 contenair m-4">
-                        <h4 class="mb-3 text-center">Chercher un trajet</h4>
-                        <form method="POST" action="covoiturages.php">
-                            <div class="row g-3 cardTrajet">
-                                <!-- Ville de départ -->
-                                <div class="col-12">
-                                    <label for="ville_depart" class="form-label">Ville de départ</label>
-                                    <input type="text" class="form-control" id="ville_depart" name="ville_depart"
-                                           placeholder="Entrez une ville de départ" required
-                                           value="<?php echo isset($_POST['ville_depart']) ? htmlspecialchars($_POST['ville_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-                                </div>
+<div class="containHistoire">
+    <div class="d-flex">
+        <div class="h-100 p-1 rounded-3 image-backgroundHistoire">
+            <p class="descriptionHistoire">
+                En choisissant EcoRide, vous contribuez à réduire les émissions de CO2 tout en profitant d'un transport économique et pratique.
+                Grâce à notre plateforme facile d'accès, chacun peut trouver un trajet éco-responsable adapté à ses besoins. EcoRide, c'est la solution idéale pour ceux qui veulent voyager intelligemment, économiquement et en respectant la planète.
+                Rejoignez notre communauté et participez à la révolution verte du transport !
+            </p>
+        </div>
 
-                                <!-- Ville d'arrivée -->
-                                <div class="col-12">
-                                    <label for="ville_arrive" class="form-label">Ville d'arrivée</label>
-                                    <input type="text" class="form-control" id="ville_arrive" name="ville_arrive"
-                                           placeholder="Entrez une ville d'arrivée" required
-                                           value="<?php echo isset($_POST['ville_arrive']) ? htmlspecialchars($_POST['ville_arrive'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-                                </div>
+        <div class="col-md-4 p-1 d-flex justify-content-center" style="flex: 3;">
+            <div class="col-md-7 col-lg-8 contenair m-4">
+                <h4 class="mb-3 text-center">Chercher un trajet</h4>
+                <form method="POST" action="covoiturages.php">
+                    <div class="row g-3 cardTrajet">
+                        <!-- Ville de départ -->
+                        <div class="col-12">
+                            <label for="ville_depart" class="form-label">Ville de départ</label>
+                            <input type="text" class="form-control" id="ville_depart" name="ville_depart" placeholder="Entrez une ville de départ" required value="<?php echo isset($_POST['ville_depart']) ? htmlspecialchars($_POST['ville_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                        </div>
 
-                                <!-- Date de départ -->
-                                <div class="col-12">
-                                    <label for="date_depart" class="form-label">Date de départ</label>
-                                    <input type="date" class="form-control" id="date_depart" name="date_depart" required
-                                           value="<?php echo isset($_POST['date_depart']) ? htmlspecialchars($_POST['date_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>"
-                                           min="<?php echo date('Y-m-d'); ?>">
-                                    <div class="invalid-feedback">
-                                        Veuillez saisir une date de départ valide (pas avant aujourd'hui).
-                                    </div>
-                                </div>
+                        <!-- Ville d'arrivée -->
+                        <div class="col-12">
+                            <label for="ville_arrive" class="form-label">Ville d'arrivée</label>
+                            <input type="text" class="form-control" id="ville_arrive" name="ville_arrive" placeholder="Entrez une ville d'arrivée" required value="<?php echo isset($_POST['ville_arrive']) ? htmlspecialchars($_POST['ville_arrive'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                        </div>
 
-                                <!-- Nombre de passagers -->
-                                <div class="col-12">
-                                    <label for="nb_passagers" class="form-label">Nombre de passagers</label>
-                                    <input type="number" class="form-control" id="nb_passagers" name="nb_passagers" placeholder="Nombre de passagers" required value="<?php echo isset($_POST['nb_passagers']) ? htmlspecialchars($_POST['nb_passagers'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-                                    <div class="invalid-feedback">
-                                        Veuillez saisir le nombre de passagers
-                                    </div>
-                                </div>
+                        <!-- Date de départ -->
+                        <div class="col-12">
+                            <label for="date_depart" class="form-label">Date de départ</label>
+                            <input type="date" class="form-control" id="date_depart" name="date_depart" required value="<?php echo isset($_POST['date_depart']) ? htmlspecialchars($_POST['date_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>" min="<?php echo date('Y-m-d'); ?>">
+                        </div>
 
-                                <!-- Bouton de recherche -->
-                                <button class="buttonVert" type="submit" name="chercher">Chercher</button>
-                            </div>
-                        </form>
+                        <!-- Nombre de passagers -->
+                        <div class="col-12">
+                            <label for="nb_passagers" class="form-label">Nombre de passagers</label>
+                            <input type="number" class="form-control" id="nb_passagers" name="nb_passagers" placeholder="Nombre de passagers" required value="<?php echo isset($_POST['nb_passagers']) ? htmlspecialchars($_POST['nb_passagers'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                        </div>
+
+                        <!-- Bouton de recherche -->
+                        <button class="buttonVert" type="submit" name="chercher">Chercher</button>
                     </div>
-                </div>
+                </form>
             </div>
+        </div>
+    </div>
+</div>
+<?php
+session_start();
+require_once('lib/config.php');
+require_once('lib/pdo.php');
+require_once('templates/header.php');
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Debug session
+echo "Index chargé !";
+var_dump($_SESSION);
+exit;
+
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
+
+<script>
+    function loadContent(page) {
+        fetch(page)
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('content').innerHTML = data;
+            })
+            .catch(error => console.error('Erreur lors du chargement du contenu:', error));
+    }
+</script>
+
+<div class="containHistoire">
+    <div class="d-flex">
+        <div class="h-100 p-1 rounded-3 image-backgroundHistoire">
+            <p class="descriptionHistoire">
+                En choisissant EcoRide, vous contribuez à réduire les émissions de CO2 tout en profitant d'un transport économique et pratique.
+                Grâce à notre plateforme facile d'accès, chacun peut trouver un trajet éco-responsable adapté à ses besoins. EcoRide, c'est la solution idéale pour ceux qui veulent voyager intelligemment, économiquement et en respectant la planète.
+                Rejoignez notre communauté et participez à la révolution verte du transport !
+            </p>
+        </div>
+
+        <div class="col-md-4 p-1 d-flex justify-content-center" style="flex: 3;">
+            <div class="col-md-7 col-lg-8 contenair m-4">
+                <h4 class="mb-3 text-center">Chercher un trajet</h4>
+                <form method="POST" action="covoiturages.php">
+                    <div class="row g-3 cardTrajet">
+                        <!-- Ville de départ -->
+                        <div class="col-12">
+                            <label for="ville_depart" class="form-label">Ville de départ</label>
+                            <input type="text" class="form-control" id="ville_depart" name="ville_depart" placeholder="Entrez une ville de départ" required value="<?php echo isset($_POST['ville_depart']) ? htmlspecialchars($_POST['ville_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                        </div>
+
+                        <!-- Ville d'arrivée -->
+                        <div class="col-12">
+                            <label for="ville_arrive" class="form-label">Ville d'arrivée</label>
+                            <input type="text" class="form-control" id="ville_arrive" name="ville_arrive" placeholder="Entrez une ville d'arrivée" required value="<?php echo isset($_POST['ville_arrive']) ? htmlspecialchars($_POST['ville_arrive'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                        </div>
+
+                        <!-- Date de départ -->
+                        <div class="col-12">
+                            <label for="date_depart" class="form-label">Date de départ</label>
+                            <input type="date" class="form-control" id="date_depart" name="date_depart" required value="<?php echo isset($_POST['date_depart']) ? htmlspecialchars($_POST['date_depart'], ENT_QUOTES, 'UTF-8') : ''; ?>" min="<?php echo date('Y-m-d'); ?>">
+                        </div>
+
+                        <!-- Nombre de passagers -->
+                        <div class="col-12">
+                            <label for="nb_passagers" class="form-label">Nombre de passagers</label>
+                            <input type="number" class="form-control" id="nb_passagers" name="nb_passagers" placeholder="Nombre de passagers" required value="<?php echo isset($_POST['nb_passagers']) ? htmlspecialchars($_POST['nb_passagers'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                        </div>
+
+                        <!-- Bouton de recherche -->
+                        <button class="buttonVert" type="submit" name="chercher">Chercher</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
             <div class="carousselImageDescription">
                 <div class="col-lg-4 d-flex flex-column align-items-center text-center">
