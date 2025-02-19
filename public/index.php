@@ -105,3 +105,22 @@ if (file_exists($main_file)) {
     require_once __DIR__ . '/../404.php';
     require_once __DIR__ . '/../templates/footer.php';
 }
+
+foreach ($search_paths as $base_path) {
+    error_log("Checking path: " . $base_path . $clean_path);
+    if (file_exists($base_path . $clean_path)) {
+        $static_file = $base_path . $clean_path;
+        $file_found = true;
+        error_log("File found: " . $static_file);
+        break;
+    }
+
+    $filename = basename($clean_path);
+    error_log("Checking filename: " . $base_path . $filename);
+    if (file_exists($base_path . $filename)) {
+        $static_file = $base_path . $filename;
+        $file_found = true;
+        error_log("File found: " . $static_file);
+        break;
+    }
+}
