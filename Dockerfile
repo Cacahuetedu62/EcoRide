@@ -36,8 +36,9 @@ COPY . /app
 # Assurez-vous que les dossiers essentiels sont bien copiés
 COPY lib /app/lib
 COPY public /app/public
-# Supprimez ou commentez cette ligne si src n'existe pas
-# COPY src /app/src
+COPY lib /app/lib
+COPY images /app/images
+COPY uploads /app/uploads
 COPY vendor /app/vendor
 
 # Permissions 
