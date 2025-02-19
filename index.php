@@ -74,15 +74,15 @@ require_once('templates/header.php');
 
             <div class="carousselImageDescription">
                 <div class="col-lg-4 d-flex flex-column align-items-center text-center">
-                    <img src="images/poignee_de_main.jpg" class="bd-placeholder-img rounded-circle" width="200" height="150" alt="poignée de main">
+                    <img src="" class="https://res.cloudinary.com/dmktstvsg/image/upload/v1739960426/nyrkg1emsa1ifzuq4vkb.jpg" width="200" height="150" alt="poignée de main">
                     <p class="p-3">Le covoiturage favorise la solidarité et l'entraide entre les conducteurs et passagers, permettant de partager des trajets tout en économisant de l'argent. C'est aussi une manière de renforcer les liens sociaux et d'encourager une mobilité plus responsable.</p>
                 </div>
                 <div class="col-lg-4 d-flex flex-column align-items-center text-center">
-                    <img src="images/electric-car.jpg" class="bd-placeholder-img rounded-circle" width="200" height="140" alt="voiture éléctrique en charge">
+                    <img src="https://res.cloudinary.com/dmktstvsg/image/upload/v1739960425/zwrtlzeuzcnkcp4nxvw4.jpg" class="bd-placeholder-img rounded-circle" width="200" height="140" alt="voiture éléctrique en charge">
                     <p class="p-3">Le covoiturage électrique contribue à réduire les émissions de CO2 et à diminuer la pollution de l'air. En choisissant des véhicules électriques, nous participons activement à la préservation de l'environnement.</p>
                 </div>
                 <div class="col-lg-4 d-flex flex-column align-items-center text-center">
-                    <img src="images/pouce-levé.jpg" class="bd-placeholder-img rounded-circle" width="200" height="140" alt="pouce levé">
+                    <img src="https://res.cloudinary.com/dmktstvsg/image/upload/v1739960425/hpxpive6rpckzw0px4md.jpg" class="bd-placeholder-img rounded-circle" width="200" height="140" alt="pouce levé">
                     <p class="p-3">L'application et le site web "EcoRide" sont conçus pour offrir une expérience utilisateur simple et rapide. Trouver un trajet éco-responsable n'a jamais été aussi facile grâce à une interface claire et intuitive.</p>
                 </div>
             </div>
