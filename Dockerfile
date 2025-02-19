@@ -54,5 +54,4 @@ RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
 EXPOSE 5000  
 
 # Commande de démarrage pour utiliser PHP intégré 
-CMD php -S 0.0.0.0:$PORT public/router.php
-
+CMD php -S 0.0.0.0:$PORT public/index.php

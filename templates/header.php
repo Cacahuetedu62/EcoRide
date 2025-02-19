@@ -159,8 +159,9 @@ if (isset($_SESSION['utilisateur'])) {
 
                 <!-- Logo -->
                 <div class="navbar-logo-container">
-                    <img src="public\images\LogoEcoride.png" alt="Logo EcoRide" width="200" height="100">
-                </div>
+    <img src="https://res.cloudinary.com/dmktstvsg/image/upload/v1739960379/on8spzmi05uspjyfbih7.png" alt="Logo EcoRide" width="200" height="100">
+</div>
+
             </div>
         </div>
     </header>
