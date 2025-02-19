@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 require_once('lib/config.php');
 require_once('lib/pdo.php');
 require_once('lib/config.prod.php');
+require_once('templates/header.php'); 
 
 function logMessage($message) {
     $logFile = __DIR__ . '/logs/logs.txt';
@@ -65,16 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - EcoRide</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
+
     <?php if (!empty($debug_messages) && isset($_GET['debug'])): ?>
         <div class="debug-info" style="background: #f8f9fa; padding: 15px; margin: 15px; border: 1px solid #ddd;">
             <h3>Informations de débogage :</h3>
