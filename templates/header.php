@@ -9,11 +9,11 @@ header("Expires: Sat, 1 Jan 2000 00:00:00 GMT");
 require_once('lib/config.php');
 require_once('lib/pdo.php');
 
-// // Redirection HTTPS (désactivée pour le moment)
-// if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
-//      header("Location: https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
-//     exit();
-// }
+// Redirection HTTPS (désactivée pour le moment)
+ if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
+     header("Location: https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+     exit();
+}
 
 // Démarrer la session si elle n'est pas déjà active
 if (session_status() === PHP_SESSION_NONE) {
@@ -159,7 +159,7 @@ if (isset($_SESSION['utilisateur'])) {
 
                 <!-- Logo -->
                 <div class="navbar-logo-container">
-                    <img src="images/Logo_EcoRide transparent.png" alt="Logo EcoRide" width="200" height="100">
+                    <img src="images\LogoEcoride.png" alt="Logo EcoRide" width="200" height="100">
                 </div>
             </div>
         </div>

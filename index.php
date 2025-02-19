@@ -2,25 +2,6 @@
 require_once('lib/config.php');
 require_once('lib/pdo.php');
 require_once('templates/header.php');
-
-// Ajouter du débogage pour vérifier les chemins des images
-error_log("=== DEBUG INDEX ===");
-error_log("Checking image paths...");
-
-$images = [
-    'images/poignee_de_main.jpg',
-    'images/electric-car.jpg',
-    'images/pouce-levé.jpg'
-];
-
-foreach ($images as $image) {
-    $full_path = __DIR__ . '/' . $image;
-    if (file_exists($full_path)) {
-        error_log("Image found: " . $full_path);
-    } else {
-        error_log("Image NOT found: " . $full_path);
-    }
-}
 ?>
 
     <script>
