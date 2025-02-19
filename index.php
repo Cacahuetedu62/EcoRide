@@ -1,7 +1,9 @@
 <?php
-require_once('lib/config.php');
-require_once('lib/pdo.php');
-require_once('templates/header.php');
+require_once(PROJECT_ROOT . 'lib/config.php');
+require_once(PROJECT_ROOT . 'lib/pdo.php');
+require_once(PROJECT_ROOT . 'templates/header.php');
+
+
 
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
