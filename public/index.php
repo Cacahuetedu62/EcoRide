@@ -8,6 +8,18 @@ if (!ob_start("ob_gzhandler")) ob_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Charger la page demandée avec header et footer
+if (file_exists($main_file)) {
+    require_once __DIR__ . '/../templates/header.php';
+    require_once $main_file;
+    require_once __DIR__ . '/../templates/footer.php';
+} else {
+    http_response_code(404);
+    require_once __DIR__ . '/../templates/header.php';
+    require_once __DIR__ . '/../404.php';
+    require_once __DIR__ . '/../templates/footer.php';
+}
+
 // Charger les dépendances essentielles
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../lib/config.php';
@@ -66,14 +78,3 @@ if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico|svg|webp)$/i', $clean_uri)) {
     error_log("Fichier non trouvé : " . $static_file);
 }
 
-// Charger la page demandée avec header et footer
-if (file_exists($main_file)) {
-    require_once __DIR__ . '/../templates/header.php';
-    require_once $main_file;
-    require_once __DIR__ . '/../templates/footer.php';
-} else {
-    http_response_code(404);
-    require_once __DIR__ . '/../templates/header.php';
-    require_once __DIR__ . '/../404.php';
-    require_once __DIR__ . '/../templates/footer.php';
-}
