@@ -47,7 +47,7 @@ if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico|svg|webp)$/i', $clean_uri)) {
             $file_found = true;
             break;
         }
-        
+
         // Vérifier aussi juste le nom du fichier (pour les images dans les sous-dossiers)
         $filename = basename($clean_path);
         if (file_exists($base_path . $filename)) {
@@ -69,7 +69,7 @@ if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico|svg|webp)$/i', $clean_uri)) {
             'svg' => 'image/svg+xml',
             'webp' => 'image/webp'
         ];
-        
+
         $ext = strtolower(pathinfo($static_file, PATHINFO_EXTENSION));
         if (isset($mime_types[$ext])) {
             // Ajouter des headers pour le cache
@@ -98,6 +98,21 @@ if (empty($clean_uri) || $clean_uri === '/') {
 if (file_exists($main_file)) {
     require_once __DIR__ . '/../templates/header.php';
     require_once $main_file;
+
+    // Afficher toutes les images des dossiers images et uploads
+    echo '<div class="gallery">';
+    foreach (['images', 'uploads'] as $folder) {
+        $directory = __DIR__ . '/../' . $folder;
+        if (is_dir($directory)) {
+            $files = glob($directory . '/*.{jpg,jpeg,png,gif}', GLOB_BRACE);
+            foreach ($files as $file) {
+                $image_path = str_replace(__DIR__ . '/../', '', $file);
+                echo '<img src="' . $image_path . '" alt="' . basename($file) . '" style="width: 200px; margin: 10px;">';
+            }
+        }
+    }
+    echo '</div>';
+
     require_once __DIR__ . '/../templates/footer.php';
 } else {
     http_response_code(404);
@@ -105,22 +120,4 @@ if (file_exists($main_file)) {
     require_once __DIR__ . '/../404.php';
     require_once __DIR__ . '/../templates/footer.php';
 }
-
-foreach ($search_paths as $base_path) {
-    error_log("Checking path: " . $base_path . $clean_path);
-    if (file_exists($base_path . $clean_path)) {
-        $static_file = $base_path . $clean_path;
-        $file_found = true;
-        error_log("File found: " . $static_file);
-        break;
-    }
-
-    $filename = basename($clean_path);
-    error_log("Checking filename: " . $base_path . $filename);
-    if (file_exists($base_path . $filename)) {
-        $static_file = $base_path . $filename;
-        $file_found = true;
-        error_log("File found: " . $static_file);
-        break;
-    }
-}
+?>
