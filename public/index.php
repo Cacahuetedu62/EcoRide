@@ -30,9 +30,28 @@ error_log("URI demandée : " . $clean_uri);
 if (empty($clean_uri) || $clean_uri === '/') {
     $main_file = __DIR__ . '/../index.php'; // Page d'accueil
 } else {
+    // Cherche le fichier correspondant dans le répertoire courant
     $main_file = __DIR__ . '/../' . ltrim($clean_uri, '/');
-    if (!str_ends_with($main_file, '.php')) {
-        $main_file .= '.php'; // Ajouter .php si non spécifié
+    
+    // Vérifie si le fichier existe
+    if (file_exists($main_file)) {
+        // Si c'est un fichier .php, on l'utilise
+        if (is_file($main_file)) {
+            // Assurez-vous d'inclure .php si non spécifié
+            if (!str_ends_with($main_file, '.php')) {
+                $main_file .= '.php';
+            }
+        } else {
+            // Si le fichier n'existe pas, gérer les fichiers .php automatiquement
+            $main_file .= '.php';
+        }
+    } else {
+        // Si le fichier n'existe pas, retournez une 404
+        http_response_code(404);
+        require_once __DIR__ . '/../templates/header.php';
+        require_once __DIR__ . '/../404.php'; // Page 404 personnalisée
+        require_once __DIR__ . '/../templates/footer.php';
+        exit;
     }
 }
 
@@ -67,13 +86,6 @@ if (preg_match('/\.(css|jpg|jpeg|png|gif|js|ico|svg|webp)$/i', $clean_uri)) {
 }
 
 // Charger la page demandée avec header et footer
-if (file_exists($main_file)) {
-    require_once __DIR__ . '/../templates/header.php'; // Inclure l'en-tête
-    require_once $main_file; // Inclure le contenu principal
-    require_once __DIR__ . '/../templates/footer.php'; // Inclure le pied de page
-} else {
-    http_response_code(404); // Code d'erreur 404 si fichier non trouvé
-    require_once __DIR__ . '/../templates/header.php';
-    require_once __DIR__ . '/../404.php'; // Page 404 personnalisée
-    require_once __DIR__ . '/../templates/footer.php';
-}
+require_once __DIR__ . '/../templates/header.php'; // Inclure l'en-tête
+require_once $main_file; // Inclure le contenu principal
+require_once __DIR__ . '/../templates/footer.php'; // Inclure le pied de page
